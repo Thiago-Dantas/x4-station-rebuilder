@@ -53,7 +53,7 @@ The page text below is for players. [README.md](../README.md) is for people inst
 
 This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.
 
-Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is moved clear. The ship you are flying stays put.
+Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.
 
 Cargo that no longer fits goes into that station's build storage, and is put back when there is room.
 
@@ -77,7 +77,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is moved clear. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer." author="Dant" version="100" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer." author="Dant" version="100" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
