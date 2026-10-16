@@ -21,6 +21,7 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 - [x] Build method for refunds: `esr_confirm.lua` also sends the build storage's build method; `esr_refund.xml` maps it to a race and uses `raceresources`. Checker: keyword values (`race.terran`, `class.storage`, …) now learned from vanilla scripts. Checks pass.
 - [x] **Verified in game (automated runs 6–8, the user's CVL-296 replacement through the build menu):** cargo (14.46 M wares kept), ships (0 of 2 lost after the warp fix), workforce (41 250 held). Equipment refund: vanilla already pays 100 % (manual test 2026-10-16, D-17).
 - [x] **Grace-period decay verified (run 15, 2026-10-16, log `research/logs/run-20261016-090809.txt`):** harness set grace 0.1 h and leave rate 20 %/h (the save still held 10). 250 Argon workers stayed held until the grace period ended, then fell to 237.314 over the next 0.254 h; 20 %/h predicts 237.303.
+- [x] **ReturnLeftovers on a real build (run 18, 2026-10-16, log `research/logs/run-20261016-100731.txt`):** one Argon S habitat, not force-completed. The builder took the recipe from build storage (94 claytronics, 188 energy cells, 343 hull parts). Medical supplies were untouched. When the build ended, the script moved back what the station could hold and left the rest in build storage (1639 hull parts, 998 medical supplies). Nothing was created (D-15).
 
 ## What the user's replacement showed (2026-10-15)
 - Cargo protection: the most important one (≈13 M wares lost). It must act at Confirm: 57 s later all storage was gone.
@@ -32,6 +33,6 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 - ~~Leave rate~~: settled, D-12 revised: setting, default 20 %/h of the held pool (vanilla drops everything at once). Saves that already ran the mod keep their stored value (10) until changed in the options.
 - ~~Refunds use the default build method's recipe~~: fixed; the build method comes with the Confirm event (`GetContainerBuildMethod`, else the player's global method) and refunds use `ware.raceresources.{race}`. Plan changes made without the build menu still use the default recipe.
 - ~~Equipment (turrets, shields) on removed modules~~: vanilla refunds 100 % (D-17).
-- Wares in build storage that the build doesn't need: can the player get them back? (OD-10)
+- ~~Wares in build storage that the build doesn't need~~: settled, D-15. Run 18 confirmed the split: what fits goes back to the station, the rest stays in build storage.
 - `recyclingwares.max` may already be a table; then `.table` gives null and the refund would add the full cost on top of vanilla (B2 log shows the type).
 - Ships arriving at a doomed dock later are caught by the 30 s sweep, not prevented from docking.
