@@ -254,6 +254,70 @@ local function removePlanModule(tag, macro, doneControl, station, allowSequence)
 	end)
 end
 
+-- B2: three modules, one Confirm. sequence stays false. The S container's
+-- successors are the pier and the habitat, and sequence=true would take those
+-- too. Nothing is added: AddMacroToConstructionMap starts a drag and does not
+-- place a module. The first energy-cell entry is the only one of that macro removed.
+local function removePlanModules(tag, macros, doneControl, station)
+	log(tag .. ": station param " .. tostring(station))
+	local id = ConvertStringTo64Bit(tostring(station))
+	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
+	log(tag .. ": build menu opened for " .. ffi.string(C.GetComponentName(id)))
+	later(8, function ()
+		local menu = findMenu("StationConfigurationMenu")
+		if not menu or not menu.shown or not menu.holomap or menu.holomap == 0 then
+			log(tag .. ": menu not ready, shown=" .. tostring(menu and menu.shown) .. " holomap=" .. tostring(menu and menu.holomap))
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+			return
+		end
+		menu.refreshPlan()
+		local entries, withcomp, removed, changed = planCounts(menu)
+		log(string.format("%s open: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+		log(tag .. " open-order: " .. planOrder(menu))
+		local function findEntry(macro)
+			for _, candidate in ipairs(menu.constructionplan or {}) do
+				if candidate.macro == macro then
+					return candidate
+				end
+			end
+		end
+		for _, macro in ipairs(macros) do
+			local entry = findEntry(macro)
+			if not entry then
+				log(tag .. ": " .. macro .. " is not in the plan")
+				AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+				return
+			end
+			local before = removed
+			log(string.format("%s: RemoveItemFromConstructionMap2 idx=%s macro=%s sequence=false", tag, tostring(entry.idx), macro))
+			local ok, err = pcall(function ()
+				C.RemoveItemFromConstructionMap2(menu.holomap, entry.idx, false)
+			end)
+			if not ok then
+				log(tag .. ": remove failed: " .. tostring(err))
+				AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+				return
+			end
+			menu.refreshPlan()
+			entries, withcomp, removed, changed = planCounts(menu)
+			log(string.format("%s removed: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+			log(tag .. " order: " .. planOrder(menu))
+			if removed <= before then
+				log(tag .. ": sequence=false did not remove " .. macro)
+				AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+				return
+			end
+		end
+		menu.buttonConfirm()
+		log(tag .. ": confirmed")
+		later(3, function ()
+			menu.closeMenu("close")
+			log(tag .. ": build menu closed")
+			AddUITriggeredEvent("ESR_Test", doneControl, "")
+		end)
+	end)
+end
+
 local function replaceStation(_, station)
 	log("replace: station param " .. tostring(station) .. " (" .. type(station) .. ")")
 	local id = ConvertStringTo64Bit(tostring(station))
@@ -289,6 +353,13 @@ local function init()
 	RegisterEvent("esr_test_b1b", function (_, station) matchStation("b1b", station) end)
 	RegisterEvent("esr_test_b1c", function (_, station) matchStation("b1c", station) end)
 	RegisterEvent("esr_test_b4", function (_, station) removePlanModule("b4", "storage_arg_s_container_01_macro", "b4done", station) end)
+	RegisterEvent("esr_test_b2", function (_, station)
+		removePlanModules("b2", {
+			"storage_arg_s_container_01_macro",
+			"prod_gen_energycells_macro",
+			"defence_arg_claim_01_macro",
+		}, "b2done", station)
+	end)
 	RegisterEvent("esr_test_b6menu", function (_, station) removePlanModule("b6menu", "pier_arg_harbor_02_macro", "b6done", station) end)
 	RegisterEvent("esr_test_b6dock", function (_, station) removePlanModule("b6dock", "dockarea_arg_m_station_01_macro", "b6dockdone", station, false) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
