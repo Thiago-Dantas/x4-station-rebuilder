@@ -256,6 +256,13 @@
             <param name="Doomed" value="$Doomed"/>
           </run_actions>
         </do_if>
+        <!-- D-15: when the build is over, leftovers in build storage go back to the station (once per build) -->
+        <do_if value="md.ESR_Main.Settings.$Cargo and not $Build.exists and not $Entry.$returned?">
+          <run_actions ref="md.ESR_Cargo.ReturnLeftovers">
+            <param name="Station" value="$Station"/>
+          </run_actions>
+          <set_value name="$Entry.$returned" exact="true"/>
+        </do_if>
         <do_if value="md.ESR_Main.Settings.$Refund">
           <run_actions ref="md.ESR_Refund.Sweep" result="$Watching">
             <param name="Station" value="$Station"/>

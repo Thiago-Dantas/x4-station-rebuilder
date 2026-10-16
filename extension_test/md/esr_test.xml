@@ -188,9 +188,10 @@
     <cue name="Replace" instantiate="true" namespace="this">
       <conditions>
         <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
-        <check_value value="event.param3 == 'replace'"/>
+        <check_value value="event.param3 == 'replace' or event.param3 == 'replace_build'"/>
       </conditions>
       <actions>
+        <set_value name="$Mode" exact="event.param3"/>
         <find_station name="$Stations" space="player.galaxy" multiple="true"/>
         <set_value name="$Station" exact="null"/>
         <do_for_each name="$Candidate" in="$Stations">
@@ -231,6 +232,16 @@
         </do_else>
       </actions>
       <cues>
+        <!-- replace_build: finish the new build at once (after the removal) to see the held workers come back -->
+        <cue name="ForceBuild" checkinterval="5s">
+          <conditions>
+            <check_value value="$AskedAt? and $Mode == 'replace_build' and player.age gt $AskedAt + 100s"/>
+          </conditions>
+          <actions>
+            <debug_text text="'[ESR-TEST] forcing build completion of %s; modules %s, workforce %s / %s, held %s'.[$Station.knownname, $Station.modules.all.count, @$Station.workforce.amounts, @$Station.workforce.capacities, @md.ESR_Workforce.State.$Stations.{$Station}.$held]" filter="general"/>
+            <raise_lua_event name="'esr_test_forcebuild'" param="$Station"/>
+          </actions>
+        </cue>
         <cue name="ReplaceReport" checkinterval="15s">
           <conditions>
             <check_value value="$AskedAt? and player.age gt $AskedAt + 6min"/>
@@ -239,7 +250,7 @@
             <run_actions ref="md.ESR_Test.Totals" result="$After">
               <param name="Station" value="$Station"/>
             </run_actions>
-            <debug_text text="'[ESR-TEST] AFTER %s s: modules all=%s operational=%s; station cargo %s (%s wares); build storage %s (%s wares); workforce %s; held workforce %s'.[player.age - $AskedAt, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.cargo.table, $After.$cargo, @$Station.buildstorage.cargo.table, $After.$buildstorage, @$Station.workforce.amounts, @md.ESR_Workforce.State.$Stations.{$Station}.$held]" filter="general"/>
+            <debug_text text="'[ESR-TEST] AFTER %s s: modules all=%s operational=%s; station cargo %s (%s wares); build storage %s (%s wares); workforce %s / %s; held workforce %s'.[player.age - $AskedAt, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.cargo.table, $After.$cargo, @$Station.buildstorage.cargo.table, $After.$buildstorage, @$Station.workforce.amounts, @$Station.workforce.capacities, @md.ESR_Workforce.State.$Stations.{$Station}.$held]" filter="general"/>
             <set_value name="$Lost" exact="0"/>
             <do_for_each name="$Ship" in="$DockedBefore">
               <do_if value="not $Ship.exists">

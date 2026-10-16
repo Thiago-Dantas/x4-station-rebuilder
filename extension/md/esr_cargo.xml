@@ -76,5 +76,36 @@
         </do_for_each>
       </actions>
     </library>
+
+    <!-- D-15: once the build is over, wares left in build storage go back into station cargo where they fit -->
+    <library name="ReturnLeftovers" purpose="run_actions">
+      <params>
+        <param name="Station"/>
+      </params>
+      <actions>
+        <set_value name="$BuildStorage" exact="$Station.buildstorage"/>
+        <set_value name="$Moved" exact="table[]"/>
+        <set_value name="$Kept" exact="table[]"/>
+        <do_if value="$BuildStorage">
+          <do_for_each name="$Ware" valuename="$Amount" in="$BuildStorage.cargo.table">
+            <set_value name="$Move" exact="[$Amount, $Station.cargo.{$Ware}.free].min"/>
+            <do_if value="$Move gt 0">
+              <remove_cargo object="$BuildStorage" ware="$Ware" exact="$Move" result="$Taken"/>
+              <add_cargo object="$Station" ware="$Ware" exact="$Taken" result="$Added"/>
+              <do_if value="$Added">
+                <set_value name="$Moved.{$Ware}" exact="$Taken"/>
+              </do_if>
+              <do_else>
+                <add_cargo object="$BuildStorage" ware="$Ware" exact="$Taken"/>
+              </do_else>
+            </do_if>
+            <do_if value="$Amount gt $Move">
+              <set_value name="$Kept.{$Ware}" exact="$Amount - $Move"/>
+            </do_if>
+          </do_for_each>
+        </do_if>
+        <debug_text text="'[ESR] CARGO %s: build done; moved back to the station %s; left in build storage (no room) %s'.[$Station.knownname, $Moved, $Kept]" filter="general"/>
+      </actions>
+    </library>
   </cues>
 </mdscript>
