@@ -20,7 +20,8 @@
     Scenario grace (workforce grace period and leave rate, D-8, D-12): a new tutorial_station on save_010,
     workforce protection on, $GraceHours and $LeaveRate set here (a save that already ran the mod keeps its
     stored leave rate; runs 6–9 logged 10). Removes the habitat and does not rebuild it. Samples the held
-    pool every 30 s until 15 min of game time after the grace period. set_timewarp_factor is capped at 6 by the game.
+    pool every 30 s until 15 min of game time after the grace period. set_timewarp_factor takes a time
+    (game seconds per real second, capped at 6s). Run 15 rejected a bare number.
   -->
   <cues>
     <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
@@ -302,8 +303,9 @@
         <set_value name="md.ESR_Test.GraceLog.$WhenFirst" exact="-1"/>
         <set_value name="md.ESR_Test.GraceLog.$HeldGrace" exact="-1"/>
         <set_value name="md.ESR_Test.GraceLog.$WhenGrace" exact="-1"/>
-        <set_timewarp_factor factor="6"/>
-        <debug_text text="'[ESR-TEST] scenario grace: workforce=%s grace=%s h (length %s) leave=%s pct/h; timewarp active=%s available=%s factor=%s'.[md.ESR_Main.Settings.$Workforce, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$GraceHours * 1h, md.ESR_Main.Settings.$LeaveRate, timewarp.active, timewarp.available, timewarp.factor]" filter="general"/>
+        <!-- factor is a time: game seconds per real second. A bare number is rejected (run 15). -->
+        <set_timewarp_factor factor="6s"/>
+        <debug_text text="'[ESR-TEST] scenario grace: workforce=%s grace=%s h (length %s) leave=%s pct/h; timewarp active=%s available=%s factor=%s'.[md.ESR_Main.Settings.$Workforce, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$GraceHours * 1h, md.ESR_Main.Settings.$LeaveRate, @player.timewarp.active, @player.timewarp.available, @player.timewarp.factor]" filter="general"/>
 
         <set_value name="$Sector" exact="player.sector"/>
         <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
@@ -367,7 +369,7 @@
                   <set_value name="md.ESR_Test.GraceLog.$HeldGrace" exact="$HeldNow"/>
                   <set_value name="md.ESR_Test.GraceLog.$WhenGrace" exact="player.age"/>
                 </do_if>
-                <debug_text text="'[ESR-TEST] GRACE dt=%s since=%s grace_end=%s held=%s workforce=%s / %s habitats=%s builds=%s warp=%s'.[player.age - $ChangedAt, $Since, $GraceEnd, $HeldNow, @$Station.workforce.amounts, @$Station.workforce.capacities, @$Station.habitationmodules.count, @$Station.buildstorage.builds.inprogress.count, timewarp.factor]" filter="general"/>
+                <debug_text text="'[ESR-TEST] GRACE dt=%s since=%s grace_end=%s held=%s workforce=%s / %s habitats=%s builds=%s warp=%s'.[player.age - $ChangedAt, $Since, $GraceEnd, $HeldNow, @$Station.workforce.amounts, @$Station.workforce.capacities, @$Station.habitationmodules.count, @$Station.buildstorage.builds.inprogress.count, @player.timewarp.factor]" filter="general"/>
 
                 <set_value name="$Reason" exact="''"/>
                 <do_if value="$GraceEnd ge 0 and player.age gt $GraceEnd + 15min">
@@ -386,7 +388,7 @@
                   <set_value name="$Unchanged" exact="md.ESR_Test.GraceLog.$HeldFirst gt 0 and md.ESR_Test.GraceLog.$HeldGrace ge md.ESR_Test.GraceLog.$HeldFirst - 1"/>
                   <set_value name="$Decayed" exact="md.ESR_Test.GraceLog.$HeldGrace gt 0 and $HeldNow lt md.ESR_Test.GraceLog.$HeldGrace - 1"/>
                   <debug_text text="'[ESR-TEST] RESULT grace: unchanged_during_grace=%s decayed_after=%s held_first=%s held_at_grace=%s held_final=%s hours_after_grace=%s expected_linear=%s grace_h=%s leave_pct=%s reason=%s'.[$Unchanged, $Decayed, md.ESR_Test.GraceLog.$HeldFirst, md.ESR_Test.GraceLog.$HeldGrace, $HeldNow, $HoursAfter, $Expected, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$LeaveRate, $Reason]" filter="general"/>
-                  <do_if value="timewarp.active">
+                  <do_if value="@player.timewarp.active">
                     <toggle_timewarp/>
                   </do_if>
                   <set_timewarp_factor/>

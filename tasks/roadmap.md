@@ -9,7 +9,7 @@ Log: [workflow-project-setup.md](workflow-project-setup.md)
 - [x] CLAUDE.md, docs/, tasks/ skeleton
 - [x] Repo-local `user.email`
 - [x] User review of the roadmap; OD-1 … OD-7 decided (D-4 … D-10), `LICENSE` (MIT)
-- [ ] First commit and push (when the user asks)
+- [x] First commit and push (when the user asks)
 
 ## Phase 1: Research: what the game does when a plan changes
 Log: [workflow-phase1-research.md](workflow-phase1-research.md)
@@ -53,11 +53,11 @@ Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes **an
 - [ ] In-game test: full replacement; wares before and after add up
 
 ## Phase 5: Workforce (G3, D-8)
-Holding and returning **verified in game** (runs 6–9: 41 250 held, all returned when the new habitats were built). The grace-period decay is not tested yet. `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
-- [ ] Record workforce per race before habitats go
-- [ ] Hold workers above the new capacity in a mod-side store; add them back as capacity returns
-- [ ] Grace period (setting, default 2 h), then workers leave at the game's own rate or the rate setting (D-8, D-12)
-- [ ] In-game test: replace all habitats; workforce comes back after the rebuild
+Holding, returning and the grace-period decay are **verified in game** (runs 6–9: 41 250 held, all returned when the new habitats were built; run 15: the pool stays until the grace period ends, then shrinks at the leave-rate setting). `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+- [x] Record workforce per race before habitats go
+- [x] Hold workers above the new capacity in a mod-side store; add them back as capacity returns
+- [x] Grace period (setting, default 2 h), then workers leave at the rate setting (D-8, D-12). Verified run 15 with 0.1 h and 20 %/h
+- [x] In-game test: replace all habitats; workforce comes back after the rebuild (runs 6–9) and, if the habitats are not rebuilt, leaves only after the grace period (run 15)
 
 ## Phase 6: Keep unchanged modules (S1, D-9)
 - [ ] Depends on Phase 1 findings; steps to be written then
