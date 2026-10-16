@@ -32,7 +32,8 @@ User request (2026-10-15): automate the game so Claude can test without the user
 - [ ] More B6 variants: dock area with ships (S/M docks, internal storage), full replacement
 - [x] D-15 leftovers return (`ESR_Cargo.ReturnLeftovers`, once when the build is gone) and scenario `replace_build`: the harness calls `C.ForceBuildCompletion(station)` (the "workshop" game start's Force build button) at Confirm + 100 s, after the removal; report at + 6 min. Checks pass.
 - [x] **Run 9 (replace_build), passed:** `ForceBuildCompletion` from Lua works outside the workshop start (571 modules operational). The first sweep after it: leftovers moved back to the station (all of them, nothing left in build storage), 41 250 held workers returned (workforce 41 281 / 79 250 at the end, vanilla growth on top). Ships 0 of 2 lost.
-- [ ] **Run 10 (replace, equipment refund on)**
+- [x] **Run 10 (replace, equipment refund on), failed for the refund:** no REFUND lines, metallic microlattice unchanged; the logger also found no equipment on any of the 427 modules. `find_object_component` searches direct children only by default; station equipment sits deeper. Fix: `recursive="true"`, keeping only components whose `container` is the station (skips docked ships). Ships, cargo, workforce as in run 8.
+- [ ] **Run 11 (replace, equipment refund, recursive search)**
 - [ ] Scenarios B1–B6 (vanilla, protections off), then each protection on
 - [ ] Docs: docs/testing.md (automated runs), CLAUDE.md, roadmap
 

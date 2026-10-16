@@ -46,7 +46,15 @@
           </do_if>
           <!-- by class, not by a list of known equipment: mods' turrets and shields are found and priced the same way
                (weapon covers turret, missileturret and any modded weapon class derived from it) -->
-          <find_object_component name="$Items" object="$Module" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true"/>
+          <!-- run 10: on station modules the equipment is not a direct child, so search recursively; skip what belongs
+               to docked ships (their container is the ship, not the station) -->
+          <find_object_component name="$Found" object="$Module" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true" recursive="true"/>
+          <set_value name="$Items" exact="[]"/>
+          <do_for_each name="$Item" in="$Found">
+            <do_if value="$Item.container == $Station">
+              <append_to_list name="$Items" exact="$Item"/>
+            </do_if>
+          </do_for_each>
           <set_value name="$Equipment" exact="table[]"/>
           <do_for_each name="$Item" in="$Items">
             <set_value name="$Recipe" exact="if $Race then @$Item.macro.ware.raceresources.{$Race}.table else @$Item.macro.ware.resources.table"/>

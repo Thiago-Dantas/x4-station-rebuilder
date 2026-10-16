@@ -63,11 +63,13 @@
                   <set_value name="$NumRemoved" operation="add"/>
                   <debug_text text="'[ESR] PLAN removed %s %s build-cost=%s'.[$Module.macro, $Module, @$Module.macro.ware.resources.table]" filter="general"/>
                   <!-- equipment on it: does vanilla's refund cover it? (compare build storage before and after) -->
-                  <find_object_component name="$Equipment" object="$Module" class="[class.turret, class.missileturret, class.shieldgenerator]" checkoperational="false" multiple="true"/>
+                  <find_object_component name="$Equipment" object="$Module" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true" recursive="true"/>
                   <do_if value="$Equipment.count">
                     <set_value name="$Fitted" exact="table[]"/>
                     <do_for_each name="$Item" in="$Equipment">
-                      <set_value name="$Fitted.{$Item.macro}" exact="1" operation="add"/>
+                      <do_if value="$Item.container == $Station">
+                        <set_value name="$Fitted.{$Item.macro}" exact="1" operation="add"/>
+                      </do_if>
                     </do_for_each>
                     <debug_text text="'[ESR] PLAN removed-equipment %s: %s'.[$Module, $Fitted]" filter="general"/>
                   </do_if>
