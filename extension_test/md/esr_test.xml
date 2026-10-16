@@ -16,6 +16,11 @@
     recycling properties), without @, so failures show up as script errors.
     Note (run 2): sub-cues of a cue with <delay> start checking at once, not after the delay, so every
     follow-up cue checks $ChangedAt? itself.
+
+    Scenario grace (workforce grace period and leave rate, D-8, D-12): a new tutorial_station on save_010,
+    workforce protection on, $GraceHours and $LeaveRate set here (a save that already ran the mod keeps its
+    stored leave rate; runs 6–9 logged 10). Removes the habitat and does not rebuild it. Samples the held
+    pool every 30 s until 15 min of game time after the grace period. set_timewarp_factor is capped at 6 by the game.
   -->
   <cues>
     <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
@@ -263,6 +268,134 @@
             <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
             <raise_lua_event name="'esr_test_quit'"/>
           </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!--
+      Scenario grace: see the header. State lives on GraceLog because a repeating cue instance does not
+      keep variables from the previous instance, and a root cue's actions do not run again in an old save.
+    -->
+    <cue name="GraceLog">
+      <actions>
+        <do_if value="not md.ESR_Test.GraceLog.$Stop?">
+          <set_value name="md.ESR_Test.GraceLog.$Stop" exact="false"/>
+        </do_if>
+      </actions>
+    </cue>
+
+    <cue name="Grace" instantiate="true" namespace="this">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'grace'"/>
+      </conditions>
+      <actions>
+        <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
+        <!-- 0.1 h = 6 min. The options slider steps by 1; the sweep uses this number times 1h. -->
+        <set_value name="md.ESR_Main.Settings.$GraceHours" exact="0.1"/>
+        <set_value name="md.ESR_Main.Settings.$LeaveRate" exact="20"/>
+        <set_value name="md.ESR_Test.GraceLog.$Stop" exact="false"/>
+        <set_value name="md.ESR_Test.GraceLog.$HeldFirst" exact="-1"/>
+        <set_value name="md.ESR_Test.GraceLog.$WhenFirst" exact="-1"/>
+        <set_value name="md.ESR_Test.GraceLog.$HeldGrace" exact="-1"/>
+        <set_value name="md.ESR_Test.GraceLog.$WhenGrace" exact="-1"/>
+        <set_timewarp_factor factor="6"/>
+        <debug_text text="'[ESR-TEST] scenario grace: workforce=%s grace=%s h (length %s) leave=%s pct/h; timewarp active=%s available=%s factor=%s'.[md.ESR_Main.Settings.$Workforce, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$GraceHours * 1h, md.ESR_Main.Settings.$LeaveRate, timewarp.active, timewarp.available, timewarp.factor]" filter="general"/>
+
+        <set_value name="$Sector" exact="player.sector"/>
+        <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
+          <safepos max="30km" allowyaxis="false" includeplotbox="true" radius="5km"/>
+        </create_station>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="false"/>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="true"/>
+        <add_workforce object="$Station" race="race.argon" exact="@$Station.workforce.{race.argon}.capacity"/>
+        <debug_text text="'[ESR-TEST] station %s (%s): %s modules, habitats %s, workforce %s / %s'.[@$Station.knownname, @$Station.idcode, @$Station.modules.all.count, @$Station.habitationmodules.count, @$Station.workforce.amounts, @$Station.workforce.capacities]" filter="general"/>
+
+        <create_ship name="$Builder" macro="macro.ship_arg_xl_builder_01_a_macro" sector="$Sector">
+          <owner exact="faction.player" overridenpc="true"/>
+          <loadout>
+            <quantity exact="1.0">
+              <variation exact="0.0"/>
+            </quantity>
+            <quality exact="0.5"/>
+          </loadout>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+          <safepos object="$Station" min="2km" max="4km"/>
+        </create_ship>
+        <create_order object="$Builder" id="'DeployToStation'">
+          <param name="station" value="$Station"/>
+        </create_order>
+        <debug_text text="'[ESR-TEST] builder %s (%s), distance %s m, deployed %s'.[@$Builder.knownname, @$Builder.idcode, @$Builder.distanceto.{$Station}, @$Station.buildstorage.buildmodule.constructionvesseldeployed]" filter="general"/>
+      </actions>
+      <cues>
+        <cue name="GraceRemove">
+          <delay exact="60s"/>
+          <actions>
+            <remove_from_construction_sequence object="$Station" sequence="$Station.constructionsequence" macros="[macro.hab_arg_s_01_macro]">
+              <result sequence="$NewSequence" removed="$Removed" cost="$Cost"/>
+            </remove_from_construction_sequence>
+            <debug_text text="'[ESR-TEST] plan change: %s -> %s entries, removes %s (%s), cost %s'.[$Station.constructionsequence.count, @$NewSequence.count, @$Removed.count, $Removed, $Cost]" filter="general"/>
+            <add_build_to_expand_station object="$Station.buildstorage" buildobject="$Station" constructionplan="$NewSequence" result="$Build"/>
+            <set_value name="$ChangedAt" exact="player.age"/>
+            <debug_text text="'[ESR-TEST] build %s added; habitats %s, workforce %s / %s, held %s'.[$Build, @$Station.habitationmodules.count, @$Station.workforce.amounts, @$Station.workforce.capacities, @md.ESR_Workforce.State.$Stations.{$Station}.$held]" filter="general"/>
+          </actions>
+          <cues>
+            <cue name="GraceSample" instantiate="true" checkinterval="30s">
+              <conditions>
+                <check_value value="$ChangedAt? and not @md.ESR_Test.GraceLog.$Stop"/>
+              </conditions>
+              <actions>
+                <set_value name="$Since" exact="@md.ESR_Workforce.State.$Stations.{$Station}.$since"/>
+                <set_value name="$HeldNow" exact="@md.ESR_Workforce.State.$Stations.{$Station}.$held.{race.argon}"/>
+                <do_if value="not $HeldNow?">
+                  <set_value name="$HeldNow" exact="0"/>
+                </do_if>
+                <set_value name="$GraceEnd" exact="-1"/>
+                <do_if value="$Since? and $Since ge 0">
+                  <set_value name="$GraceEnd" exact="$Since + md.ESR_Main.Settings.$GraceHours * 1h"/>
+                </do_if>
+                <do_if value="$HeldNow gt 0 and md.ESR_Test.GraceLog.$HeldFirst lt 0">
+                  <set_value name="md.ESR_Test.GraceLog.$HeldFirst" exact="$HeldNow"/>
+                  <set_value name="md.ESR_Test.GraceLog.$WhenFirst" exact="player.age"/>
+                </do_if>
+                <do_if value="$GraceEnd ge 0 and player.age le $GraceEnd and $HeldNow gt 0">
+                  <set_value name="md.ESR_Test.GraceLog.$HeldGrace" exact="$HeldNow"/>
+                  <set_value name="md.ESR_Test.GraceLog.$WhenGrace" exact="player.age"/>
+                </do_if>
+                <debug_text text="'[ESR-TEST] GRACE dt=%s since=%s grace_end=%s held=%s workforce=%s / %s habitats=%s builds=%s warp=%s'.[player.age - $ChangedAt, $Since, $GraceEnd, $HeldNow, @$Station.workforce.amounts, @$Station.workforce.capacities, @$Station.habitationmodules.count, @$Station.buildstorage.builds.inprogress.count, timewarp.factor]" filter="general"/>
+
+                <set_value name="$Reason" exact="''"/>
+                <do_if value="$GraceEnd ge 0 and player.age gt $GraceEnd + 15min">
+                  <set_value name="$Reason" exact="'after-grace'"/>
+                </do_if>
+                <do_elseif value="player.age gt $ChangedAt + 45min">
+                  <set_value name="$Reason" exact="'cap'"/>
+                </do_elseif>
+                <do_if value="$Reason != ''">
+                  <set_value name="md.ESR_Test.GraceLog.$Stop" exact="true"/>
+                  <set_value name="$HoursAfter" exact="0"/>
+                  <do_if value="$GraceEnd ge 0">
+                    <set_value name="$HoursAfter" exact="(player.age - $GraceEnd) / 1h"/>
+                  </do_if>
+                  <set_value name="$Expected" exact="md.ESR_Test.GraceLog.$HeldGrace * (1.0f - md.ESR_Main.Settings.$LeaveRate / 100.0f * $HoursAfter)"/>
+                  <set_value name="$Unchanged" exact="md.ESR_Test.GraceLog.$HeldFirst gt 0 and md.ESR_Test.GraceLog.$HeldGrace ge md.ESR_Test.GraceLog.$HeldFirst - 1"/>
+                  <set_value name="$Decayed" exact="md.ESR_Test.GraceLog.$HeldGrace gt 0 and $HeldNow lt md.ESR_Test.GraceLog.$HeldGrace - 1"/>
+                  <debug_text text="'[ESR-TEST] RESULT grace: unchanged_during_grace=%s decayed_after=%s held_first=%s held_at_grace=%s held_final=%s hours_after_grace=%s expected_linear=%s grace_h=%s leave_pct=%s reason=%s'.[$Unchanged, $Decayed, md.ESR_Test.GraceLog.$HeldFirst, md.ESR_Test.GraceLog.$HeldGrace, $HeldNow, $HoursAfter, $Expected, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$LeaveRate, $Reason]" filter="general"/>
+                  <do_if value="timewarp.active">
+                    <toggle_timewarp/>
+                  </do_if>
+                  <set_timewarp_factor/>
+                  <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+                  <raise_lua_event name="'esr_test_quit'"/>
+                </do_if>
+              </actions>
+            </cue>
+          </cues>
         </cue>
       </cues>
     </cue>

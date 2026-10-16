@@ -20,6 +20,7 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 - [x] Engine list of removed modules (added after the first review): `ui/esr_confirm.lua` sends the build menu's removed modules at Confirm (UI event `esr_confirm`), `ESR_Main.OnConfirm` stores them and the sweep prefers them over the plan-entry mapping; `MAIN COMPARE` logs both. Removes the dependency on the B1 hypothesis for plan changes made in the build menu. Checks pass.
 - [x] Build method for refunds: `esr_confirm.lua` also sends the build storage's build method; `esr_refund.xml` maps it to a race and uses `raceresources`. Checker: keyword values (`race.terran`, `class.storage`, …) now learned from vanilla scripts. Checks pass.
 - [x] **Verified in game (automated runs 6–8, the user's CVL-296 replacement through the build menu):** cargo (14.46 M wares kept), ships (0 of 2 lost after the warp fix), workforce (41 250 held). Equipment refund: vanilla already pays 100 % (manual test 2026-10-16, D-17).
+- [ ] Grace-period decay (scenario `grace` in the harness): held workers stay until `$GraceHours`, then shrink by `$LeaveRate` percent per hour of those still held. Not verified in game yet.
 
 ## What the user's replacement showed (2026-10-15)
 - Cargo protection: the most important one (≈13 M wares lost). It must act at Confirm: 57 s later all storage was gone.
