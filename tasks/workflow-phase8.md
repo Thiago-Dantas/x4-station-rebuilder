@@ -9,7 +9,7 @@ Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [
 - [x] Confirm `WorkshopTool` prints its command list and does not upload
 - [x] Record the install path in [docs/dev-setup.md](../docs/dev-setup.md) and the publish command in [docs/workshop.md](../docs/workshop.md)
 - [x] README for players ([README.md](../README.md)). Written for people installing from the repo. The Workshop page text is separate.
-- [x] Workshop publishing draft: title, description, release `content.xml`, dependencies ([docs/workshop.md](../docs/workshop.md)). Player-facing page text, not the README. Not uploaded. Page text retuned 2026-10-16 to the length and voice of the top-rated Workshop items (185 words, plain paragraphs, one compatibility line).
+- [x] Workshop publishing draft: title, description, release `content.xml`, dependencies ([docs/workshop.md](../docs/workshop.md)). Player-facing page text, not the README. Not uploaded. Page text retuned 2026-10-16 to the length and voice of the top-rated Workshop items (173 words, plain paragraphs, one compatibility line). The module-refund sentence was removed the same day: that refund is vanilla (D-17).
 - [ ] Make the repo public
 - [ ] Steam Workshop upload (description, screenshots, dependencies). Not started. The draft lists what is still missing: release copy, protections on by default, the log-only refund option removed from the player menu, a preview screenshot.
 - [ ] Suggested pairings on the Workshop page. Wording is drafted and held until the Phase 7 test.
