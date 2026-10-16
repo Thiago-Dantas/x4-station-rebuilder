@@ -506,7 +506,7 @@
                 <debug_text text="'[ESR-TEST] sequence %s entries (station had %s)'.[$NewSequence.count, $Station.constructionsequence.count]" filter="general"/>
                 <add_build_to_expand_station object="$Station.buildstorage" buildobject="$Station" constructionplan="$NewSequence" result="$Build"/>
                 <set_value name="$ChangedAt" exact="player.age"/>
-                <debug_text text="'[ESR-TEST] build %s added, exists=%s processing=%s tracked=%s storage=%s'.[$Build, @$Build.exists, @$Build.isprocessing, @md.ESR_Main.Tracker.$Rebuilds.{$Station}?, $Station.buildstorage.cargo.table]" filter="general"/>
+                <debug_text text="'[ESR-TEST] build %s added, exists=%s processing=%s storage=%s'.[$Build, @$Build.exists, @$Build.isprocessing, $Station.buildstorage.cargo.table]" filter="general"/>
               </do_else>
             </do_else>
           </actions>
