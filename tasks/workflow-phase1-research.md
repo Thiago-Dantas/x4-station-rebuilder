@@ -29,7 +29,7 @@ Setup: a test save (backed up), a player station with a builder assigned, some w
 - [ ] **B1 Matching (S1).** (a) Open the station's build menu, save its plan as a new plan, then load that same plan onto the station. Does the plan view list "Removed Modules"? (b) Same with the plan's build order changed (from `x4-station-designer` or by removing and re-adding a module in game). (c) In the editor, move one built module. What shows as removed?
 - [ ] **B2 Replace a few modules.** Note build storage, station cargo, and each removed module's resources from the plan view (they are shown before confirm). Confirm, wait for the build to finish, note build storage and cargo again.
 - [ ] **B3 Full replacement.** Same as B2 for the whole station. Also: does the build ever stall on "waiting for storage"?
-- [ ] **B4 Storage modules with cargo removed.** Where does that cargo go, and when?
+- [x] **B4 Storage modules with cargo removed.** Run 23 (scenario `b4`, build menu, log `research/logs/run-20261016-114357.txt`): the cargo is gone within 3 s of Confirm and does not arrive in build storage. The module recipe is refunded when the module finishes deconstruction. The station had no other container storage.
 - [ ] **B5 Habitats removed.** Workforce per race and capacity before confirm, right after each habitat disappears, and every 10 minutes for an hour.
 - [ ] **B6 Dock area / pier with docked ships removed.** Which ships die, at confirm or when the dock is recycled; time from confirm to the dock disappearing.
 
