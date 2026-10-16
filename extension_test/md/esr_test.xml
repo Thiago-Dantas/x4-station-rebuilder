@@ -472,50 +472,57 @@
         <set_value name="md.ESR_Test.BuildLog.$Clay0" exact="$Clay0"/>
         <set_value name="md.ESR_Test.BuildLog.$Hull0" exact="$Hull0"/>
         <set_value name="md.ESR_Test.BuildLog.$Med0" exact="$Med0"/>
-        <debug_text text="'[ESR-TEST] station %s (%s), %s modules; paid %s; build storage clay=%s hull=%s energy=%s medical=%s'.[@$Station.knownname, @$Station.idcode, @$Station.modules.all.count, $Paid, $Clay0, $Hull0, $Energy0, $Med0]" filter="general"/>
-
-        <do_if value="not $Station.constructionsequence">
-          <debug_text text="'[ESR-TEST] RESULT build: sequence=null reason=no-base-sequence'" filter="general"/>
-          <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
-          <raise_lua_event name="'esr_test_quit'"/>
-        </do_if>
-        <do_else>
-          <!-- No connector list: the property check only knows macro names vanilla scripts use.
-               failsafe places the habitat in free space when it cannot attach to the existing plan. -->
-          <create_construction_sequence station="$Station" macros="[macro.hab_arg_s_01_macro]" base="$Station.constructionsequence" timeout="30s" failsafe="true">
-            <immediate result="$NewSequence"/>
-          </create_construction_sequence>
-          <!-- The sequence is the desired station, not a delta. A shorter one would remove modules. -->
-          <do_if value="not $NewSequence">
-            <debug_text text="'[ESR-TEST] RESULT build: sequence=null reason=no-sequence'" filter="general"/>
-            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
-            <raise_lua_event name="'esr_test_quit'"/>
-          </do_if>
-          <do_elseif value="$NewSequence.count le $Station.constructionsequence.count">
-            <debug_text text="'[ESR-TEST] RESULT build: sequence=%s reason=not-extended base=%s'.[$NewSequence.count, $Station.constructionsequence.count]" filter="general"/>
-            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
-            <raise_lua_event name="'esr_test_quit'"/>
-          </do_elseif>
-          <do_else>
-            <debug_text text="'[ESR-TEST] sequence %s entries (station had %s)'.[$NewSequence.count, $Station.constructionsequence.count]" filter="general"/>
-            <add_build_to_expand_station object="$Station.buildstorage" buildobject="$Station" constructionplan="$NewSequence" result="$Build"/>
-            <set_value name="$ChangedAt" exact="player.age"/>
-            <debug_text text="'[ESR-TEST] build %s added, exists=%s processing=%s'.[$Build, @$Build.exists, @$Build.isprocessing]" filter="general"/>
-          </do_else>
-        </do_else>
+        <debug_text text="'[ESR-TEST] station %s (%s), %s modules; paid %s; build storage clay=%s hull=%s energy=%s medical=%s table=%s'.[@$Station.knownname, @$Station.idcode, @$Station.modules.all.count, $Paid, $Clay0, $Hull0, $Energy0, $Med0, $Station.buildstorage.cargo.table]" filter="general"/>
       </actions>
       <cues>
+        <!-- Run 16 added the build in the same frame the MD scripts were still starting, and
+             event_player_build_added had no listener yet. Wait until those cues exist. -->
+        <cue name="AddHabitat">
+          <delay exact="10s"/>
+          <actions>
+            <do_if value="not $Station.constructionsequence">
+              <debug_text text="'[ESR-TEST] RESULT build: sequence=null reason=no-base-sequence'" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
+            <do_else>
+              <!-- No connector list: the property check only knows macro names vanilla scripts use.
+                   failsafe places the habitat in free space when it cannot attach to the existing plan. -->
+              <create_construction_sequence station="$Station" macros="[macro.hab_arg_s_01_macro]" base="$Station.constructionsequence" timeout="30s" failsafe="true">
+                <immediate result="$NewSequence"/>
+              </create_construction_sequence>
+              <!-- The sequence is the desired station, not a delta. A shorter one would remove modules. -->
+              <do_if value="not $NewSequence">
+                <debug_text text="'[ESR-TEST] RESULT build: sequence=null reason=no-sequence'" filter="general"/>
+                <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+                <raise_lua_event name="'esr_test_quit'"/>
+              </do_if>
+              <do_elseif value="$NewSequence.count le $Station.constructionsequence.count">
+                <debug_text text="'[ESR-TEST] RESULT build: sequence=%s reason=not-extended base=%s'.[$NewSequence.count, $Station.constructionsequence.count]" filter="general"/>
+                <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+                <raise_lua_event name="'esr_test_quit'"/>
+              </do_elseif>
+              <do_else>
+                <debug_text text="'[ESR-TEST] sequence %s entries (station had %s)'.[$NewSequence.count, $Station.constructionsequence.count]" filter="general"/>
+                <add_build_to_expand_station object="$Station.buildstorage" buildobject="$Station" constructionplan="$NewSequence" result="$Build"/>
+                <set_value name="$ChangedAt" exact="player.age"/>
+                <debug_text text="'[ESR-TEST] build %s added, exists=%s processing=%s tracked=%s storage=%s'.[$Build, @$Build.exists, @$Build.isprocessing, @md.ESR_Main.Tracker.$Rebuilds.{$Station}?, $Station.buildstorage.cargo.table]" filter="general"/>
+              </do_else>
+            </do_else>
+          </actions>
+        </cue>
         <cue name="BuildSample" instantiate="true" checkinterval="15s">
           <conditions>
             <check_value value="$ChangedAt? and not @md.ESR_Test.BuildLog.$Stop"/>
           </conditions>
           <actions>
-            <set_value name="$Clay" exact="@$Station.buildstorage.cargo.{ware.claytronics}"/>
-            <set_value name="$Hull" exact="@$Station.buildstorage.cargo.{ware.hullparts}"/>
-            <set_value name="$Med" exact="@$Station.buildstorage.cargo.{ware.medicalsupplies}"/>
-            <do_if value="not $Clay?"><set_value name="$Clay" exact="0"/></do_if>
-            <do_if value="not $Hull?"><set_value name="$Hull" exact="0"/></do_if>
-            <do_if value="not $Med?"><set_value name="$Med" exact="0"/></do_if>
+            <!-- cargo.{ware} is a ware-amount entry; the number is .count. A missing ware is null, not 0. -->
+            <set_value name="$Clay" exact="@$Station.buildstorage.cargo.{ware.claytronics}.count"/>
+            <set_value name="$Hull" exact="@$Station.buildstorage.cargo.{ware.hullparts}.count"/>
+            <set_value name="$Med" exact="@$Station.buildstorage.cargo.{ware.medicalsupplies}.count"/>
+            <do_if value="not $Clay"><set_value name="$Clay" exact="0"/></do_if>
+            <do_if value="not $Hull"><set_value name="$Hull" exact="0"/></do_if>
+            <do_if value="not $Med"><set_value name="$Med" exact="0"/></do_if>
             <do_if value="@$Build.exists">
               <do_if value="md.ESR_Test.BuildLog.$MinClay lt 0 or $Clay lt md.ESR_Test.BuildLog.$MinClay">
                 <set_value name="md.ESR_Test.BuildLog.$MinClay" exact="$Clay"/>
@@ -530,7 +537,13 @@
             <do_elseif value="not md.ESR_Test.BuildLog.$EndedAt?">
               <set_value name="md.ESR_Test.BuildLog.$EndedAt" exact="player.age"/>
             </do_elseif>
-            <debug_text text="'[ESR-TEST] BUILD dt=%s exists=%s processing=%s modules=%s operational=%s buildstorage clay=%s hull=%s medical=%s station clay=%s hull=%s medical=%s'.[player.age - $ChangedAt, @$Build.exists, @$Build.isprocessing, @$Station.modules.all.count, @$Station.modules.operational.count, $Clay, $Hull, $Med, @$Station.cargo.{ware.claytronics}, @$Station.cargo.{ware.hullparts}, @$Station.cargo.{ware.medicalsupplies}]" filter="general"/>
+            <set_value name="$StationClay" exact="@$Station.cargo.{ware.claytronics}.count"/>
+            <set_value name="$StationHull" exact="@$Station.cargo.{ware.hullparts}.count"/>
+            <set_value name="$StationMed" exact="@$Station.cargo.{ware.medicalsupplies}.count"/>
+            <do_if value="not $StationClay"><set_value name="$StationClay" exact="0"/></do_if>
+            <do_if value="not $StationHull"><set_value name="$StationHull" exact="0"/></do_if>
+            <do_if value="not $StationMed"><set_value name="$StationMed" exact="0"/></do_if>
+            <debug_text text="'[ESR-TEST] BUILD dt=%s exists=%s processing=%s modules=%s operational=%s buildstorage clay=%s hull=%s medical=%s station clay=%s hull=%s medical=%s'.[player.age - $ChangedAt, @$Build.exists, @$Build.isprocessing, @$Station.modules.all.count, @$Station.modules.operational.count, $Clay, $Hull, $Med, $StationClay, $StationHull, $StationMed]" filter="general"/>
 
             <set_value name="$Reason" exact="''"/>
             <do_if value="md.ESR_Test.BuildLog.$EndedAt? and player.age gt md.ESR_Test.BuildLog.$EndedAt + 90s">
@@ -541,13 +554,7 @@
             </do_elseif>
             <do_if value="$Reason != ''">
               <set_value name="md.ESR_Test.BuildLog.$Stop" exact="true"/>
-              <set_value name="$StationClay" exact="@$Station.cargo.{ware.claytronics}"/>
-              <set_value name="$StationHull" exact="@$Station.cargo.{ware.hullparts}"/>
-              <set_value name="$StationMed" exact="@$Station.cargo.{ware.medicalsupplies}"/>
-              <do_if value="not $StationClay?"><set_value name="$StationClay" exact="0"/></do_if>
-              <do_if value="not $StationHull?"><set_value name="$StationHull" exact="0"/></do_if>
-              <do_if value="not $StationMed?"><set_value name="$StationMed" exact="0"/></do_if>
-              <debug_text text="'[ESR-TEST] RESULT build: reason=%s clay0=%s clay_min=%s clay_build=%s clay_station=%s hull0=%s hull_min=%s hull_build=%s hull_station=%s med0=%s med_min=%s med_build=%s med_station=%s modules=%s'.[$Reason, md.ESR_Test.BuildLog.$Clay0, md.ESR_Test.BuildLog.$MinClay, $Clay, $StationClay, md.ESR_Test.BuildLog.$Hull0, md.ESR_Test.BuildLog.$MinHull, $Hull, $StationHull, md.ESR_Test.BuildLog.$Med0, md.ESR_Test.BuildLog.$MinMed, $Med, $StationMed, @$Station.modules.all.count]" filter="general"/>
+              <debug_text text="'[ESR-TEST] RESULT build: reason=%s clay0=%s clay_min=%s clay_build=%s clay_station=%s hull0=%s hull_min=%s hull_build=%s hull_station=%s med0=%s med_min=%s med_build=%s med_station=%s modules=%s buildstorage=%s station=%s'.[$Reason, md.ESR_Test.BuildLog.$Clay0, md.ESR_Test.BuildLog.$MinClay, $Clay, $StationClay, md.ESR_Test.BuildLog.$Hull0, md.ESR_Test.BuildLog.$MinHull, $Hull, $StationHull, md.ESR_Test.BuildLog.$Med0, md.ESR_Test.BuildLog.$MinMed, $Med, $StationMed, @$Station.modules.all.count, @$Station.buildstorage.cargo.table, @$Station.cargo.table]" filter="general"/>
               <do_if value="@player.timewarp.active">
                 <toggle_timewarp/>
               </do_if>
