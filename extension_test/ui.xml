@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon name="station_rebuilder_test" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../ui/core/addon.xsd">
+  <environment type="menus">
+    <file name="ui/esr_test_config.lua" />
+    <file name="ui/esr_test.lua" />
+    <!-- after the game's own addons: gameoptions declares IsStartmenu / IsSaveValid, the helper has the delayed
+         callbacks, detailmonitor has the station build menu and the construction plan declarations -->
+    <dependency name="ego_detailmonitorhelper" />
+    <dependency name="ego_gameoptions" />
+    <dependency name="ego_detailmonitor" />
+  </environment>
+</addon>

@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="ESR_Test" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <!--
+    Easier Station Rebuilder test harness (MD side). Development only.
+    After the test save loads (MD raises the Lua event esr_test_ready), the Lua side requests the scenario named in ui/esr_test_config.lua
+    (UI event screen 'ESR_Test', control 'scenario', param3 = name). Each scenario logs "[ESR-TEST] ..." lines,
+    ends with "[ESR-TEST] DONE" and asks the Lua side to quit the game. tools/run-game.ps1 waits for DONE.
+
+    Scenario B6 (docked ships at a removed pier, vanilla behaviour unless protections are on):
+    - a player station from the library plan tutorial_station in the player's sector, with a builder,
+      an L freighter docked at the pier and an M freighter at the dock area, cargo and workforce;
+    - 60 s later the pier is removed from the plan by script (remove_from_construction_sequence +
+      add_build_to_expand_station, the MD path, not the build menu);
+    - then waits until the build is done (or 20 min of game time) and logs what survived.
+    PROBE lines log lookups that failed or were empty in run 2 (sequence entries, docked ships at a pier,
+    recycling properties), without @, so failures show up as script errors.
+    Note (run 2): sub-cues of a cue with <delay> start checking at once, not after the delay, so every
+    follow-up cue checks $ChangedAt? itself.
+  -->
+  <cues>
+    <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
+    <cue name="Ready" instantiate="true">
+      <conditions>
+        <event_game_loaded/>
+      </conditions>
+      <actions>
+        <debug_text text="'[ESR-TEST] save loaded, t=%s; asking Lua for the scenario'.[player.age]" filter="general"/>
+        <raise_lua_event name="'esr_test_ready'"/>
+      </actions>
+    </cue>
+
+    <cue name="Run" instantiate="true" namespace="this">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'b6'"/>
+      </conditions>
+      <actions>
+        <debug_text text="'[ESR-TEST] scenario %s, t=%s, player in %s; main mod settings %s (ships=%s cargo=%s refund=%s workforce=%s)'.[event.param3, player.age, @player.sector.knownname, md.ESR_Main.Settings.$Ships?, @md.ESR_Main.Settings.$Ships, @md.ESR_Main.Settings.$Cargo, @md.ESR_Main.Settings.$Refund, @md.ESR_Main.Settings.$Workforce]" filter="general"/>
+        <set_value name="$Sector" exact="player.sector"/>
+        <set_value name="$Started" exact="player.age"/>
+
+        <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
+          <safepos max="30km" allowyaxis="false" includeplotbox="true" radius="5km"/>
+        </create_station>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="false"/>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="true"/>
+        <debug_text text="'[ESR-TEST] station %s (%s) %s: %s modules, sequence %s entries, build storage %s'.[@$Station.knownname, @$Station.idcode, $Station, @$Station.modules.all.count, @$Station.constructionsequence.count, @$Station.buildstorage]" filter="general"/>
+
+        <find_object_component name="$Pier" object="$Station" class="class.pier" checkoperational="false"/>
+        <find_object_component name="$DockArea" object="$Station" class="class.dockarea" checkoperational="false"/>
+        <find_dockingbay name="$PierBay" object="$Pier">
+          <match_dock size="tag.dock_l" free="true"/>
+        </find_dockingbay>
+        <find_dockingbay name="$AreaBay" object="$DockArea">
+          <match_dock size="tag.dock_m" free="true"/>
+        </find_dockingbay>
+        <debug_text text="'[ESR-TEST] pier %s bay %s; dock area %s bay %s'.[$Pier, $PierBay, $DockArea, $AreaBay]" filter="general"/>
+
+        <create_ship name="$ShipL" macro="macro.ship_arg_l_trans_container_01_a_macro" dock="$PierBay">
+          <owner exact="faction.player" overridenpc="true"/>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+        </create_ship>
+        <create_ship name="$ShipM" macro="macro.ship_arg_m_trans_container_01_a_macro" dock="$AreaBay">
+          <owner exact="faction.player" overridenpc="true"/>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+        </create_ship>
+        <debug_text text="'[ESR-TEST] docked: L %s (%s) at %s; M %s (%s) at %s'.[@$ShipL.knownname, @$ShipL.idcode, @$ShipL.dock, @$ShipM.knownname, @$ShipM.idcode, @$ShipM.dock]" filter="general"/>
+
+        <create_ship name="$Builder" macro="macro.ship_arg_xl_builder_01_a_macro" sector="$Sector">
+          <owner exact="faction.player" overridenpc="true"/>
+          <loadout>
+            <quantity exact="1.0">
+              <variation exact="0.0"/>
+            </quantity>
+            <quality exact="0.5"/>
+          </loadout>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+          <safepos object="$Station" min="2km" max="4km"/>
+        </create_ship>
+        <create_order object="$Builder" id="'DeployToStation'">
+          <param name="station" value="$Station"/>
+        </create_order>
+        <debug_text text="'[ESR-TEST] builder %s (%s), distance %s m'.[@$Builder.knownname, @$Builder.idcode, @$Builder.distanceto.{$Station}]" filter="general"/>
+
+        <add_cargo object="$Station" ware="ware.energycells" exact="2000"/>
+        <add_workforce object="$Station" race="race.argon" exact="@$Station.workforce.{race.argon}.capacity"/>
+        <debug_text text="'[ESR-TEST] cargo %s, workforce %s / %s'.[$Station.cargo.table, @$Station.workforce.amounts, @$Station.workforce.capacities]" filter="general"/>
+        <run_actions ref="md.ESR_Test.Probe">
+              <param name="Tag" value="'setup'"/>
+              <param name="Station" value="$Station"/>
+              <param name="Pier" value="$Pier"/>
+              <param name="PierBay" value="$PierBay"/>
+              <param name="ShipL" value="$ShipL"/>
+              <param name="Build" value="null"/>
+            </run_actions>
+      </actions>
+      <cues>
+        <cue name="ChangePlan">
+          <delay exact="60s"/>
+          <actions>
+            <remove_from_construction_sequence object="$Station" sequence="$Station.constructionsequence" macros="[macro.pier_arg_harbor_02_macro]">
+              <result sequence="$NewSequence" removed="$Removed" cost="$Cost"/>
+            </remove_from_construction_sequence>
+            <debug_text text="'[ESR-TEST] plan change: %s -> %s entries, removes %s, cost %s'.[$Station.constructionsequence.count, @$NewSequence.count, $Removed, $Cost]" filter="general"/>
+            <debug_text text="'[ESR-TEST] PROBE after-remove | new sequence count %s, entry 1 %s, id %s, macro %s'.[$NewSequence.count, $NewSequence.{1}, $NewSequence.{1}.id, $NewSequence.{1}.macro]" filter="general"/>
+            <add_build_to_expand_station object="$Station.buildstorage" buildobject="$Station" constructionplan="$NewSequence" result="$Build"/>
+            <set_value name="$ChangedAt" exact="player.age"/>
+            <debug_text text="'[ESR-TEST] build %s added, builder deployed %s'.[$Build, @$Station.buildstorage.buildmodule.constructionvesseldeployed]" filter="general"/>
+            <run_actions ref="md.ESR_Test.Probe">
+              <param name="Tag" value="'after-add'"/>
+              <param name="Station" value="$Station"/>
+              <param name="Pier" value="$Pier"/>
+              <param name="PierBay" value="$PierBay"/>
+              <param name="ShipL" value="$ShipL"/>
+              <param name="Build" value="$Build"/>
+            </run_actions>
+          </actions>
+          <cues>
+            <cue name="Probe30s" checkinterval="5s">
+              <conditions>
+                <check_value value="$ChangedAt? and player.age ge $ChangedAt + 30s"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.ESR_Test.Probe">
+              <param name="Tag" value="'30s'"/>
+              <param name="Station" value="$Station"/>
+              <param name="Pier" value="$Pier"/>
+              <param name="PierBay" value="$PierBay"/>
+              <param name="ShipL" value="$ShipL"/>
+              <param name="Build" value="$Build"/>
+            </run_actions>
+              </actions>
+            </cue>
+            <cue name="Probe3min" checkinterval="5s">
+              <conditions>
+                <check_value value="$ChangedAt? and player.age ge $ChangedAt + 3min"/>
+              </conditions>
+              <actions>
+                <run_actions ref="md.ESR_Test.Probe">
+              <param name="Tag" value="'3min'"/>
+              <param name="Station" value="$Station"/>
+              <param name="Pier" value="$Pier"/>
+              <param name="PierBay" value="$PierBay"/>
+              <param name="ShipL" value="$ShipL"/>
+              <param name="Build" value="$Build"/>
+            </run_actions>
+              </actions>
+            </cue>
+            <cue name="Report" checkinterval="15s">
+              <conditions>
+                <check_value value="$ChangedAt?"/>
+                <check_any>
+                  <check_value value="player.age gt $ChangedAt + 30s and not @$Station.buildstorage.builds.inprogress.count and not @$Station.buildstorage.builds.queued.count"/>
+                  <check_value value="player.age gt $ChangedAt + 20min"/>
+                </check_any>
+              </conditions>
+              <actions>
+                <debug_text text="'[ESR-TEST] RESULT B6 after %s s: pier exists=%s, modules %s; L ship exists=%s dock=%s; M ship exists=%s dock=%s; builder deployed=%s; builds in progress %s queued %s'.[player.age - $ChangedAt, $Pier.exists, @$Station.modules.all.count, $ShipL.exists, @$ShipL.dock, $ShipM.exists, @$ShipM.dock, @$Station.buildstorage.buildmodule.constructionvesseldeployed, @$Station.buildstorage.builds.inprogress.count, @$Station.buildstorage.builds.queued.count]" filter="general"/>
+                <run_actions ref="md.ESR_Test.Probe">
+              <param name="Tag" value="'end'"/>
+              <param name="Station" value="$Station"/>
+              <param name="Pier" value="$Pier"/>
+              <param name="PierBay" value="$PierBay"/>
+              <param name="ShipL" value="$ShipL"/>
+              <param name="Build" value="$Build"/>
+            </run_actions>
+                <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+                <raise_lua_event name="'esr_test_quit'"/>
+              </actions>
+            </cue>
+          </cues>
+        </cue>
+      </cues>
+    </cue>
+
+    <!--
+      Scenario replace: the user's own test, automated (2026-10-15). Save: a copy of the user's quicksave
+      (save_009). Station CVL-296 (Asteroid Belt High Tech Factory II) gets the plan player_1792092162
+      ("terran high tech factory optimized") through the build menu (Lua drives it), with the ship, cargo and
+      workforce protections on. Logs before and after: station cargo, build storage, workforce, every docked ship.
+    -->
+    <cue name="Replace" instantiate="true" namespace="this">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'replace'"/>
+      </conditions>
+      <actions>
+        <find_station name="$Stations" space="player.galaxy" multiple="true"/>
+        <set_value name="$Station" exact="null"/>
+        <do_for_each name="$Candidate" in="$Stations">
+          <do_if value="$Candidate.idcode == 'CVL-296'">
+            <set_value name="$Station" exact="$Candidate"/>
+            <break/>
+          </do_if>
+        </do_for_each>
+        <!-- (run 4: <return/> is only allowed in libraries; a cue that uses it is rejected at load) -->
+        <do_if value="not $Station">
+          <debug_text text="'[ESR-TEST] scenario replace: station CVL-296 not found'" filter="general"/>
+          <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+          <raise_lua_event name="'esr_test_quit'"/>
+        </do_if>
+        <do_else>
+          <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
+          <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
+          <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
+          <debug_text text="'[ESR-TEST] scenario replace: %s (%s), %s modules; protections ships=%s cargo=%s refund=%s workforce=%s'.[$Station.knownname, $Station.idcode, $Station.modules.all.count, md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce]" filter="general"/>
+
+          <run_actions ref="md.ESR_Test.Totals" result="$Before">
+            <param name="Station" value="$Station"/>
+          </run_actions>
+          <set_value name="$DockedBefore" exact="[]"/>
+          <find_dockingbay name="$Bays" object="$Station" multiple="true"/>
+          <do_for_each name="$Bay" in="$Bays">
+            <do_for_each name="$Ship" in="$Bay.docked">
+              <append_to_list name="$DockedBefore" exact="$Ship"/>
+            </do_for_each>
+          </do_for_each>
+          <debug_text text="'[ESR-TEST] BEFORE station cargo %s (%s wares), build storage %s, workforce %s, docked ships %s'.[$Station.cargo.table, $Before.$cargo, @$Station.buildstorage.cargo.table, @$Station.workforce.amounts, $DockedBefore.count]" filter="general"/>
+          <do_for_each name="$Ship" in="$DockedBefore">
+            <debug_text text="'[ESR-TEST] BEFORE docked %s (%s) %s class=%s pilot=%s at %s'.[$Ship.knownname, $Ship.idcode, $Ship, $Ship.class, $Ship.pilot, $Ship.dock]" filter="general"/>
+          </do_for_each>
+
+          <raise_lua_event name="'esr_test_replace'" param="$Station"/>
+          <set_value name="$AskedAt" exact="player.age"/>
+        </do_else>
+      </actions>
+      <cues>
+        <cue name="ReplaceReport" checkinterval="15s">
+          <conditions>
+            <check_value value="$AskedAt? and player.age gt $AskedAt + 6min"/>
+          </conditions>
+          <actions>
+            <run_actions ref="md.ESR_Test.Totals" result="$After">
+              <param name="Station" value="$Station"/>
+            </run_actions>
+            <debug_text text="'[ESR-TEST] AFTER %s s: modules all=%s operational=%s; station cargo %s (%s wares); build storage %s (%s wares); workforce %s; held workforce %s'.[player.age - $AskedAt, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.cargo.table, $After.$cargo, @$Station.buildstorage.cargo.table, $After.$buildstorage, @$Station.workforce.amounts, @md.ESR_Workforce.State.$Stations.{$Station}.$held]" filter="general"/>
+            <set_value name="$Lost" exact="0"/>
+            <do_for_each name="$Ship" in="$DockedBefore">
+              <do_if value="not $Ship.exists">
+                <set_value name="$Lost" operation="add"/>
+              </do_if>
+              <debug_text text="'[ESR-TEST] AFTER ship %s exists=%s dock=%s distance to station %s m'.[$Ship, $Ship.exists, @$Ship.dock, @$Ship.distanceto.{$Station}]" filter="general"/>
+            </do_for_each>
+            <debug_text text="'[ESR-TEST] RESULT replace: ships lost %s of %s; wares before %s (station) + %s (build storage), after %s + %s'.[$Lost, $DockedBefore.count, $Before.$cargo, $Before.$buildstorage, $After.$cargo, $After.$buildstorage]" filter="general"/>
+            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+            <raise_lua_event name="'esr_test_quit'"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!-- Total ware counts on the station and in its build storage -->
+    <library name="Totals" purpose="run_actions">
+      <params>
+        <param name="Station"/>
+      </params>
+      <actions>
+        <set_value name="$Result" exact="table[$cargo = 0, $buildstorage = 0]"/>
+        <do_for_each name="$Ware" valuename="$Amount" in="$Station.cargo.table">
+          <set_value name="$Result.$cargo" exact="$Result.$cargo + $Amount"/>
+        </do_for_each>
+        <do_if value="$Station.buildstorage">
+          <do_for_each name="$Ware" valuename="$Amount" in="$Station.buildstorage.cargo.table">
+            <set_value name="$Result.$buildstorage" exact="$Result.$buildstorage + $Amount"/>
+          </do_for_each>
+        </do_if>
+        <return value="$Result"/>
+      </actions>
+    </library>
+
+    <!-- Lookups the protections depend on, logged without @ so failures show up as script errors -->
+    <library name="Probe" purpose="run_actions">
+      <params>
+        <param name="Tag"/>
+        <param name="Station"/>
+        <param name="Pier"/>
+        <param name="PierBay"/>
+        <param name="ShipL"/>
+        <param name="Build"/>
+      </params>
+      <actions>
+        <set_value name="$Seq" exact="$Station.constructionsequence"/>
+        <debug_text text="'[ESR-TEST] PROBE %s | station sequence count %s, entry 1 %s, id %s, macro %s, planmodule %s; hasplannedconstruction %s'.[$Tag, $Seq.count, $Seq.{1}, $Seq.{1}.id, $Seq.{1}.macro, $Station.planmodule.{$Seq.{1}.id}, $Station.hasplannedconstruction]" filter="general"/>
+        <set_value name="$Planned" exact="$Station.plannedconstruction.sequence"/>
+        <debug_text text="'[ESR-TEST] PROBE %s | planned sequence count %s, entry 1 %s, id %s, planmodule %s'.[$Tag, $Planned.count, $Planned.{1}, $Planned.{1}.id, $Station.planmodule.{$Planned.{1}.id}]" filter="general"/>
+        <do_if value="$Build">
+          <debug_text text="'[ESR-TEST] PROBE %s | build exists %s, processing %s, sequence count %s, entry 1 %s, id %s'.[$Tag, $Build.exists, @$Build.isprocessing, @$Build.constructionsequence.count, $Build.constructionsequence.{1}, $Build.constructionsequence.{1}.id]" filter="general"/>
+        </do_if>
+        <debug_text text="'[ESR-TEST] PROBE %s | pier exists %s, canberecycled %s, recyclingwares.max %s, buildresourcevalue %s; station recyclingwares.max %s'.[$Tag, $Pier.exists, $Pier.canberecycled, $Pier.recyclingwares.max, $Pier.buildresourcevalue, $Station.recyclingwares.max]" filter="general"/>
+        <find_dockingbay name="$Bays" object="$Pier" multiple="true"/>
+        <set_value name="$BayText" exact="''"/>
+        <do_for_each name="$Bay" in="$Bays">
+          <set_value name="$BayText" exact="$BayText + ' %s:%s'.[$Bay, $Bay.docked.count]"/>
+        </do_for_each>
+        <find_object_component name="$ShipsIn" object="$Pier" class="class.ship" checkoperational="false" multiple="true"/>
+        <debug_text text="'[ESR-TEST] PROBE %s | pier bays (bay:docked)%s; known bay docked %s; ship L exists %s dock %s dock.pier %s container %s; ships found inside the pier %s'.[$Tag, $BayText, @$PierBay.docked, $ShipL.exists, @$ShipL.dock, @$ShipL.dock.pier, @$ShipL.container, $ShipsIn]" filter="general"/>
+      </actions>
+    </library>
+  </cues>
+</mdscript>

@@ -1,0 +1,4 @@
+# Files extracted from the game or from mods: not ours to commit, and large
+research/extracted/
+# Logs copied from automated test runs (tools/run-game.ps1)
+research/logs/

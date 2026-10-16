@@ -1,0 +1,36 @@
+# Workflow: automated in-game tests (test harness)
+
+Status: **in progress** (started 2026-10-15)
+
+User request (2026-10-15): automate the game so Claude can test without the user. User: Protected UI mode is already off; any save may be copied and used (smallest preferred) or a new game; Steam is always running.
+
+## Design
+- **Harness extension** `extension_test/` (id `station_rebuilder_test`, never published), linked into `<profile>\extensions\` **only while an automated run is going** (so normal play never auto-loads anything).
+  - Lua `ui/esr_test.lua`: at the start menu (`C.IsStartmenu()`), a few seconds after the UI is up, `LoadGame("save_010")`; in game, quits (`QuitGame()`) when MD raises the Lua event `esr_test_quit`.
+  - MD `md/esr_test.xml`: after `event_game_loaded`, runs the scenario(s), logs `[ESR-TEST] …` lines and `[ESR-TEST] DONE`, then raises `esr_test_quit`.
+- **Test save** `save_010` (a valid slot the user doesn't use; valid names: `save_001`–`save_010`, `autosave_01`–`03`, `quicksave`), copied from the user's smallest save `save_002` (94 MB). The user's own saves are never written.
+- **Runner** `tools/run-game.ps1`: links the harness, starts the game through Steam (`steam://rungameid/392160`; launch options `-skipintro -logfile debuglog.txt` set in Steam), waits for `[ESR-TEST] DONE` in `debuglog.txt` (or a timeout), waits for the game to quit (kills it after a grace period), unlinks the harness, copies the log to `research/logs/` (git-ignored), prints our lines and script errors.
+
+## Steps
+- [x] Copy `save_002` → `save_010`
+- [x] Harness extension (content.xml, ui.xml, Lua, MD smoke scenario: load, log, quit)
+- [x] `tools/run-game.ps1`
+- [x] Offline checks cover `extension_test/` too
+- [x] **Run 1 (smoke), 2026-10-15 20:12, passed in 2 min 20 s:** started from the terminal, `LoadGame("save_010")` from the start menu at 9 s, the Lua side reloaded in game, `ESR_Diag` and `ESR_Main` started, SirNukes called all six option callbacks (defaults), DONE after 10 s of game time, `QuitGame()` closed the game. No script errors in our files. Log: `research/logs/run-20261015-201224.txt`.
+- [x] Steam asks the user before a launch with arguments from outside; the runner now starts `steam://rungameid/392160` with no arguments, so the game's Steam launch options must hold `-skipintro -logfile debuglog.txt` (asked the user)
+- [x] Autosave guard: the profile's `config.xml` has `<autosave>true</autosave>` with interval factor 0.25, so a long run could autosave the test game over the user's `autosave_01`–`03`. The runner backs up `config.xml`, sets autosave off, and restores the original after the game has exited (a leftover backup is restored at the next run).
+- [x] Scenario B6 written (`esr_test.xml`): `create_station` from `tutorial_station` in the player's sector, L freighter docked at the pier, M freighter at the dock area, XL builder with `DeployToStation`, energy cells and Argon workforce; after 60 s `remove_from_construction_sequence` (pier) + `add_build_to_expand_station`; reports when the build is done or after 20 min. Checks pass.
+- [x] **Run 2 (B6, vanilla), 20:20:** scenario bug (Report checked at once, DONE at load; `QuitGame` in the load frame did nothing); the runner killed the game after its grace period and restored `config.xml` too early (fixed: waits for the process). Findings in docs/x4-modding.md.
+- [x] **Run 3 (B6 + probes), 20:28, passed:** vanilla on the script path undocks the ship from the removed pier (survives), refunds 100 % of the removed modules' build cost, drops the workforce to 0 at once. Probes: entry ids readable directly, module recycling properties missing. Findings in docs/x4-modding.md; logger fixed, refund made log-only.
+- [x] The user's manual replacement (CVL-296, build menu path, 21:06–21:14) reproduced the losses; analysed from our log and the saves (docs/x4-modding.md). Their `quicksave` (before) and `save_003` "bug" (after) are backed up in `<profile>\save-backups-esr\`.
+- [x] Harness: scenario and save chosen per run (`-Scenario`, `-Save` → generated `ui/esr_test_config.lua`; Lua asks MD for the scenario with UI event `ESR_Test`/`scenario`); scenario `replace` drives the build menu from Lua (import plan `player_1792092162` if needed, `OpenMenu("StationConfigurationMenu")`, `menu.dropdownLoad`, `menu.buttonConfirm`, `menu.closeMenu`), protections ships/cargo/workforce on, logs before/after. `save_009` = copy of the user's quicksave. Checks pass.
+- [x] **Run 4 (replace), 21:31, invalid:** the game rejected cue `Replace` at load (`Script node 'return' is not allowed in this context`: `<return>` only works in libraries), so the protections stayed off and the menu was never scripted; the user imported and applied the plan by hand (vanilla again: build storage nearly empty after the removal). Fixed the cue; `check.py` now fails on `<return>` in a cue (negative test passes). The user quit the game; config restored, harness unlinked, `save_009` unchanged.
+- [x] **Run 5 (replace), 21:39, invalid:** the Lua side requested the scenario on a 5 s timer after the UI restarted, which was during save loading (logged at game time 0.00), so no MD cue heard it. Fix: handshake — MD `Ready` (on `event_game_loaded`) raises Lua event `esr_test_ready`, Lua answers with the scenario UI event. The user quit the game; cleanup verified.
+- [ ] **Run 6 (replace, protections on, handshake)**
+- [ ] More B6 variants: dock area with ships (S/M docks, internal storage), full replacement
+- [ ] Scenarios B1–B6 (vanilla, protections off), then each protection on
+- [ ] Docs: docs/testing.md (automated runs), CLAUDE.md, roadmap
+
+## Notes
+- Launching `X4.exe` directly (run 1): Steam restarted it through its launcher with our arguments, after asking the user to allow them.
+- Scenario station: library plan `tutorial_station` (7 modules: M dock area, pier, S container storage, 2 energy cell production, admin centre, S habitat). Vanilla spawns stations with `create_station … constructionplan owner sector state` + `safepos … includeplotbox`, docked ships with `create_ship … dock="$Dock"`.

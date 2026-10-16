@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lets the editor (Red Hat XML extension) validate our scripts against the game's schemas, which are
+     extracted to research/extracted/base/ (git-ignored; see docs/dev-setup.md). The scripts name the
+     schemas relative to where they sit inside the game, so map them by suffix. -->
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <uriSuffix uriSuffix="/md.xsd" uri="../research/extracted/base/libraries/md.xsd"/>
+  <uriSuffix uriSuffix="/aiscripts.xsd" uri="../research/extracted/base/libraries/aiscripts.xsd"/>
+  <uriSuffix uriSuffix="/addon.xsd" uri="../research/extracted/base/ui/core/addon.xsd"/>
+  <systemSuffix systemIdSuffix="/md.xsd" uri="../research/extracted/base/libraries/md.xsd"/>
+  <systemSuffix systemIdSuffix="/aiscripts.xsd" uri="../research/extracted/base/libraries/aiscripts.xsd"/>
+  <systemSuffix systemIdSuffix="/addon.xsd" uri="../research/extracted/base/ui/core/addon.xsd"/>
+</catalog>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="ESR_Cargo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <!--
+    Easier Station Rebuilder: cargo in storage modules that a plan change removes (G2 part 1, D-6).
+    Called by ESR_Main's sweep with the doomed modules. Per ware transport tag:
+      capacity after removal = station capacity - the doomed storage modules' macro capacity for that tag;
+      the used volume above it moves from station cargo to build storage, spread over the wares of that tag
+      in proportion to their amounts.
+    Runs on every sweep, so wares delivered later are caught too; once the cargo fits, nothing moves.
+  -->
+  <cues>
+    <library name="Sweep" purpose="run_actions">
+      <params>
+        <param name="Station"/>
+        <param name="Doomed"/>
+      </params>
+      <actions>
+        <set_value name="$Storages" exact="[]"/>
+        <do_for_each name="$Module" in="$Doomed">
+          <do_if value="$Module.exists and $Module.isclass.storage">
+            <append_to_list name="$Storages" exact="$Module"/>
+          </do_if>
+        </do_for_each>
+        <do_if value="$Storages.count == 0">
+          <return/>
+        </do_if>
+
+        <set_value name="$BuildStorage" exact="$Station.buildstorage"/>
+        <set_value name="$Cargo" exact="$Station.cargo.table"/>
+        <set_value name="$Tags" exact="[]"/>
+        <do_for_each name="$Ware" in="$Cargo.keys.list">
+          <do_if value="not $Tags.indexof.{$Ware.transporttag}">
+            <append_to_list name="$Tags" exact="$Ware.transporttag"/>
+          </do_if>
+        </do_for_each>
+
+        <do_for_each name="$Tag" in="$Tags">
+          <set_value name="$Removed" exact="0"/>
+          <do_for_each name="$Module" in="$Storages">
+            <set_value name="$Removed" exact="$Removed + @$Module.macro.cargo.capacity.{$Tag}"/>
+          </do_for_each>
+          <do_if value="$Removed le 0">
+            <continue/>
+          </do_if>
+          <set_value name="$Used" exact="0"/>
+          <do_for_each name="$Ware" valuename="$Amount" in="$Cargo">
+            <do_if value="$Ware.transporttag == $Tag">
+              <set_value name="$Used" exact="$Used + $Amount * $Ware.volume"/>
+            </do_if>
+          </do_for_each>
+          <set_value name="$Left" exact="[$Station.cargo.capacity.{$Tag} - $Removed, 0].max"/>
+          <set_value name="$Excess" exact="$Used - $Left"/>
+          <do_if value="$Excess le 0 or $Used le 0">
+            <continue/>
+          </do_if>
+          <set_value name="$Share" exact="$Excess * 1.0f / $Used"/>
+          <debug_text text="'[ESR] CARGO %s: %s used %s, capacity %s minus %s removed; moving %s to build storage'.[$Station.knownname, $Tag, $Used, $Station.cargo.capacity.{$Tag}, $Removed, $Excess]" filter="general"/>
+          <do_for_each name="$Ware" valuename="$Amount" in="$Cargo">
+            <do_if value="$Ware.transporttag != $Tag">
+              <continue/>
+            </do_if>
+            <set_value name="$Move" exact="[($Amount * $Share + 0.999f)i, $Amount].min"/>
+            <do_if value="$Move le 0">
+              <continue/>
+            </do_if>
+            <remove_cargo object="$Station" ware="$Ware" exact="$Move" result="$Taken"/>
+            <add_cargo object="$BuildStorage" ware="$Ware" exact="$Taken" result="$Added"/>
+            <do_if value="$Added">
+              <debug_text text="'[ESR] CARGO %s: moved %s %s to build storage'.[$Station.knownname, $Taken, $Ware]" filter="general"/>
+            </do_if>
+            <do_else>
+              <add_cargo object="$Station" ware="$Ware" exact="$Taken"/>
+              <debug_text text="'[ESR] CARGO %s: build storage refused %s %s; put back'.[$Station.knownname, $Taken, $Ware]" filter="general"/>
+            </do_else>
+          </do_for_each>
+        </do_for_each>
+      </actions>
+    </library>
+  </cues>
+</mdscript>

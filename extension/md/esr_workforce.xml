@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="ESR_Workforce" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <!--
+    Easier Station Rebuilder: workforce during rebuilds (G3, D-8, D-12).
+    Called by ESR_Main's sweep for each tracked station. Per race:
+    - a drop caused by lost capacity (previous amount above the new capacity) goes into a held pool;
+    - held workers come back with add_workforce as soon as capacity allows (the game can't hold more
+      workers than its habitats fit, so the pool lives here);
+    - once the grace period (setting, hours) since the last loss is over, the pool shrinks by the
+      leave-rate setting (percent of the pool per hour).
+    Returns true while workers are held.
+  -->
+  <cues>
+    <cue name="State">
+      <actions>
+        <!-- station -> table[$last = table[race -> amount], $held = table[race -> amount], $since, $tick] -->
+        <do_if value="not md.ESR_Workforce.State.$Stations?">
+          <set_value name="md.ESR_Workforce.State.$Stations" exact="table[]"/>
+        </do_if>
+      </actions>
+    </cue>
+
+    <library name="Sweep" purpose="run_actions">
+      <params>
+        <param name="Station"/>
+      </params>
+      <actions>
+        <set_value name="$Amounts" exact="$Station.workforce.amounts"/>
+        <set_value name="$Capacities" exact="$Station.workforce.capacities"/>
+        <set_value name="$State" exact="@md.ESR_Workforce.State.$Stations.{$Station}"/>
+        <do_if value="not $State">
+          <set_value name="md.ESR_Workforce.State.$Stations.{$Station}" exact="table[$last = $Amounts.clone, $held = table[], $since = -1, $tick = player.age]"/>
+          <debug_text text="'[ESR] WORKFORCE %s: baseline %s, capacity %s'.[$Station.knownname, $Amounts, $Capacities]" filter="general"/>
+          <return value="false"/>
+        </do_if>
+
+        <!-- every race seen before, now, or held -->
+        <set_value name="$Races" exact="$State.$last.keys.list"/>
+        <do_for_each name="$Race" in="$Amounts.keys.list">
+          <do_if value="not $Races.indexof.{$Race}">
+            <append_to_list name="$Races" exact="$Race"/>
+          </do_if>
+        </do_for_each>
+        <do_for_each name="$Race" in="$State.$held.keys.list">
+          <do_if value="not $Races.indexof.{$Race}">
+            <append_to_list name="$Races" exact="$Race"/>
+          </do_if>
+        </do_for_each>
+        <set_value name="$Elapsed" exact="player.age - $State.$tick"/>
+        <set_value name="$Holding" exact="false"/>
+        <do_for_each name="$Race" in="$Races">
+          <set_value name="$Now" exact="if $Amounts.{$Race}? then $Amounts.{$Race} else 0"/>
+          <set_value name="$Capacity" exact="if $Capacities.{$Race}? then $Capacities.{$Race} else 0"/>
+          <set_value name="$Before" exact="if $State.$last.{$Race}? then $State.$last.{$Race} else $Now"/>
+          <set_value name="$Held" exact="if $State.$held.{$Race}? then $State.$held.{$Race} else 0"/>
+
+          <!-- loss caused by capacity -->
+          <do_if value="$Capacity lt $Before">
+            <set_value name="$Lost" exact="$Before - [$Now, $Capacity].max"/>
+            <do_if value="$Lost gt 0">
+              <set_value name="$Held" exact="$Held + $Lost"/>
+              <set_value name="$State.$since" exact="player.age"/>
+              <debug_text text="'[ESR] WORKFORCE %s: %s lost %s workers to capacity (%s -> %s, capacity %s); holding %s'.[$Station.knownname, $Race, $Lost, $Before, $Now, $Capacity, $Held]" filter="general"/>
+            </do_if>
+          </do_if>
+
+          <!-- return held workers where capacity allows -->
+          <do_if value="$Held ge 1 and $Capacity gt $Now">
+            <set_value name="$Give" exact="([$Held, $Capacity - $Now].min)i"/>
+            <add_workforce object="$Station" race="$Race" exact="$Give"/>
+            <set_value name="$Held" exact="$Held - $Give"/>
+            <set_value name="$Now" exact="$Now + $Give"/>
+            <debug_text text="'[ESR] WORKFORCE %s: %s returned %s workers; still holding %s'.[$Station.knownname, $Race, $Give, $Held]" filter="general"/>
+          </do_if>
+
+          <!-- after the grace period the pool shrinks -->
+          <do_if value="$Held gt 0 and $State.$since ge 0 and player.age gt $State.$since + md.ESR_Main.Settings.$GraceHours * 1h">
+            <set_value name="$Held" exact="$Held - $Held * md.ESR_Main.Settings.$LeaveRate / 100.0f * ($Elapsed / 1h)"/>
+            <do_if value="$Held lt 1">
+              <set_value name="$Held" exact="0"/>
+              <debug_text text="'[ESR] WORKFORCE %s: %s held workers have all left'.[$Station.knownname, $Race]" filter="general"/>
+            </do_if>
+          </do_if>
+
+          <set_value name="$State.$held.{$Race}" exact="$Held"/>
+          <set_value name="$State.$last.{$Race}" exact="$Now"/>
+          <do_if value="$Held gt 0">
+            <set_value name="$Holding" exact="true"/>
+          </do_if>
+        </do_for_each>
+        <set_value name="$State.$tick" exact="player.age"/>
+        <return value="$Holding"/>
+      </actions>
+    </library>
+  </cues>
+</mdscript>

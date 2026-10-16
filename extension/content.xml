@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<content id="station_rebuilder" name="Easier Station Rebuilder" description="Development build. Changing a station's plan no longer destroys docked ships, loses cargo, materials or workforce. Every protection is OFF by default in this build (Extension Options, needs SirNukes Mod Support APIs). Also writes a diagnostic log of plan changes to debuglog.txt." author="Thiago Almeida Dantas" version="1" date="2026-10-15" save="false" enabled="1">
+  <dependency version="900"/>
+  <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
+</content>

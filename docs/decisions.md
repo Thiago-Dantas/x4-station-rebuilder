@@ -1,0 +1,24 @@
+# Decisions
+
+## Decided
+| ID | Date | Decision | Why |
+|----|------|----------|-----|
+| D-1 | 2026-10-15 | Project state lives in `.md` files (`tasks/`, `docs/`), not in session history | Long-term project over many sessions; same as the designer project |
+| D-2 | 2026-10-15 | The game install is read-only; the mod is installed for testing under `<profile>\extensions\`; savegames are backed up before tests | Protect the user's game and saves |
+| D-3 | 2026-10-15 | Git on GitHub, private until close to release, then public; release on the Steam Workshop | User decision |
+| D-4 | 2026-10-15 | **Mod id `station_rebuilder`, display name "Easier Station Rebuilder".** Mod files live in a repo subfolder (not the repo root) so docs and tasks don't ship; a directory junction links it into `<profile>\extensions\station_rebuilder` for testing. | User decision (was OD-1). The subfolder's name is picked in Phase 2. |
+| D-5 | 2026-10-15 | **Dependencies are allowed when needed.** Widespread support mods such as SirNukes Mod Support APIs (`sn_mod_support_apis`) are fine. Plain MD comes first; a dependency is added only for something MD can't do (build-menu UI, Extension Options). | User decision (was OD-2) |
+| D-6 | 2026-10-15 | **Lose nothing; everything goes to build storage.** (1) Wares stored on the station are kept, including cargo in storage modules that get removed. (2) Removed modules are refunded at 100% of their build cost. Both go to the station's build storage. | User decision (was OD-3). No capacity limit to handle (D-11). |
+| D-7 | 2026-10-15 | **Ships at a removed dock are parked near the station,** teleported there if they can't get out in time. | User decision (was OD-4) |
+| D-8 | 2026-10-15 | **Workforce grace period of 2 hours,** then the workers above capacity start to leave. | User decision (was OD-5). Assumed to be 2 hours of game time (X4 game time runs at real time unless SETA speeds it up). How fast they leave: D-12. Both are settings. |
+| D-9 | 2026-10-15 | **Go for stretch goal S1:** keep modules that stay the same instead of deconstructing them, if the game allows it. | User decision (was OD-6). Feasibility is Phase 1 research; the protections in G1–G3 are still needed for modules that really go. |
+| D-10 | 2026-10-15 | **MIT licence** (`LICENSE`, same as the designer) | User decision (was OD-7): "be permissive" |
+| D-11 | 2026-10-15 | **No overflow handling for build storage:** everything goes into it. | User decision (was OD-8): build storage has no capacity limit (user's statement; Phase 1 confirms it while measuring). |
+| D-12 | 2026-10-15 | **After the grace period, held workers leave at a rate set in the mod's settings, default 20 % per hour** (of the workers still held). The grace period (default 2 h, D-8) is a setting too. | User decision (was OD-9; first "the game's own rate", revised the same day after tests showed vanilla drops the whole workforce at once, so there is no gradual vanilla rate to follow). Settings need an options menu (SirNukes Mod Support APIs, D-5). |
+| D-13 | 2026-10-15 | **The mod lives in `extension/`** (repo subfolder, D-4); its scripts are prefixed `esr_` (Easier Station Rebuilder), MD scripts named `ESR_*`. The first content is a diagnostic logger that changes nothing. | Picked while building the logger (user asked for it). The prefix keeps our files and cue names apart from the game's and other mods'. |
+| D-14 | 2026-10-15 | **Protections are off by default in dev builds** (until each one is verified in game); each has an on/off setting, plus the grace period and leave rate (D-12). With SirNukes Mod Support APIs installed they show in *Extension Options*; without it the defaults apply. SirNukes is an **optional** dependency in `content.xml`. The PLAN log line records which protections were on. | Claude, while the user was away (reversible). Tests B1–B6 must measure vanilla behaviour; protections that are on by default would change the results. Release builds turn them on (Phase 8). |
+
+## Open
+| ID | Question | Options / notes |
+|----|----------|-----------------|
+| OD-10 | Wares in build storage that the build doesn't need (refunds, moved cargo, D-6): can the player get them back, and should the mod help? | Files (2026-10-15): stations sell to their build storage, nothing moves wares back, so leftovers likely stay there. Options: (a) when the build ends, the mod moves leftovers back to station cargo where they fit; (b) leave them (they feed the next build); (c) only moved cargo goes back, refunds stay. Recommendation: (a). |

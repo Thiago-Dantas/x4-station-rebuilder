@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<content id="station_rebuilder_test" name="Easier Station Rebuilder: test harness" description="Development only, never published. Linked in by tools/run-game.ps1 for automated test runs: loads save_010 from the start menu, runs test scenarios, quits the game." author="Thiago Almeida Dantas" version="1" date="2026-10-15" save="false" enabled="1">
+  <dependency version="900"/>
+  <dependency id="station_rebuilder" optional="true" name="Easier Station Rebuilder"/>
+</content>
