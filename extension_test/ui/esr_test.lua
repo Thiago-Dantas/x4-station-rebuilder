@@ -183,8 +183,10 @@ end
 
 -- The build menu's "remove module" button. sequence=false removes that module only;
 -- the retry uses true (remove the module and whatever is attached to it) when the first call
--- left the engine's removed list empty. B4 removes the S container. b6menu removes the pier.
-local function removePlanModule(tag, macro, doneControl, station)
+-- left the engine's removed list empty. Pass allowSequence=false to keep that retry off
+-- (b6dock: the dock area is the plan root, and sequence=true would take the whole station).
+-- B4 removes the S container. b6menu removes the pier. b6dock removes the dock area.
+local function removePlanModule(tag, macro, doneControl, station, allowSequence)
 	log(tag .. ": station param " .. tostring(station))
 	local id = ConvertStringTo64Bit(tostring(station))
 	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
@@ -226,7 +228,9 @@ local function removePlanModule(tag, macro, doneControl, station)
 			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 			return
 		end
-		if removed == 0 then
+		if removed == 0 and allowSequence == false then
+			log(tag .. ": sequence=false removed nothing; not removing the attached modules")
+		elseif removed == 0 then
 			log(tag .. ": sequence=false removed nothing; retrying with the attached modules")
 			ok, err = pcall(applyRemove, true)
 			if not ok then
@@ -286,6 +290,7 @@ local function init()
 	RegisterEvent("esr_test_b1c", function (_, station) matchStation("b1c", station) end)
 	RegisterEvent("esr_test_b4", function (_, station) removePlanModule("b4", "storage_arg_s_container_01_macro", "b4done", station) end)
 	RegisterEvent("esr_test_b6menu", function (_, station) removePlanModule("b6menu", "pier_arg_harbor_02_macro", "b6done", station) end)
+	RegisterEvent("esr_test_b6dock", function (_, station) removePlanModule("b6dock", "dockarea_arg_m_station_01_macro", "b6dockdone", station, false) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
 	RegisterEvent("esr_test_forcebuild", function (_, station)
 		local id = ConvertStringTo64Bit(tostring(station))
