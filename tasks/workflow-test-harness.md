@@ -45,6 +45,7 @@ User request (2026-10-15): automate the game so Claude can test without the user
 - [ ] Then scenarios B1–B6 on small plan changes.
   - [x] **B1(a), run 19, 2026-10-16, passed:** scenario `b1`, new `tutorial_station` OIY-653, protections off. Saving the live plan and loading it back kept all 7 modules (0 removed, 0 changed, entry ids unchanged, no build afterwards). The plan file has positions and no component ids. Log `research/logs/run-20261016-103742.txt`. The test plan was removed from the profile's `constructionplans.xml` afterwards.
   - [ ] **B1(b), scenario `b1b`:** same station, load plan `player_1792159001` (`esr b1b`). It is the run-19 layout with the two energy-cell modules swapped in sequence order and their positions unchanged. Pass when the log shows whether those modules stay. B1(c) is still a moved module.
+    - [x] **Run 20, 2026-10-16, incomplete:** the menu kept all 7 (removed 0) and the sequence order did swap. Confirm queued a price-0 build whose new entry ids do not map through `planmodule`, so the diag listed 7 removed. Modules were still all operational 3 s later. The run quit before that queued build could start. Log `research/logs/run-20261016-104737.txt`. The next run watches for 3 min.
 - [ ] Scenarios B1–B6 (vanilla, protections off), then each protection on
 - [ ] Docs: docs/testing.md (automated runs), CLAUDE.md, roadmap
 

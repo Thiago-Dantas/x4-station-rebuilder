@@ -633,15 +633,36 @@
             <check_value value="not $Stop"/>
           </conditions>
           <actions>
-            <set_value name="$Stop" exact="true"/>
-            <debug_text text="'[ESR-TEST] RESULT b1: modules=%s operational=%s builds=%s sequence=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.buildstorage.builds.inprogress.count, @$Station.constructionsequence.count]" filter="general"/>
-            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
-            <raise_lua_event name="'esr_test_quit'"/>
+            <!-- b1b leaves a queued build. Run 20 quit at +3 s, before that build could start. -->
+            <do_if value="$Mode == 'b1b'">
+              <set_value name="$WatchAt" exact="player.age"/>
+              <debug_text text="'[ESR-TEST] B1 watch start modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count]" filter="general"/>
+            </do_if>
+            <do_else>
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b1: modules=%s operational=%s builds=%s sequence=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.buildstorage.builds.inprogress.count, @$Station.constructionsequence.count]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_else>
+          </actions>
+        </cue>
+        <cue name="B1Watch" instantiate="true" checkinterval="30s">
+          <conditions>
+            <check_value value="$WatchAt? and not $Stop"/>
+          </conditions>
+          <actions>
+            <debug_text text="'[ESR-TEST] B1 watch dt=%s modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[player.age - $WatchAt, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count]" filter="general"/>
+            <do_if value="player.age gt $WatchAt + 3min">
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b1: modules=%s operational=%s construction=%s queued=%s inprogress=%s sequence=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count, @$Station.constructionsequence.count]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
           </actions>
         </cue>
         <cue name="B1Cap" checkinterval="15s">
           <conditions>
-            <check_value value="$AskedAt? and not $Stop and player.age gt $AskedAt + 5min"/>
+            <check_value value="$AskedAt? and not $Stop and player.age gt $AskedAt + 8min"/>
           </conditions>
           <actions>
             <set_value name="$Stop" exact="true"/>
