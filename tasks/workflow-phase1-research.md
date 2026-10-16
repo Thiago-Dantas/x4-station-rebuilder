@@ -16,7 +16,7 @@ Goal: answer the Phase 1 questions in [roadmap.md](roadmap.md) with evidence (ga
 - [x] Findings written into docs/x4-modding.md
 
 ### Open after part A
-- The vanilla rate at which workers leave when capacity drops isn't in the files (D-12 depends on it) → B5
+- [x] The vanilla rate at which workers leave when capacity drops isn't in the files (D-12 depends on it) → B5. Measured in run 3: instant.
 - Whether build storage really has no limit for recycled wares (`iswaitingforstorage`, D-11) → B3
 - How long between confirm and a module disappearing, and how a docked ship dies → B6
 - [x] Why materials vanish: station modules and mounted turrets/shields come back at 100 % (manual test 2026-10-16, D-17). Stored cargo is a separate loss (B4).
@@ -30,7 +30,7 @@ Setup: a test save (backed up), a player station with a builder assigned, some w
 - [ ] **B2 Replace a few modules.** Note build storage, station cargo, and each removed module's resources from the plan view (they are shown before confirm). Confirm, wait for the build to finish, note build storage and cargo again.
 - [ ] **B3 Full replacement.** Same as B2 for the whole station. Also: does the build ever stall on "waiting for storage"?
 - [x] **B4 Storage modules with cargo removed.** Run 23 (scenario `b4`, build menu, log `research/logs/run-20261016-114357.txt`): the cargo is gone within 3 s of Confirm and does not arrive in build storage. The module recipe is refunded when the module finishes deconstruction. The station had no other container storage.
-- [ ] **B5 Habitats removed.** Workforce per race and capacity before confirm, right after each habitat disappears, and every 10 minutes for an hour.
+- [x] **B5 Habitats removed.** Run 3 (script path, log `research/logs/run-20261015-202817.txt`): removing the only habitat took the workforce from 250/250 to 0 at once. The vanilla leave rate is instant. The mod's grace period and leave rate are run 15.
 - [ ] **B6 Dock area / pier with docked ships removed.** Which ships die, at confirm or when the dock is recycled; time from confirm to the dock disappearing.
 
 ## C. Decisions

@@ -22,7 +22,7 @@ Questions to answer before writing the mod (part A, game files, done 2026-10-15;
 - [x] Cargo in a removed storage module is not moved to build storage (run 23, scenario `b4`). 200 medical supplies were on the station at Confirm and gone 3 s later, while the module was still under construction. Build storage later received only the module recipe (52 claytronics, 103 energy cells, 189 hull parts). The station had no other container storage.
 - [x] The first moment a script can act: before confirm, from a Lua wrap of the build menu's confirm (the engine's removed-module list is available); after confirm, `event_build_added` on the build storage, while the builder recycles modules over time
 - [x] Docked ships: `dockingbay.docked`, `undock`, `request_undocking`, `warp` with `safepos` exist. How they die → B6.
-- [ ] Workforce: per-race amount/capacity and `add_workforce`/`remove_workforce` exist; `add_workforce` can't exceed capacity, so the grace period needs a mod-side store. The vanilla leave rate (D-12) → B5.
+- [x] Workforce: per-race amount/capacity and `add_workforce`/`remove_workforce` exist; `add_workforce` can't exceed capacity, so the grace period needs a mod-side store. The vanilla leave rate is instant (run 3, script path: the only habitat removed, 250/250 became 0 at once). The mod's own grace and leave rate are run 15.
 - [x] Prior-art mods: none touch plan changes
 - [x] OD-8, OD-9 decided by the user (D-11, D-12)
 - [ ] Decide whether S1 is doable. Deferred by the user 2026-10-16.

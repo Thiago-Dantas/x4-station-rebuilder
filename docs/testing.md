@@ -36,7 +36,7 @@ What the logger writes for each plan change:
 | B2 Replace a few | Replace 2–3 modules (one of them a storage module with cargo, if possible). Confirm and let it build. | Let it run until the build finishes, plus 5 min. |
 | B3 Full replacement | Load a different plan onto the station, Confirm, let it build. | As B2. Watch for "waiting for storage". |
 | B4 Storage with cargo | Remove a storage module that holds wares. | As B2. Run 23 (scenario `b4`, protections off): the build menu removed only the S container. 200 medical supplies were still on the station at Confirm and gone 3 s later, not in build storage. The module recipe (52 / 103 / 189) arrived in build storage when the module finished deconstruction, about 72 s later. The station had no other container storage. |
-| B5 Habitats | Remove the habitats (or replace them). | Keep the game running for an hour of game time after the build (SETA is fine). |
+| B5 Habitats | Remove the habitats (or replace them). | Run 3 (script path): removing the only habitat took the workforce from 250/250 to 0 at once. There is no gradual vanilla leave rate. The mod's grace period is run 15. |
 | B6 Docks with ships | Remove a dock area or pier with ships docked. | Note when the ships die (if they do). |
 
 Tests can share one plan change (e.g. B2 + B4 + B6 in one go); write down which ones you combined.

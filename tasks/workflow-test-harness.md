@@ -52,7 +52,7 @@ User request (2026-10-15): automate the game so Claude can test without the user
 - [ ] Docs: docs/testing.md (automated runs), CLAUDE.md, roadmap
 
 ## Notes
-- **S1 is deferred (user 2026-10-16).** Do not pick the matching question or "decide whether S1 is doable" back up until the user asks. B4 is measured (run 23). The next small-change tests are B2, B3, B5 and B6.
+- **S1 is deferred (user 2026-10-16).** Do not pick the matching question or "decide whether S1 is doable" back up until the user asks. B4 is measured (run 23). B5's vanilla leave rate is already measured (run 3, instant). The next small-change tests are B2, B3 and B6.
 - **SETA is manual (2026-10-16).** `set_timewarp_factor factor="6s"` only stores the rate. Logs that say `timewarp active=1 factor=6` do not mean the clock is at 6×. On every test so far the player pressed the SETA key. Future runs: do not block on the harness starting time warp, and do not claim a run was at 6× unless `player.activity` is `activity.seta` without a keypress and the wall clock agrees. The person at the machine turns SETA on.
 - Launching `X4.exe` directly (run 1): Steam restarted it through its launcher with our arguments, after asking the user to allow them.
 - Scenario station: library plan `tutorial_station` (7 modules: M dock area, pier, S container storage, 2 energy cell production, admin centre, S habitat). Vanilla spawns stations with `create_station … constructionplan owner sector state` + `safepos … includeplotbox`, docked ships with `create_ship … dock="$Dock"`.
