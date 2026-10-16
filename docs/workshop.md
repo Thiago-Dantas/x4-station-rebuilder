@@ -97,9 +97,9 @@ The preview is still to be made. One real in-game screenshot, JPG or PNG, widesc
 
 ### Still to do before that command
 
-- Copy `extension/` to a release folder named `station_rebuilder` and use the content.xml above. The tool rewrites the content.xml it is pointed at.
-- Turn the three protections on by default in that copy (D-14). In the dev scripts they are still off (`$Ships`, `$Cargo`, `$Workforce` start at 0 in `esr_main.xml`).
-- Take the log-only option "Refund equipment of removed modules (test)" out of the player menu in that copy (D-17). The game already refunds that equipment.
+- Copy `extension/` to a release folder named `station_rebuilder` and use the content.xml above. The tool rewrites the content.xml it is pointed at. Done for the profile install (2026-10-16, D-20): `<profile>\extensions\station_rebuilder` is that copy. Do not point the upload at it if a later edit should not rewrite the installed file; copy it again first.
+- Turn the three protections on by default in that copy (D-14). Done in the profile copy. In the dev scripts they are still off (`$Ships`, `$Cargo`, `$Workforce` start at 0 in `esr_main.xml`). The release menu passes `$default = 1`, so a save that already stored 0 still comes up on, until the player turns an option off.
+- Take the log-only option "Refund equipment of removed modules (test)" out of the player menu in that copy (D-17). Done in the profile copy. The game already refunds that equipment.
 - Make the repo public first (D-3). The player README links to it.
 - A preview screenshot.
 - Leave the suggested-pairings paragraph off the page until a rebuild has been tried with each mod (Phase 7). Draft paragraph, for after that test, in the same voice as the page: "Build Storage: Station Drone Self-Supply hauls wares you already have on the station into the build. XBuilder adds construction ships to a station that is already being built. Both need SirNukes Mod Support APIs."
