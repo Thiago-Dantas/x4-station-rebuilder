@@ -6,7 +6,7 @@
     - the player's, with a pilot: MoveWait order to a free spot near the station (parks there until given new orders);
     - someone else's: asked to undock (its own AI flies off);
     - no pilot: warped to that spot at once.
-    The Watch cue checks the ships every 2 s and warps any that is still docked 10 s after the first try.
+    The Watch cue checks the ships every 2 s and warps any that is still inside the station 10 s after the first try.
     (Automated run 6, 2026-10-15: a full replacement put every module into deconstruction ~60 s after Confirm and
     killed two ships whose park order had not got them out; the fallback then waited 60 s and lost the race.
     Modules in deconstruction can't be searched for docks ("Invalid space"), so ships are remembered at Confirm.)
@@ -32,8 +32,10 @@
                 <debug_text text="'[ESR] SHIPS %s: %s no longer exists'.[@$Entry.$station.knownname, $Ship]" filter="general"/>
                 <remove_value name="md.ESR_Ships.State.$Tried.{$Ship}"/>
               </do_if>
-              <do_elseif value="not $Ship.dock">
-                <debug_text text="'[ESR] SHIPS %s: %s (%s) has left the dock after %s s'.[@$Entry.$station.knownname, $Ship.knownname, $Ship.idcode, player.age - $Entry.$time]" filter="general"/>
+              <!-- run 7: one second after the order the ships had no dock any more but were still inside the station
+                   (undocking, then stuck when the modules went into deconstruction); only outside the station counts -->
+              <do_elseif value="not $Entry.$station.exists or not $Ship.hascontext.{$Entry.$station}">
+                <debug_text text="'[ESR] SHIPS %s: %s (%s) is out of the station after %s s'.[@$Entry.$station.knownname, $Ship.knownname, $Ship.idcode, player.age - $Entry.$time]" filter="general"/>
                 <remove_value name="md.ESR_Ships.State.$Tried.{$Ship}"/>
               </do_elseif>
               <do_elseif value="player.age gt $Entry.$time + 10s and $Entry.$station.exists">
@@ -107,7 +109,7 @@
         <warp object="$Ship" sector="$Station.sector">
           <safepos value="$Pos" radius="$Ship.size"/>
         </warp>
-        <debug_text text="'[ESR] SHIPS %s: %s (%s) warped out of a module being removed (pilot %s); docked now: %s'.[$Station.knownname, $Ship.knownname, $Ship.idcode, $Ship.pilot, $Ship.dock]" filter="general"/>
+        <debug_text text="'[ESR] SHIPS %s: %s (%s) warped out of a module being removed (pilot %s); docked now: %s, still in the station: %s'.[$Station.knownname, $Ship.knownname, $Ship.idcode, $Ship.pilot, $Ship.dock, $Ship.hascontext.{$Station}]" filter="general"/>
       </actions>
     </library>
   </cues>
