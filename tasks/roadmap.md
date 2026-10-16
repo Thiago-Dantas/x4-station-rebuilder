@@ -45,7 +45,7 @@ First version written 2026-10-15; **verified in game** (automated run 8, full re
 - [ ] In-game test: replace a pier and a dock area with ships docked; nothing destroyed
 
 ## Phase 4: Materials (G2, D-6)
-Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes **and** station equipment are refunded 100 % by vanilla (D-17); `esr_refund.xml` is log-only. `esr_cargo.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Cargo **verified in game** (runs 6–8: 14.46 M wares kept; run 29, scenario `b4`, cargo protection only: 200 medical supplies moved to build storage in the confirm frame and were still there after the only container was gone). Module recipes **and** station equipment are refunded 100 % by vanilla (D-17); `esr_refund.xml` is log-only. `esr_cargo.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Keep stored wares: cargo in storage modules that get removed goes to build storage
 - [x] Refund removed modules at 100% of their build cost: vanilla already does this (recipe + mounted equipment)
 - [x] Equipment on removed modules (turrets, shields): vanilla refunds 100 % (manual test 2026-10-16, D-17)

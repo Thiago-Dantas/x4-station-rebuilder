@@ -107,6 +107,16 @@ So the stored wares disappeared within 3 s of Confirm, while the module was stil
 
 **Limit:** the station had no second container storage, so this does not say whether wares would have stayed if another storage module had room. The confirm snapshot also showed 20 argon workers (capacity 250) that the scenario did not add. The workforce update interval in the files is 600 s, so those workers do not account for 200 medical supplies disappearing in 3 s.
 
+## Cargo protection on a removed storage module (verified, run 29, 2026-10-16)
+
+Log `research/logs/run-20261016-142516.txt`. Scenario `b4` on a new `tutorial_station` (Savage Spur II Solar Power Plant, RMZ-181). Cargo protection on. Ships, refund and workforce off (`MAIN tracking` `ships=0 cargo=1 refund=0 workforce=0`). 200 medical supplies were added to the station. The build menu removed only `storage_arg_s_container_01_macro` `0x16383f` (recycled 52 / 103 / 189). The pier and the habitat stayed.
+
+The diag snapshot in the confirm frame (t=362301.32) still had the 200 on the station and an empty build storage. The cargo sweep in that same frame logged `container used 400, capacity 50000 minus 50000 removed; moving 400` and `moved 200 Medical Supplies to build storage`. Medical supplies are 2 m³ each, so 200 is 400 m³, and the removed module was the whole container capacity.
+
+3.2 s later the station cargo was empty and build storage held the 200. That held at dt=8.7 and dt=40.3, while the module was still under construction. Build `0x8501` finished at t=362364.73 (63.4 s after Confirm). At dt=71 the module was gone, the other 6 modules were operational, and build storage held the recipe plus the supplies: 52 claytronics, 103 energy cells, 189 hull parts, 200 medical supplies. `ReturnLeftovers` then moved nothing back (`table[]`) and left all of that in build storage, logged as no room. The result line is `RESULT b4: reason=storage-gone med0=200 med_station=0 med_build=200 storage=0 modules=6 operational=6 construction=0 queued=0 inprogress=0`.
+
+**Verified:** with cargo protection on, the 200 medical supplies that vanilla dropped within 3 s (run 23) are in build storage from the confirm frame, and they are still there after the only container is gone. `esr_refund.xml` stayed log-only (0 pieces). **Limit:** the station had no second container storage. The 20 argon workers in the confirm snapshot were not added by the scenario.
+
 ## B6 build menu: one pier removed
 
 **Verified (run 24, 2026-10-16, log `research/logs/run-20261016-115545.txt`):** scenario `b6menu` on a new `tutorial_station` (Savage Spur II Solar Power Plant, QOK-341), protections off. An L freighter (Veles Vanguard, RBJ-947) started docked at the pier and an M freighter (Mercury Vanguard, UWY-520) at the dock area. Lua called `RemoveItemFromConstructionMap2` with `sequence=false` on `pier_arg_harbor_02_macro`. The menu went from 7 entries to 6, removed 1, changed 0. The habitat, whose plan predecessor is that pier, stayed.
@@ -187,7 +197,7 @@ Static analysis of `X4.exe` (sha256 19750a65…6891) with capstone and Ghidra 12
 
 ## Protections verified in game (2026-10-15, automated runs 6–8)
 The user's replacement of CVL-296 (427 modules) through the build menu, from a copy of their quicksave, protections on:
-- **Cargo:** at Confirm the cargo protection moved 14 464 307 wares (container, liquid and solid, every storage module doomed) into build storage; all of it was still there 6 min later, plus the vanilla module refunds (14 661 732 in total).
+- **Cargo:** at Confirm the cargo protection moved 14 464 307 wares (container, liquid and solid, every storage module doomed) into build storage; all of it was still there 6 min later, plus the vanilla module refunds (14 661 732 in total). Run 29 (scenario `b4`, cargo protection only): 200 medical supplies moved to build storage in the confirm frame and were still there after the only container was gone.
 - **Workforce:** 41 250 Terran workers held when capacity went to 0.
 - **Ships:** a park order alone did not save them: one second after the order `dock` was null but the ships were still inside the station, and they were destroyed with the modules ~60 s after Confirm (runs 6, 7). Now a ship counts as out only when `not $ship.hascontext.{$station}`; still inside after 10 s, it is warped to a safe spot near the station. Run 8: both warped at +11 s, both survived. Run 28 (scenario `b6dock`, ship protection only): the internal-bay S freighter and the external-pad M freighter were warped about 11 s after Confirm and both still existed after the dock was gone.
 

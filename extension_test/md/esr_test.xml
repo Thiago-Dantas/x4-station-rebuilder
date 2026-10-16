@@ -36,8 +36,9 @@
     b1c loads plan player_1792161001: the same layout with the defence disc's offset.y set to 1000.
     There is no FFI call that drags a module. b1b and b1c then watch the station for 3 min.
 
-    Scenario b4 (B4, cargo in a removed storage module): a new tutorial_station, protections off.
-    200 medical supplies go into the station (not in the S-container recipe, and no workforce is added,
+    Scenario b4 (B4, cargo in a removed storage module): a new tutorial_station, cargo
+    protection on, ships and workforce off. 200 medical supplies go into the station
+    (not in the S-container recipe, and no workforce is added,
     so nothing on the station consumes them). Lua opens the build menu and removes
     storage_arg_s_container_01_macro the way the menu's remove button does
     (RemoveItemFromConstructionMap2, sequence off, then on if the engine removed nothing).
@@ -715,7 +716,8 @@
     </cue>
 
     <!--
-      Scenario b4: see the header. Protections stay off. Medical supplies are the tracer ware.
+      Scenario b4: see the header. Cargo protection on; ships, refund and workforce stay off.
+      Medical supplies are the tracer ware.
     -->
     <cue name="B4" instantiate="true" namespace="this">
       <conditions>
@@ -725,10 +727,10 @@
       <actions>
         <set_value name="$Stop" exact="false"/>
         <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
-        <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
         <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
-        <debug_text text="'[ESR-TEST] scenario b4: protections off'" filter="general"/>
+        <debug_text text="'[ESR-TEST] scenario b4: ships=%s cargo=%s refund=%s workforce=%s'.[md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce]" filter="general"/>
 
         <set_value name="$Sector" exact="player.sector"/>
         <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
