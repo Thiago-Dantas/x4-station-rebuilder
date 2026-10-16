@@ -19,7 +19,7 @@ Goal: answer the Phase 1 questions in [roadmap.md](roadmap.md) with evidence (ga
 - The vanilla rate at which workers leave when capacity drops isn't in the files (D-12 depends on it) → B5
 - Whether build storage really has no limit for recycled wares (`iswaitingforstorage`, D-11) → B3
 - How long between confirm and a module disappearing, and how a docked ship dies → B6
-- Why materials vanish: partial refund, or recycled wares going straight into new modules (docs/x4-modding.md, "Hypothesis") → B2/B3
+- [x] Why materials vanish: station modules and mounted turrets/shields come back at 100 % (manual test 2026-10-16, D-17). Stored cargo is a separate loss (B4).
 
 ## B. In-game measurements (needs the user)
 **Proposal (waiting for the user):** build a small diagnostic extension first (Phase 2's skeleton plus a logger). On every plan change of a player station it writes to `debuglog.txt`: the removed modules with `recyclingwares.max`, build storage and station cargo, workforce per race and capacity, docked ships per removed dock; then the same at each `event_build_finished_components` and at the end, plus every `event_object_destroyed` of a ship. The user only plays the steps below and sends the log. Without it, the user has to write the numbers down from the menus.
