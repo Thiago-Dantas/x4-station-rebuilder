@@ -31,7 +31,7 @@ Setup: a test save (backed up), a player station with a builder assigned, some w
 - [ ] **B3 Full replacement.** Same as B2 for the whole station. Also: does the build ever stall on "waiting for storage"?
 - [x] **B4 Storage modules with cargo removed.** Run 23 (scenario `b4`, build menu, log `research/logs/run-20261016-114357.txt`): the cargo is gone within 3 s of Confirm and does not arrive in build storage. The module recipe is refunded when the module finishes deconstruction. The station had no other container storage.
 - [x] **B5 Habitats removed.** Run 3 (script path, log `research/logs/run-20261015-202817.txt`): removing the only habitat took the workforce from 250/250 to 0 at once. The vanilla leave rate is instant. The mod's grace period and leave rate are run 15.
-- [ ] **B6 Dock area / pier with docked ships removed.** Which ships die, at confirm or when the dock is recycled; time from confirm to the dock disappearing.
+- [x] **B6 pier with a docked ship removed.** Run 3 (script path) and run 24 (build menu, log `research/logs/run-20261016-115545.txt`): the L ship is undocked in the confirm frame, is outside the station within 3 s, and still exists after the pier disappears about 72 s later. The M ship on the dock area stays docked. A dock area with a ship in an internal bay is still open (`More B6 variants` in the harness). The 427-module replacement killed ships that were still inside the station (runs 6 and 7).
 
 ## C. Decisions
 - [x] OD-1 … OD-7 decided by the user before research started (D-4 … D-10)
