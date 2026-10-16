@@ -69,6 +69,85 @@ local function importPlan(id)
 	return false
 end
 
+local function planCounts(menu)
+	local entries = menu.constructionplan or {}
+	local withcomp = 0
+	for _, entry in ipairs(entries) do
+		if entry.component ~= nil and entry.component ~= 0 then
+			withcomp = withcomp + 1
+		end
+	end
+	local changed = 0
+	for _ in pairs(menu.changedModulesIndices or {}) do
+		changed = changed + 1
+	end
+	return #entries, withcomp, #(menu.removedModules or {}), changed
+end
+
+local function findPlanByName(name)
+	local n = C.GetNumConstructionPlans()
+	local buf = ffi.new("UIConstructionPlan[?]", n)
+	n = C.GetConstructionPlans(buf, n)
+	local found, best = nil, -1
+	for i = 0, n - 1 do
+		if ffi.string(buf[i].name) == name then
+			local id = ffi.string(buf[i].id)
+			local num = tonumber(string.match(id, "player_(%d+)")) or 0
+			if num >= best then
+				best = num
+				found = id
+			end
+		end
+	end
+	return found
+end
+
+-- B1(a): save the live station plan, load that plan back, confirm.
+-- The "reloaded" line is the engine's removed-module list (GetRemovedConstructionPlanModules2).
+local function matchStation(_, station)
+	log("b1: station param " .. tostring(station))
+	local id = ConvertStringTo64Bit(tostring(station))
+	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
+	log("b1: build menu opened for " .. ffi.string(C.GetComponentName(id)))
+	later(8, function ()
+		local menu = findMenu("StationConfigurationMenu")
+		if not menu or not menu.shown or not menu.holomap or menu.holomap == 0 then
+			log("b1: menu not ready, shown=" .. tostring(menu and menu.shown) .. " holomap=" .. tostring(menu and menu.holomap))
+			AddUITriggeredEvent("ESR_Test", "b1done", "")
+			return
+		end
+		menu.refreshPlan()
+		local entries, withcomp, removed, changed = planCounts(menu)
+		log(string.format("b1 open: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+		C.SaveMapConstructionPlan(menu.holomap, "local", "player", false, "esr b1", "")
+		log("b1: saved the live plan as 'esr b1'")
+		later(3, function ()
+			local planid = findPlanByName("esr b1")
+			if not planid then
+				log("b1: saved plan not in the library")
+				AddUITriggeredEvent("ESR_Test", "b1done", "")
+				return
+			end
+			log("b1: loading plan " .. planid)
+			menu.dropdownLoad(nil, planid)
+			entries, withcomp, removed, changed = planCounts(menu)
+			log(string.format("b1 reloaded: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+			later(2, function ()
+				menu.refreshPlan()
+				entries, withcomp, removed, changed = planCounts(menu)
+				log(string.format("b1 reloaded-settled: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+				menu.buttonConfirm()
+				log("b1: confirmed")
+				later(3, function ()
+					menu.closeMenu("close")
+					log("b1: build menu closed")
+					AddUITriggeredEvent("ESR_Test", "b1done", "")
+				end)
+			end)
+		end)
+	end)
+end
+
 -- the player's steps: open the station's build menu, load the plan, confirm, close
 local function replaceStation(_, station)
 	log("replace: station param " .. tostring(station) .. " (" .. type(station) .. ")")
@@ -101,6 +180,7 @@ local function init()
 		later(3, function () QuitGame() end)
 	end)
 	RegisterEvent("esr_test_replace", replaceStation)
+	RegisterEvent("esr_test_b1", matchStation)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
 	RegisterEvent("esr_test_forcebuild", function (_, station)
 		local id = ConvertStringTo64Bit(tostring(station))
