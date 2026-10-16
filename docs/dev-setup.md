@@ -12,6 +12,7 @@ Windows 10, game 9.00 on Steam. Installs go on H: (or D:), not C:.
 | capstone 5.0.9, pefile 2024.8.26 | `H:\dev\pylibs\disasm` (installed 2026-10-15) | disassembling single `X4.exe` functions and finding references to globals (scratch scripts; see docs/x4-modding.md, "How the engine computes module refunds") |
 | Ghidra 12.1.4 + JDK 21 | `C:\tools\ghidra_12.1.4_PUBLIC`, `C:\tools\jdk-21.0.12.1+1` (already installed, used by REA) | `analyzeHeadless` needs `JAVA_HOME` set to the JDK 21. Import `X4.exe` once with `-noanalysis`, then decompile chosen addresses with a small post-script; full auto-analysis of the 55 MB binary exceeds REA's startup deadline |
 | `x4cat.py` | `..\x4-station-designer\tools\x4cat.py` | extracting game files |
+| X Tools 1.15 (`WorkshopTool.exe`, `XRCatTool.exe`) | `H:\SteamLibrary\steamapps\common\X Tools` (Steam app 282160, build 19742470, installed 2026-10-16) | Steam Workshop upload. `WorkshopTool help` prints the commands. It does not upload. Do not pass `-batchmode` |
 
 ## Game files for the checks (git-ignored)
 `tools/check.py` needs the game's schemas and scripts in `research/extracted/base/`:

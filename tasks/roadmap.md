@@ -72,7 +72,9 @@ Log: [workflow-phase7.md](workflow-phase7.md)
 - [ ] Performance: no polling every frame
 
 ## Phase 8: Release (G5)
+Log: [workflow-phase8.md](workflow-phase8.md)
 - [x] Licence: MIT (D-10)
+- [x] X Tools installed (WorkshopTool 1.15, Steam app 282160, `H:\SteamLibrary\steamapps\common\X Tools`)
 - [ ] README for players
 - [ ] Make the repo public
 - [ ] Steam Workshop upload (Egosoft's X Tools / WorkshopTool), description, screenshots; list dependencies on the Workshop page
