@@ -16,16 +16,16 @@ Log: [workflow-phase1-research.md](workflow-phase1-research.md)
 
 Questions to answer before writing the mod (part A, game files, done 2026-10-15; part B, in game, waiting):
 - [x] Reproduce the four losses in a test save and measure them (B2–B6). Station modules and their mounted equipment are refunded in full by vanilla (manual test 2026-10-16, D-17). That refund is not a gap for the mod.
-- [ ] How the game matches the old station to the new plan, and can a script influence it (S1, D-9). The engine matches; no script binds an entry to a module. B1 is measured (runs 19–22): an identical plan keeps every module, a build-order swap dismantled none in 3 min, and moving the defence disc removes only that disc. Whether S1 is doable is still open.
+- [ ] How the game matches the old station to the new plan, and can a script influence it (S1, D-9). The engine matches; no script binds an entry to a module. B1 is measured (runs 19–22): an identical plan keeps every module, a build-order swap dismantled none in 3 min, and moving the defence disc removes only that disc. Whether S1 is doable is still open. Deferred by the user 2026-10-16.
 - [x] The vanilla refund rule for removed modules: 100 % of the module recipe plus mounted turrets/shields (`GetModuleRecycledResources`; delivered to build storage). Manual test 2026-10-16, D-17.
 - [x] Build storage: MD adds wares with `add_cargo` (vanilla does it). The no-limit statement (D-11) vs `iswaitingforstorage` → B3.
-- [ ] Cargo in storage modules that get removed: vanilla moves cargo only when the whole station goes → B4
+- [ ] Cargo in storage modules that get removed: vanilla moves cargo only when the whole station goes → B4. Next measurement (S1 deferred): scenario `b4`, build menu removes the S container.
 - [x] The first moment a script can act: before confirm, from a Lua wrap of the build menu's confirm (the engine's removed-module list is available); after confirm, `event_build_added` on the build storage, while the builder recycles modules over time
 - [x] Docked ships: `dockingbay.docked`, `undock`, `request_undocking`, `warp` with `safepos` exist. How they die → B6.
 - [ ] Workforce: per-race amount/capacity and `add_workforce`/`remove_workforce` exist; `add_workforce` can't exceed capacity, so the grace period needs a mod-side store. The vanilla leave rate (D-12) → B5.
 - [x] Prior-art mods: none touch plan changes
 - [x] OD-8, OD-9 decided by the user (D-11, D-12)
-- [ ] Decide whether S1 is doable
+- [ ] Decide whether S1 is doable. Deferred by the user 2026-10-16.
 
 ## Phase 2: Mod skeleton and dev loop
 Log: [workflow-diag-logger.md](workflow-diag-logger.md) (the skeleton is the diagnostic logger)

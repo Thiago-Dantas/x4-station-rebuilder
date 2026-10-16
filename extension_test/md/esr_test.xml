@@ -35,6 +35,13 @@
     b1b loads plan player_1792159001 (energy-cell sequence order swapped). That plan was removed after run 21.
     b1c loads plan player_1792161001: the same layout with the defence disc's offset.y set to 1000.
     There is no FFI call that drags a module. b1b and b1c then watch the station for 3 min.
+
+    Scenario b4 (B4, cargo in a removed storage module): a new tutorial_station, protections off.
+    200 medical supplies go into the station (not in the S-container recipe, and no workforce is added,
+    so nothing on the station consumes them). Lua opens the build menu and removes
+    storage_arg_s_container_01_macro the way the menu's remove button does
+    (RemoveItemFromConstructionMap2, sequence off, then on if the engine removed nothing).
+    The watch logs station cargo against build storage until that module is gone, or for 6 min.
   -->
   <cues>
     <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
@@ -673,6 +680,138 @@
           <actions>
             <set_value name="$Stop" exact="true"/>
             <debug_text text="'[ESR-TEST] RESULT b1: reason=cap modules=%s operational=%s builds=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.buildstorage.builds.inprogress.count]" filter="general"/>
+            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+            <raise_lua_event name="'esr_test_quit'"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!--
+      Scenario b4: see the header. Protections stay off. Medical supplies are the tracer ware.
+    -->
+    <cue name="B4" instantiate="true" namespace="this">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'b4'"/>
+      </conditions>
+      <actions>
+        <set_value name="$Stop" exact="false"/>
+        <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
+        <debug_text text="'[ESR-TEST] scenario b4: protections off'" filter="general"/>
+
+        <set_value name="$Sector" exact="player.sector"/>
+        <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
+          <safepos max="30km" allowyaxis="false" includeplotbox="true" radius="5km"/>
+        </create_station>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="false"/>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="true"/>
+        <transfer_money from="faction.player" to="$Station.buildstorage" amount="20000000ct" result="$Paid"/>
+        <create_ship name="$Builder" macro="macro.ship_arg_xl_builder_01_a_macro" sector="$Sector">
+          <owner exact="faction.player" overridenpc="true"/>
+          <loadout>
+            <quantity exact="1.0">
+              <variation exact="0.0"/>
+            </quantity>
+            <quality exact="0.5"/>
+          </loadout>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+          <safepos object="$Station" min="2km" max="4km"/>
+        </create_ship>
+        <create_order object="$Builder" id="'DeployToStation'">
+          <param name="station" value="$Station"/>
+        </create_order>
+        <add_cargo object="$Station" ware="ware.medicalsupplies" exact="200" result="$Med0"/>
+        <debug_text text="'[ESR-TEST] B4 station %s (%s): %s modules, paid %s, medical added %s, station %s, build storage %s'.[@$Station.knownname, @$Station.idcode, @$Station.modules.all.count, $Paid, $Med0, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+      </actions>
+      <cues>
+        <cue name="B4Open">
+          <delay exact="10s"/>
+          <actions>
+            <set_value name="$AskedAt" exact="player.age"/>
+            <raise_lua_event name="'esr_test_b4'" param="$Station"/>
+            <debug_text text="'[ESR-TEST] B4 menu requested, modules %s, medical %s'.[@$Station.modules.all.count, @$Station.cargo.{ware.medicalsupplies}.count]" filter="general"/>
+          </actions>
+        </cue>
+        <cue name="B4Done" instantiate="true">
+          <conditions>
+            <event_ui_triggered screen="'ESR_Test'" control="'b4done'"/>
+            <check_value value="not $Stop"/>
+          </conditions>
+          <actions>
+            <do_if value="event.param3 == 'fail'">
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b4: reason=remove-failed modules=%s station=%s buildstorage=%s'.[@$Station.modules.all.count, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
+            <do_else>
+              <set_value name="$WatchAt" exact="player.age"/>
+              <debug_text text="'[ESR-TEST] B4 watch start modules=%s operational=%s construction=%s queued=%s inprogress=%s medical=%s station=%s buildstorage=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count, @$Station.cargo.{ware.medicalsupplies}.count, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+            </do_else>
+          </actions>
+        </cue>
+        <cue name="B4Watch" instantiate="true" checkinterval="30s">
+          <conditions>
+            <check_value value="$WatchAt? and not $Stop"/>
+          </conditions>
+          <actions>
+            <set_value name="$StorageLeft" exact="0"/>
+            <do_for_each name="$Module" in="$Station.modules.all.list">
+              <do_if value="$Module.macro == macro.storage_arg_s_container_01_macro">
+                <set_value name="$StorageLeft" operation="add"/>
+              </do_if>
+            </do_for_each>
+            <set_value name="$Queued" exact="@$Station.buildstorage.builds.queued.count"/>
+            <do_if value="not $Queued">
+              <set_value name="$Queued" exact="0"/>
+            </do_if>
+            <set_value name="$Busy" exact="@$Station.buildstorage.builds.inprogress.count"/>
+            <do_if value="not $Busy">
+              <set_value name="$Busy" exact="0"/>
+            </do_if>
+            <set_value name="$MedStation" exact="@$Station.cargo.{ware.medicalsupplies}.count"/>
+            <do_if value="not $MedStation">
+              <set_value name="$MedStation" exact="0"/>
+            </do_if>
+            <set_value name="$MedBuild" exact="@$Station.buildstorage.cargo.{ware.medicalsupplies}.count"/>
+            <do_if value="not $MedBuild">
+              <set_value name="$MedBuild" exact="0"/>
+            </do_if>
+            <debug_text text="'[ESR-TEST] B4 watch dt=%s storage=%s modules=%s operational=%s construction=%s queued=%s inprogress=%s med_station=%s med_build=%s station=%s buildstorage=%s'.[player.age - $WatchAt, $StorageLeft, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, $Queued, $Busy, $MedStation, $MedBuild, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+            <set_value name="$Reason" exact="''"/>
+            <do_if value="player.age gt $WatchAt + 6min">
+              <set_value name="$Reason" exact="'cap'"/>
+            </do_if>
+            <do_elseif value="$StorageLeft == 0 and $Busy == 0 and $Queued == 0">
+              <!-- one extra sample after the module is gone, so a refund that lands a few seconds later is in the log -->
+              <do_if value="$SawGone?">
+                <set_value name="$Reason" exact="'storage-gone'"/>
+              </do_if>
+              <do_else>
+                <set_value name="$SawGone" exact="true"/>
+              </do_else>
+            </do_elseif>
+            <do_if value="$Reason != ''">
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b4: reason=%s med0=%s med_station=%s med_build=%s storage=%s modules=%s operational=%s construction=%s queued=%s inprogress=%s station=%s buildstorage=%s'.[$Reason, $Med0, $MedStation, $MedBuild, $StorageLeft, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, $Queued, $Busy, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
+          </actions>
+        </cue>
+        <cue name="B4Cap" checkinterval="15s">
+          <conditions>
+            <check_value value="$AskedAt? and not $Stop and player.age gt $AskedAt + 10min"/>
+          </conditions>
+          <actions>
+            <set_value name="$Stop" exact="true"/>
+            <debug_text text="'[ESR-TEST] RESULT b4: reason=menu-cap modules=%s station=%s buildstorage=%s'.[@$Station.modules.all.count, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
             <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
             <raise_lua_event name="'esr_test_quit'"/>
           </actions>
