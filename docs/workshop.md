@@ -47,15 +47,19 @@ Draft only (2026-10-16). Not uploaded. The dev `extension/content.xml` is unchan
 
 Title: **Easy Station Rebuild**
 
-Description the tool uploads (the `description` attribute below). English, as the Workshop page does not localise:
+The page text below is for players. It is not the GitHub README. [README.md](../README.md) is for people installing from the repository and covers how the scripts work. English only. The Workshop page does not localise.
 
-Changing a station's construction plan keeps the ships at its docks, the wares in its storage, and the workforce for a grace period.
+Change a station's plan without losing the ships at its docks, the wares in its storage, or the people who work there.
 
-When you confirm a plan change on a station you own, ships docked at a module that is removed are parked near the station, and moved out if they cannot leave in time. Wares that no longer fit are moved to the station's build storage, and what the finished station can hold is moved back when the build ends. Removed modules, turrets and shields are refunded in full by the game. Workers who lose their habitat wait 2 hours, then leave at 20% of those still waiting per hour. New habitats take them back as room appears.
+When you confirm a new plan on a station you own, docked ships move off the modules that are coming down and wait nearby. A ship that cannot get out is moved clear. The ship you are flying stays where it is.
 
-Settings are in Extension Options when SirNukes Mod Support APIs is installed. Without it, the defaults above are used. That mod is optional.
+Wares that would not fit any more are kept in that station's build storage. When the new station has room, they are put back. Materials from the modules you removed come back into build storage as well.
 
-Only your own stations are affected. A module the new plan still contains can still be taken apart and built again. Build time and build cost are unchanged.
+Workers stay while new housing is built. They wait 2 hours. After that, workers who still have nowhere to live leave slowly, 20% of those still waiting each hour. New housing takes them back as soon as there is room.
+
+With SirNukes Mod Support APIs you can turn ships, wares, or workers off, and change the wait and the leave rate, under Extension Options. The mod works without that mod, using the settings above.
+
+Only your own stations are affected. Building takes the same time and costs the same. A module that is still part of the new plan can still be taken down and built again.
 
 Dependency to show on the page: SirNukes Mod Support APIs, optional, Workshop id 2042901274 (`ws_2042901274` in `content.xml`). Minimum game version 9.00 (`<dependency version="900"/>`).
 
@@ -67,7 +71,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easy Station Rebuild" description="Changing a station's construction plan keeps the ships at its docks, the wares in its storage, and the workforce for a grace period.&#10;&#10;When you confirm a plan change on a station you own, ships docked at a module that is removed are parked near the station, and moved out if they cannot leave in time. Wares that no longer fit are moved to the station's build storage, and what the finished station can hold is moved back when the build ends. Removed modules, turrets and shields are refunded in full by the game. Workers who lose their habitat wait 2 hours, then leave at 20% of those still waiting per hour. New habitats take them back as room appears.&#10;&#10;Settings are in Extension Options when SirNukes Mod Support APIs is installed. Without it, the defaults above are used. That mod is optional.&#10;&#10;Only your own stations are affected. A module the new plan still contains can still be taken apart and built again. Build time and build cost are unchanged." author="Thiago Almeida Dantas" version="100" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="Change a station's plan without losing the ships at its docks, the wares in its storage, or the people who work there.&#10;&#10;When you confirm a new plan on a station you own, docked ships move off the modules that are coming down and wait nearby. A ship that cannot get out is moved clear. The ship you are flying stays where it is.&#10;&#10;Wares that would not fit any more are kept in that station's build storage. When the new station has room, they are put back. Materials from the modules you removed come back into build storage as well.&#10;&#10;Workers stay while new housing is built. They wait 2 hours. After that, workers who still have nowhere to live leave slowly, 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, wares, or workers off, and change the wait and the leave rate, under Extension Options. The mod works without that mod, using the settings above.&#10;&#10;Only your own stations are affected. Building takes the same time and costs the same. A module that is still part of the new plan can still be taken down and built again." author="Thiago Almeida Dantas" version="100" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
