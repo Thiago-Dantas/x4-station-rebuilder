@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Refund" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuilder: full refund for removed modules (G2 part 2, D-6).
-    Called by ESR_Main's sweep. Doomed modules are watched with their build cost (the module ware's
-    recipe for the station's build method, sent at Confirm; the default recipe otherwise).
-    LOG ONLY for now: automated run 3 (2026-10-15, script-made plan change) showed vanilla returning the
-    full build cost of the removed modules to build storage, so adding the cost again would double it.
-    When a watched module no longer exists, the cost it would add is logged; nothing is added until a
-    case with a real shortfall is measured (build menu path, full replacement).
-    A module that is no longer doomed (plan changed again) or still stands after the build is dropped
-    without a refund. Returns true while the station has watched modules.
+    Easier Station Rebuilder: refund for the equipment of removed modules (G2 part 2, D-6).
+    Vanilla refunds the module's own recipe to build storage, but not the turrets and shields on it
+    (verified in game and in X4.exe, docs/x4-modding.md "How the engine computes module refunds").
+    Called by ESR_Main's sweep. The first time a doomed module is seen (before it goes into deconstruction,
+    when it can still be searched) its turrets, missile turrets and shield generators are recorded with
+    their wares' recipes for the station's build method (sent at Confirm; default recipe otherwise).
+    When the module no longer exists, that equipment cost goes to the station's build storage.
+    A module that is no longer doomed (plan changed again) or still stands after the build gets nothing.
+    Returns true while the station has watched modules.
   -->
   <cues>
     <cue name="State">
       <actions>
-        <!-- module -> table[$station, $macro, $cost] -->
+        <!-- module -> table[$station, $macro, $equipment = table[ware -> amount], $count] -->
         <do_if value="not md.ESR_Refund.State.$Watch?">
           <set_value name="md.ESR_Refund.State.$Watch" exact="table[]"/>
         </do_if>
@@ -37,15 +37,24 @@
             <break/>
           </do_if>
         </do_for_each>
+
         <set_value name="$Current" exact="table[]"/>
         <do_for_each name="$Module" in="$Doomed">
           <set_value name="$Current.{$Module}" exact="true"/>
-          <do_if value="$Module.exists">
-            <set_value name="$Watch.{$Module}" exact="table[
-              $station = $Station,
-              $macro = $Module.macro,
-              $cost = if $Race then @$Module.macro.ware.raceresources.{$Race}.table else @$Module.macro.ware.resources.table]"/>
+          <do_if value="$Watch.{$Module}? or not $Module.exists or $Module.isconstruction">
+            <continue/>
           </do_if>
+          <find_object_component name="$Items" object="$Module" class="[class.turret, class.missileturret, class.shieldgenerator]" checkoperational="false" multiple="true"/>
+          <set_value name="$Equipment" exact="table[]"/>
+          <do_for_each name="$Item" in="$Items">
+            <set_value name="$Recipe" exact="if $Race then @$Item.macro.ware.raceresources.{$Race}.table else @$Item.macro.ware.resources.table"/>
+            <do_if value="$Recipe">
+              <do_for_each name="$Ware" valuename="$Amount" in="$Recipe">
+                <set_value name="$Equipment.{$Ware}" exact="$Amount" operation="add"/>
+              </do_for_each>
+            </do_if>
+          </do_for_each>
+          <set_value name="$Watch.{$Module}" exact="table[$station = $Station, $macro = $Module.macro, $equipment = $Equipment, $count = $Items.count]"/>
         </do_for_each>
 
         <set_value name="$Watching" exact="false"/>
@@ -61,12 +70,12 @@
           <do_if value="$Module.exists">
             <debug_text text="'[ESR] REFUND %s: %s is no longer being removed; no refund'.[$Station.knownname, $Entry.$macro]" filter="general"/>
           </do_if>
-          <do_elseif value="not $Entry.$cost">
-            <debug_text text="'[ESR] REFUND %s: %s removed, but its build cost is unknown; no refund'.[$Station.knownname, $Entry.$macro]" filter="general"/>
+          <do_elseif value="$Entry.$count gt 0">
+            <do_for_each name="$Ware" valuename="$Amount" in="$Entry.$equipment">
+              <add_cargo object="$Station.buildstorage" ware="$Ware" exact="$Amount"/>
+            </do_for_each>
+            <debug_text text="'[ESR] REFUND %s: %s removed with %s turrets/shields; refunded %s to build storage'.[$Station.knownname, $Entry.$macro, $Entry.$count, $Entry.$equipment]" filter="general"/>
           </do_elseif>
-          <do_else>
-            <debug_text text="'[ESR] REFUND %s: %s removed; build cost %s; build storage now %s (log only, nothing added)'.[$Station.knownname, $Entry.$macro, $Entry.$cost, @$Station.buildstorage.cargo.table]" filter="general"/>
-          </do_else>
           <remove_value name="$Watch.{$Module}"/>
         </do_for_each>
         <return value="$Watching"/>

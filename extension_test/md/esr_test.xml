@@ -210,6 +210,7 @@
           <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
           <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
           <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
+          <set_value name="md.ESR_Main.Settings.$Refund" exact="1"/>
           <debug_text text="'[ESR-TEST] scenario replace: %s (%s), %s modules; protections ships=%s cargo=%s refund=%s workforce=%s'.[$Station.knownname, $Station.idcode, $Station.modules.all.count, md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce]" filter="general"/>
 
           <run_actions ref="md.ESR_Test.Totals" result="$Before">
