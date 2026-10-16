@@ -16,7 +16,7 @@ No DLC is required. `extension/content.xml` depends on game version `900`.
 
 [SirNukes Mod Support APIs](https://steamcommunity.com/sharedfiles/filedetails/?id=2042901274) is an optional dependency (`ws_2042901274`). With it, the settings appear in Extension Options. Without it, the values in `extension/md/esr_main.xml` are used and there is no menu.
 
-A Workshop release turns the three protections on. This repository is the dev build: ships, cargo, and workforce start off, so a test can watch the game on its own. Turn them on in Extension Options when you want the mod to act.
+A Workshop release turns the three protections on. Version 1.01 also turns them on once for a save that still had them off. This repository is the dev build: ships, cargo, and workforce start off, so a test can watch the game on its own. Turn them on in Extension Options when you want the mod to act.
 
 ## What the scripts do
 

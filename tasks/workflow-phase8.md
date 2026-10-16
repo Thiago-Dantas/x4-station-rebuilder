@@ -14,6 +14,7 @@ Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [
 - [x] Steam Workshop upload. Item [3821053684](https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684), public, version 1.00 (D-20). Uploaded 2026-10-16 from `H:\dev\esr-release\station_rebuilder` with `WorkshopTool publishx4 -buildcat`. The dev `extension/` was not the `-path`. Protections default on in that copy. The refund test option is not in its menu. Three images: `cargo on build storage.jpg` is the preview; `station cargo.jpg` and `mod settings.png` are additional previews.
 - [ ] Suggested pairings on the Workshop page. Wording is drafted and held until the Phase 7 test.
 - [x] Version scheme and release notes (D-20). First release 1.00, change note `First release.` The `version` attribute stays the displayed version times 100.
+- [x] Update 1.01 (D-21). Ships, cargo and workforce start on, including a save that already had SirNukes' stored off values. Change note `Ships, cargo and workforce now start on.` Dev `extension/` stays off. Uploaded 2026-10-16 with `WorkshopTool update -buildcat` (exit 0, item 3821053684, version 1.01).
 
 ## Notes
 - Installed 2026-10-16. Path: `H:\SteamLibrary\steamapps\common\X Tools`. WorkshopTool 1.15, build 19742470. Steam had written it on C:; it was moved to the H: library and Steam loaded it from there on restart (content log: 8 apps on H:, no manifest left on C:).

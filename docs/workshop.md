@@ -45,6 +45,8 @@ The dev `extension/content.xml` is unchanged. The upload was from a separate fol
 
 Published 2026-10-16. **verified** from `WorkshopTool` (exit 0, item id 3821053684) and from the Steam Web API `GetPublishedFileDetails` (result 1, visibility 0, title and the 944-character description below). An `ISteamUGC` details query on the same item returned the primary preview plus two additional image previews.
 
+Update 1.01 (2026-10-16, D-21): ships, cargo and workforce start on. Version 1.00 already used that default for a new save, but SirNukes kept the off values saved while the dev build was in use and applied them on every load. The update writes those three menu values on once. Grace period and leave rate stay as the player left them. Change note: `Ships, cargo and workforce now start on.` **verified** from `WorkshopTool update` (exit 0, version 1.00 to 1.01, item 3821053684). The release `content.xml` is `version="101"`, `lastupdate="1792187373"`.
+
 Page: <https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684>
 
 The upload used a copy at `H:\dev\esr-release\station_rebuilder`, not the dev junction. `WorkshopTool` rewrote that copy's `content.xml` to `id="ws_3821053684"` and `sync="false"`. The dev `extension/content.xml` was not changed. In the copy, ships, cargo and workforce default on, and the log-only refund option is not in the menu (D-17).
@@ -85,7 +87,7 @@ The page does not mention module refunds. The game already returns those materia
 
 Dependency to show on the page: SirNukes Mod Support APIs, optional, Workshop id 2042901274 (`ws_2042901274` in `content.xml`). Minimum game version 9.00 (`<dependency version="900"/>`). The dependency is named in the text above. The `<dependency>` entry is what the extension menu lists.
 
-First version: **1.00**, which is `version="100"` (D-20). The attribute is the displayed version times 100. First change note: `First release.`
+First version: **1.00**, which is `version="100"` (D-20). The attribute is the displayed version times 100. First change note: `First release.` Update **1.01** is `version="101"` (D-21). Change note: `Ships, cargo and workforce now start on.`
 
 ### Release content.xml
 
@@ -93,7 +95,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer." author="Dant" version="100" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer." author="Dant" version="101" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
