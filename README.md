@@ -48,7 +48,7 @@ The engine matches old modules to the new plan. Reordering the build, or loading
 
 Build time and build cost are unchanged. NPC stations are ignored.
 
-`content.xml` sets `save="false"`, so the mod is left out of the save's patch list. Its Mission Director state is still stored while it is installed. Disable it under Extensions, or unsubscribe, to remove it. Let a rebuild finish first. Removing it during a rebuild has not been tested.
+`content.xml` sets `save="false"`, so the mod is left out of the save's patch list. Its Mission Director state is still stored while it is installed. Disable it under Extensions, or unsubscribe, to remove it. The save still loads, and a station build is not left stuck: this mod never takes over the construction. Workers who are only in the waiting pool are dropped, because that pool is mod state and they are already off the station. Cargo already moved to build storage stays there. Finish the rebuild first if those waiting workers matter.
 
 ## Licence
 

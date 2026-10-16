@@ -64,7 +64,7 @@ Holding, returning and the grace-period decay are **verified in game** (runs 6â€
 
 ## Phase 7: Safety, options, compatibility (G4)
 Log: [workflow-phase7.md](workflow-phase7.md)
-- [ ] Save compatibility: install mid-game, uninstall mid-game, during a rebuild
+- [x] Save compatibility: install mid-game (runs 1â€“29), uninstall mid-game (run 31), during a rebuild (scripts: the mod never takes the build; the held workforce pool is dropped with the mod). DLCs and pairing mods are left for the user.
 - [x] Options menu (SirNukes Mod Support APIs, optional dependency, D-14): toggles per protection, grace period, leave rate (written 2026-10-15, untested in game)
 - [ ] Without DLCs; with common station mods
 - [ ] With the suggested pairings: Build Storage: Station Drone Self-Supply and XBuilder ([docs/workshop.md](../docs/workshop.md))
