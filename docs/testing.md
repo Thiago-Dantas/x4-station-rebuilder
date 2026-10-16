@@ -32,7 +32,7 @@ What the logger writes for each plan change:
 
 | Test | Do | Then |
 |------|----|------|
-| B1 Matching | (a) Save the station's plan as a new plan and load it back onto the station; Confirm. (b) The same plan with a changed build order (from `x4-station-designer`), Confirm. (c) Move one built module in the editor, Confirm. | Note which of a/b/c you did and roughly when. The `PLAN … -> existing/new` lines answer it. (a) is done: automated run 19, 2026-10-16, kept all 7 modules. (b) is done for a 3-minute window: automated run 21, 2026-10-16, the menu removed 0 and no module left operational, but a price-0 build stayed queued the whole time. (c) is open. |
+| B1 Matching | (a) Save the station's plan as a new plan and load it back onto the station; Confirm. (b) The same plan with a changed build order (from `x4-station-designer`), Confirm. (c) Move one built module in the editor, Confirm. | Note which of a/b/c you did and roughly when. The engine's `CONFIRM removed` line answers it; the diag `PLAN removed` list is wrong when the new entry ids are not mapped yet. (a) run 19: kept all 7. (b) run 21: menu removed 0, no module left operational in 3 min, a price-0 build stayed queued. (c) run 22: a plan load with the defence disc 1000 m higher removed only that disc, and one module entered construction within 3 s. |
 | B2 Replace a few | Replace 2–3 modules (one of them a storage module with cargo, if possible). Confirm and let it build. | Let it run until the build finishes, plus 5 min. |
 | B3 Full replacement | Load a different plan onto the station, Confirm, let it build. | As B2. Watch for "waiting for storage". |
 | B4 Storage with cargo | Remove a storage module that holds wares. | As B2. |

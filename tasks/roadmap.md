@@ -16,7 +16,7 @@ Log: [workflow-phase1-research.md](workflow-phase1-research.md)
 
 Questions to answer before writing the mod (part A, game files, done 2026-10-15; part B, in game, waiting):
 - [x] Reproduce the four losses in a test save and measure them (B2–B6). Station modules and their mounted equipment are refunded in full by vanilla (manual test 2026-10-16, D-17). That refund is not a gap for the mod.
-- [ ] How the game matches the old station to the new plan, and can a script influence it (S1, D-9). Files: the engine matches, Lua only reads the result; B1 decides.
+- [ ] How the game matches the old station to the new plan, and can a script influence it (S1, D-9). The engine matches; no script binds an entry to a module. B1 is measured (runs 19–22): an identical plan keeps every module, a build-order swap dismantled none in 3 min, and moving the defence disc removes only that disc. Whether S1 is doable is still open.
 - [x] The vanilla refund rule for removed modules: 100 % of the module recipe plus mounted turrets/shields (`GetModuleRecycledResources`; delivered to build storage). Manual test 2026-10-16, D-17.
 - [x] Build storage: MD adds wares with `add_cargo` (vanilla does it). The no-limit statement (D-11) vs `iswaitingforstorage` → B3.
 - [ ] Cargo in storage modules that get removed: vanilla moves cargo only when the whole station goes → B4
