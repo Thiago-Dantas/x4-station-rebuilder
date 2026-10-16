@@ -4,12 +4,15 @@
     Easier Station Rebuilder: refund for the equipment of removed modules (G2 part 2, D-6).
     Vanilla refunds the module's own recipe to build storage, but not the turrets and shields on it
     (verified in game and in X4.exe, docs/x4-modding.md "How the engine computes module refunds").
-    Called by ESR_Main's sweep. The first time a doomed module is seen (before it goes into deconstruction,
-    when it can still be searched) its weapons (turrets, missile turrets, modded weapon classes) and shield generators are recorded with
-    their wares' recipes for the station's build method (sent at Confirm; default recipe otherwise).
-    When the module no longer exists, that equipment cost goes to the station's build storage.
-    A module that is no longer doomed (plan changed again) or still stands after the build gets nothing.
-    Returns true while the station has watched modules.
+    Where the equipment comes from: ui/esr_confirm.lua sends each removed module's loadout as the build menu
+    read it before Confirm (UI event "esr_equipment"). MD searches don't find station equipment
+    (automated runs 10-12: not under the module, not recursively, not station-wide), so this is the source.
+    Equipment is matched by class nowhere here: any turret or shield macro whose ware has a recipe is priced,
+    modded ones included.
+    Called by ESR_Main's sweep: the first time a doomed module is seen, its loadout is priced with the recipes
+    for the station's build method (sent at Confirm; default recipe otherwise). When the module no longer
+    exists, that cost goes to the station's build storage. A module that is no longer doomed (plan changed
+    again) or still stands after the build gets nothing. Returns true while the station has watched modules.
   -->
   <cues>
     <cue name="State">
@@ -18,7 +21,42 @@
         <do_if value="not md.ESR_Refund.State.$Watch?">
           <set_value name="md.ESR_Refund.State.$Watch" exact="table[]"/>
         </do_if>
+        <!-- module -> table[macro -> count], from the build menu at Confirm -->
+        <do_if value="not md.ESR_Refund.State.$Loadouts?">
+          <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
+        </do_if>
       </actions>
+      <cues>
+        <!-- param3 = [station, module, macro name, count, macro name, count, module, ...] -->
+        <cue name="OnEquipment" instantiate="true">
+          <conditions>
+            <event_ui_triggered screen="'StationConfigurationMenu'" control="'esr_equipment'"/>
+          </conditions>
+          <actions>
+            <set_value name="$List" exact="event.param3"/>
+            <set_value name="$Module" exact="null"/>
+            <set_value name="$Modules" exact="0"/>
+            <set_value name="$Items" exact="0"/>
+            <set_value name="$i" exact="2"/>
+            <do_while value="$i le $List.count">
+              <do_if value="typeof $List.{$i} == datatype.component">
+                <set_value name="$Module" exact="$List.{$i}"/>
+                <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}" exact="table[]"/>
+                <set_value name="$Modules" operation="add"/>
+                <set_value name="$i" operation="add"/>
+              </do_if>
+              <do_else>
+                <do_if value="$Module and $i lt $List.count">
+                  <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}.{macro.{$List.{$i}}}" exact="$List.{$i + 1}" operation="add"/>
+                  <set_value name="$Items" exact="$List.{$i + 1}" operation="add"/>
+                </do_if>
+                <set_value name="$i" exact="$i + 2"/>
+              </do_else>
+            </do_while>
+            <debug_text text="'[ESR] REFUND %s: equipment of removed modules from the build menu: %s pieces on %s modules'.[@$List.{1}.knownname, $Items, $Modules]" filter="general"/>
+          </actions>
+        </cue>
+      </cues>
     </cue>
 
     <library name="Sweep" purpose="run_actions">
@@ -38,49 +76,30 @@
           </do_if>
         </do_for_each>
 
-        <!-- by class, not by a list of known equipment: mods' turrets and shields are found and priced the same way
-             (weapon covers turret, missileturret and any modded weapon class derived from it).
-             Runs 10-11: a station's equipment is not found under its module (not as a child, not recursively), so
-             search the whole station once and match each item to a module by its module context. Docked ships'
-             equipment is skipped (its container is the ship, not the station). -->
-        <set_value name="$StationEquipment" exact="null"/>
         <set_value name="$Current" exact="table[]"/>
         <do_for_each name="$Module" in="$Doomed">
           <set_value name="$Current.{$Module}" exact="true"/>
-          <do_if value="$Watch.{$Module}? or not $Module.exists or $Module.isconstruction">
+          <do_if value="$Watch.{$Module}? or not $Module.exists">
             <continue/>
           </do_if>
-          <do_if value="not $StationEquipment">
-            <find_object_component name="$Found" object="$Station" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true" recursive="true"/>
-            <set_value name="$StationEquipment" exact="[]"/>
-            <set_value name="$Contexts" exact="table[]"/>
-            <do_for_each name="$Item" in="$Found">
-              <do_if value="$Item.container == $Station">
-                <append_to_list name="$StationEquipment" exact="$Item"/>
-                <set_value name="$Contexts.{@$Item.module.macro}" exact="1" operation="add"/>
-              </do_if>
-            </do_for_each>
-            <debug_text text="'[ESR] REFUND %s: %s weapons/shields on the station (of %s found incl. docked ships); by module context %s'.[$Station.knownname, $StationEquipment.count, $Found.count, $Contexts]" filter="general"/>
-          </do_if>
-          <set_value name="$Items" exact="[]"/>
-          <do_for_each name="$Item" in="$StationEquipment">
-            <do_if value="$Item.module == $Module or $Item.hascontext.{$Module}">
-              <append_to_list name="$Items" exact="$Item"/>
-            </do_if>
-          </do_for_each>
           <set_value name="$Equipment" exact="table[]"/>
-          <do_for_each name="$Item" in="$Items">
-            <set_value name="$Recipe" exact="if $Race then @$Item.macro.ware.raceresources.{$Race}.table else @$Item.macro.ware.resources.table"/>
-            <do_if value="$Recipe">
-              <do_for_each name="$Ware" valuename="$Amount" in="$Recipe">
-                <set_value name="$Equipment.{$Ware}" exact="$Amount" operation="add"/>
-              </do_for_each>
-            </do_if>
-            <do_else>
-              <debug_text text="'[ESR] REFUND %s: %s on %s has no ware recipe; it cannot be refunded'.[$Station.knownname, $Item.macro, $Module.macro]" filter="general"/>
-            </do_else>
-          </do_for_each>
-          <set_value name="$Watch.{$Module}" exact="table[$station = $Station, $macro = $Module.macro, $equipment = $Equipment, $count = $Items.count]"/>
+          <set_value name="$Count" exact="0"/>
+          <set_value name="$Loadout" exact="@md.ESR_Refund.State.$Loadouts.{$Module}"/>
+          <do_if value="$Loadout">
+            <do_for_each name="$Macro" valuename="$Number" in="$Loadout">
+              <set_value name="$Count" exact="$Number" operation="add"/>
+              <set_value name="$Recipe" exact="if $Race then @$Macro.ware.raceresources.{$Race}.table else @$Macro.ware.resources.table"/>
+              <do_if value="$Recipe">
+                <do_for_each name="$Ware" valuename="$Amount" in="$Recipe">
+                  <set_value name="$Equipment.{$Ware}" exact="$Amount * $Number" operation="add"/>
+                </do_for_each>
+              </do_if>
+              <do_else>
+                <debug_text text="'[ESR] REFUND %s: %s on %s has no ware recipe; it cannot be refunded'.[$Station.knownname, $Macro, $Module.macro]" filter="general"/>
+              </do_else>
+            </do_for_each>
+          </do_if>
+          <set_value name="$Watch.{$Module}" exact="table[$station = $Station, $macro = $Module.macro, $equipment = $Equipment, $count = $Count]"/>
         </do_for_each>
 
         <set_value name="$Watching" exact="false"/>
@@ -103,6 +122,7 @@
             <debug_text text="'[ESR] REFUND %s: %s removed with %s turrets/shields; refunded %s to build storage'.[$Station.knownname, $Entry.$macro, $Entry.$count, $Entry.$equipment]" filter="general"/>
           </do_elseif>
           <remove_value name="$Watch.{$Module}"/>
+          <remove_value name="md.ESR_Refund.State.$Loadouts.{$Module}"/>
         </do_for_each>
         <return value="$Watching"/>
       </actions>
