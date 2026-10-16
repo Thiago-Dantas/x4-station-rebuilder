@@ -8,10 +8,11 @@ Goal (G5): published on the Steam Workshop as "Easier Station Rebuild". Roadmap:
 - [x] Tooling: Egosoft X Tools (Steam app 282160), which contains `WorkshopTool.exe` and the catalog tool
 - [x] Confirm `WorkshopTool` prints its command list and does not upload
 - [x] Record the install path in [docs/dev-setup.md](../docs/dev-setup.md) and the publish command in [docs/workshop.md](../docs/workshop.md)
-- [ ] README for players
+- [x] README for players ([README.md](../README.md))
+- [x] Workshop publishing draft: title, description, release `content.xml`, dependencies ([docs/workshop.md](../docs/workshop.md)). Not uploaded.
 - [ ] Make the repo public
-- [ ] Steam Workshop upload (description, screenshots, dependencies). Not started.
-- [ ] Suggested pairings on the Workshop page
+- [ ] Steam Workshop upload (description, screenshots, dependencies). Not started. The draft lists what is still missing: release copy, protections on by default, the log-only refund option removed from the player menu, a preview screenshot.
+- [ ] Suggested pairings on the Workshop page. Wording is drafted and held until the Phase 7 test.
 - [ ] Version scheme and release notes
 
 ## Notes

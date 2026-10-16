@@ -75,7 +75,7 @@ Log: [workflow-phase7.md](workflow-phase7.md)
 Log: [workflow-phase8.md](workflow-phase8.md)
 - [x] Licence: MIT (D-10)
 - [x] X Tools installed (WorkshopTool 1.15, Steam app 282160, `H:\SteamLibrary\steamapps\common\X Tools`)
-- [ ] README for players
+- [x] README for players ([README.md](../README.md)). Workshop page draft is in [docs/workshop.md](../docs/workshop.md); not uploaded.
 - [ ] Make the repo public
 - [ ] Steam Workshop upload (Egosoft's X Tools / WorkshopTool), description, screenshots; list dependencies on the Workshop page
 - [ ] Suggested pairings on the Workshop page ([docs/workshop.md](../docs/workshop.md))
