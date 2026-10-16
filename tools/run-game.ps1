@@ -6,7 +6,8 @@
 # grace: remove a new station's habitat and sample the held workforce through the grace period;
 # build: add a habitat to a new tutorial_station and let the builder finish it;
 # b1: save the new station's own plan and load it back through the build menu;
-# b1b: load that same layout with the two energy-cell modules swapped in sequence order).
+# b1b: load that same layout with the two energy-cell modules swapped in sequence order;
+# b1c: load that layout with the defence disc moved 1000 m up).
 # Links the test harness (extension_test\) and the mod into the profile, starts X4 through Steam
 # (launch options in Steam: -skipintro -logfile debuglog.txt), waits for
 # "[ESR-TEST] DONE" in debuglog.txt, lets the game quit (kills it after a grace period),

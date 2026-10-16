@@ -32,6 +32,9 @@
     Scenario b1 (B1a, S1): a new tutorial_station, protections off. Lua opens the build menu, saves the
     station's own plan, loads that plan back and confirms. The Lua lines "B1 reloaded" are the engine's
     removed-module list before Confirm; the MD PLAN lines are the same change after it.
+    b1b loads plan player_1792159001 (energy-cell sequence order swapped). That plan was removed after run 21.
+    b1c loads plan player_1792161001: the same layout with the defence disc's offset.y set to 1000.
+    There is no FFI call that drags a module. b1b and b1c then watch the station for 3 min.
   -->
   <cues>
     <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
@@ -577,7 +580,7 @@
     <cue name="B1" instantiate="true" namespace="this">
       <conditions>
         <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
-        <check_value value="event.param3 == 'b1' or event.param3 == 'b1b'"/>
+        <check_value value="event.param3 == 'b1' or event.param3 == 'b1b' or event.param3 == 'b1c'"/>
       </conditions>
       <actions>
         <set_value name="$Mode" exact="event.param3"/>
@@ -621,6 +624,9 @@
             <do_if value="$Mode == 'b1b'">
               <raise_lua_event name="'esr_test_b1b'" param="$Station"/>
             </do_if>
+            <do_elseif value="$Mode == 'b1c'">
+              <raise_lua_event name="'esr_test_b1c'" param="$Station"/>
+            </do_elseif>
             <do_else>
               <raise_lua_event name="'esr_test_b1'" param="$Station"/>
             </do_else>
@@ -633,8 +639,8 @@
             <check_value value="not $Stop"/>
           </conditions>
           <actions>
-            <!-- b1b leaves a queued build. Run 20 quit at +3 s, before that build could start. -->
-            <do_if value="$Mode == 'b1b'">
+            <!-- b1b left a queued build that run 20 quit before it could start. b1c watches the same way. -->
+            <do_if value="$Mode == 'b1b' or $Mode == 'b1c'">
               <set_value name="$WatchAt" exact="player.age"/>
               <debug_text text="'[ESR-TEST] B1 watch start modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count]" filter="general"/>
             </do_if>

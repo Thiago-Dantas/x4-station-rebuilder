@@ -102,13 +102,16 @@ local function findPlanByName(name)
 	return found
 end
 
--- Positions separate the two energy-cell modules, which share a macro.
+-- x,y separate modules that share a macro, and show the B1(c) move (defence disc, y +1000).
 local function planOrder(menu)
 	local parts = {}
 	for _, entry in ipairs(menu.constructionplan or {}) do
-		local x = "?"
-		pcall(function () x = string.format("%.0f", entry.offset.x) end)
-		table.insert(parts, tostring(entry.macro) .. "@" .. x)
+		local x, y = "?", "?"
+		pcall(function ()
+			x = string.format("%.0f", entry.offset.x)
+			y = string.format("%.0f", entry.offset.y)
+		end)
+		table.insert(parts, tostring(entry.macro) .. "@" .. x .. "," .. y)
 	end
 	return table.concat(parts, ", ")
 end
@@ -133,13 +136,19 @@ local function confirmPlan(menu, planid)
 	end)
 end
 
--- B1(a): save the live plan and load it back. B1(b): load player_1792159001, the same
--- layout with the two energy-cell modules swapped in sequence order. The "reloaded" line
+-- B1(a): save the live plan and load it back.
+-- B1(b): load player_1792159001 (sequence order of the two energy cells swapped). That plan
+-- was removed from the profile library after run 21.
+-- B1(c): load player_1792161001. Same layout, defence disc offset.y set to 1000. The build
+-- menu has no FFI call that moves a module; the gizmo is engine-side. The "reloaded" line
 -- is the engine's removed-module list.
-local B1B_PLAN = "player_1792159001"
+local B1_PLANS = {
+	b1b = "player_1792159001",
+	b1c = "player_1792161001",
+}
 
-local function matchStation(reorder, station)
-	log("b1: station param " .. tostring(station) .. " reorder=" .. tostring(reorder))
+local function matchStation(mode, station)
+	log("b1: station param " .. tostring(station) .. " mode=" .. tostring(mode))
 	local id = ConvertStringTo64Bit(tostring(station))
 	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
 	log("b1: build menu opened for " .. ffi.string(C.GetComponentName(id)))
@@ -154,8 +163,8 @@ local function matchStation(reorder, station)
 		local entries, withcomp, removed, changed = planCounts(menu)
 		log(string.format("b1 open: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
 		log("b1 open-order: " .. planOrder(menu))
-		if reorder then
-			confirmPlan(menu, B1B_PLAN)
+		if B1_PLANS[mode] then
+			confirmPlan(menu, B1_PLANS[mode])
 			return
 		end
 		C.SaveMapConstructionPlan(menu.holomap, "local", "player", false, "esr b1", "")
@@ -204,8 +213,9 @@ local function init()
 		later(3, function () QuitGame() end)
 	end)
 	RegisterEvent("esr_test_replace", replaceStation)
-	RegisterEvent("esr_test_b1", function (_, station) matchStation(false, station) end)
-	RegisterEvent("esr_test_b1b", function (_, station) matchStation(true, station) end)
+	RegisterEvent("esr_test_b1", function (_, station) matchStation("b1", station) end)
+	RegisterEvent("esr_test_b1b", function (_, station) matchStation("b1b", station) end)
+	RegisterEvent("esr_test_b1c", function (_, station) matchStation("b1c", station) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
 	RegisterEvent("esr_test_forcebuild", function (_, station)
 		local id = ConvertStringTo64Bit(tostring(station))
