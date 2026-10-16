@@ -19,6 +19,11 @@
 # unlinks the harness, copies the log to research\logs\ and prints our lines and script errors.
 # Autosave is switched off in the profile's config.xml for the run (the test game must never overwrite the
 # user's autosave_01..03) and the original config.xml is put back afterwards.
+# save_010 needs Corporate Dynamics (ws_3772881250). The profile keeps it disabled. A writable
+# enabled="true" is rewritten to false within seconds of launch, so the runner copies content.xml
+# to content.xml.esr-run-backup, enables only that extension, and sets the file read-only.
+# FOpenForWriting Error 13 is that read-only file. The backup is restored after the game exits,
+# including when the run fails. A leftover backup is restored at the next run.
 # Exit code 0 when the DONE line was seen.
 param([string]$Scenario = 'b6', [string]$Save = 'save_010', [int]$TimeoutMinutes = 20)
 $ErrorActionPreference = 'Stop'
@@ -39,6 +44,16 @@ if (Test-Path $configBackup) {
     Copy-Item $configBackup $config -Force
     Remove-Item $configBackup
     'Restored config.xml left over from an interrupted run'
+}
+
+$content = Join-Path $profileDir 'content.xml'
+$contentBackup = "$content.esr-run-backup"
+if (Test-Path $contentBackup) {
+    $contentItem = Get-Item $content
+    if ($contentItem.IsReadOnly) { $contentItem.IsReadOnly = $false }
+    Copy-Item $contentBackup $content -Force
+    Remove-Item $contentBackup
+    'Restored content.xml left over from an interrupted run'
 }
 
 function Read-Log {
@@ -63,10 +78,22 @@ if (-not (Get-Item $harness -ErrorAction SilentlyContinue)) {
 
 $started = Get-Date
 $done = $false
-Copy-Item $config $configBackup
-(Get-Content $config -Raw) -replace '<autosave>true</autosave>', '<autosave>false</autosave>' | Set-Content $config -NoNewline
-'Autosave off for the run (config.xml backed up)'
 try {
+    Copy-Item $config $configBackup
+    (Get-Content $config -Raw) -replace '<autosave>true</autosave>', '<autosave>false</autosave>' | Set-Content $config -NoNewline
+    'Autosave off for the run (config.xml backed up)'
+    Copy-Item $content $contentBackup
+    $utf8 = New-Object System.Text.UTF8Encoding $false
+    $contentText = [System.IO.File]::ReadAllText($content)
+    $cdOff = '<extension id="ws_3772881250" enabled="false"/>'
+    $cdOn = '<extension id="ws_3772881250" enabled="true"/>'
+    if ($contentText.Contains($cdOff)) {
+        [System.IO.File]::WriteAllText($content, $contentText.Replace($cdOff, $cdOn), $utf8)
+    } elseif (-not $contentText.Contains($cdOn)) {
+        throw 'ws_3772881250 is not in the profile content.xml'
+    }
+    (Get-Item $content).IsReadOnly = $true
+    'content.xml: Corporate Dynamics enabled and the file is read-only'
     # through Steam with no arguments of our own: arguments from outside make Steam ask the user first.
     # The game's Steam launch options must contain -skipintro -logfile debuglog.txt (docs/testing.md).
     Start-Process 'steam://rungameid/392160'
@@ -93,11 +120,20 @@ try {
 finally {
     # the game writes config.xml when it exits, so restore only after it is gone
     if (-not (Get-Process -Name X4 -ErrorAction SilentlyContinue)) {
-        Copy-Item $configBackup $config -Force
-        Remove-Item $configBackup
-        'config.xml restored (autosave as before)'
+        if (Test-Path $configBackup) {
+            Copy-Item $configBackup $config -Force
+            Remove-Item $configBackup
+            'config.xml restored (autosave as before)'
+        }
+        $contentItem = Get-Item $content -ErrorAction SilentlyContinue
+        if ($contentItem -and $contentItem.IsReadOnly) { $contentItem.IsReadOnly = $false }
+        if (Test-Path $contentBackup) {
+            Copy-Item $contentBackup $content -Force
+            Remove-Item $contentBackup
+            'content.xml restored (Corporate Dynamics as before)'
+        }
     } else {
-        "X4 still running; config.xml NOT restored yet (backup: $configBackup, restored at the next run)"
+        "X4 still running; config.xml and content.xml NOT restored yet (backups restored at the next run)"
     }
     $item = Get-Item $harness -ErrorAction SilentlyContinue
     if ($item -and $item.LinkType -eq 'Junction') { $item.Delete(); 'Harness unlinked' }

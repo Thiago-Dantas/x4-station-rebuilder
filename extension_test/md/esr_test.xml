@@ -48,13 +48,13 @@
     (sequence off, then on if nothing was removed). The watch logs whether each ship still exists
     until the pier is gone, or for 6 min. The script-path B6 (scenario b6) is a different cue.
 
-    Scenario b6dock (B6, dock area, internal bay): the same new station, protections off. An S
-    freighter is created on an internal storage bay of the dock area (match_dock storage=true,
-    size dock_s). An M freighter is created on the dock area's external M pad when that pad
-    exists. The menu is opened only if the S ship is still internally stored 10 s later. Lua
-    removes dockarea_arg_m_station_01_macro with sequence off and does not retry with sequence
-    on, because that module is the plan root. The watch logs each ship until the dock area is
-    gone, or for 6 min.
+    Scenario b6dock (B6, dock area, internal bay): the same new station, ship protection on,
+    cargo and workforce off. An S freighter is created on an internal storage bay of the dock
+    area (match_dock storage=true, size dock_s). An M freighter is created on the dock area's
+    external M pad when that pad exists. The menu is opened only if the S ship is still
+    internally stored 10 s later. Lua removes dockarea_arg_m_station_01_macro with sequence
+    off and does not retry with sequence on, because that module is the plan root. The watch
+    logs each ship until the dock area is gone, or for 6 min.
 
     Scenario b2 (B2, a few modules in one Confirm): a new tutorial_station, protections off,
     200 medical supplies. Lua removes three modules with sequence off and confirms once:
@@ -1014,7 +1014,8 @@
     </cue>
 
     <!--
-      Scenario b6dock: see the header. Protections stay off. The S ship is the one in the internal bay.
+      Scenario b6dock: see the header. Ship protection on; cargo, refund and workforce stay off.
+      The S ship is the one in the internal bay.
       sequence=true is not used: the dock area is the plan root.
     -->
     <cue name="B6Dock" instantiate="true" namespace="this">
@@ -1024,11 +1025,11 @@
       </conditions>
       <actions>
         <set_value name="$Stop" exact="false"/>
-        <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
         <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
-        <debug_text text="'[ESR-TEST] scenario b6dock: protections off'" filter="general"/>
+        <debug_text text="'[ESR-TEST] scenario b6dock: ships=%s cargo=%s refund=%s workforce=%s'.[md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce]" filter="general"/>
 
         <set_value name="$Sector" exact="player.sector"/>
         <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">

@@ -38,7 +38,7 @@ Log: [workflow-diag-logger.md](workflow-diag-logger.md) (the skeleton is the dia
 - [ ] Test save(s) with a station set up for each loss (user), backed up
 
 ## Phase 3: Docked ships (G1, D-7)
-First version written 2026-10-15; **verified in game** (automated run 8, full replacement: 0 of 2 ships lost): [workflow-protections-v1.md](workflow-protections-v1.md) (`esr_ships.xml`).
+First version written 2026-10-15; **verified in game** (automated run 8, full replacement: 0 of 2 ships lost; run 28, scenario `b6dock`, ship protection only: the internal-bay S freighter and the external-pad M freighter both still existed after the dock was gone): [workflow-protections-v1.md](workflow-protections-v1.md) (`esr_ships.xml`).
 - [ ] Find ships docked at modules about to be removed
 - [ ] Undock them and park them near the station; teleport the ones that can't get out in time
 - [ ] Handle ships that can't undock (no pilot, busy, being built or repaired at that dock)

@@ -133,6 +133,18 @@ So on this path vanilla clears the dock assignment within 3 s of Confirm, but bo
 
 **Limit:** one dock area. The M internal bay (capacity 10) and the XS bay had no ship. Both ships had pilots. Protections were off.
 
+## Ship protection on a removed dock area (verified, run 28, 2026-10-16)
+
+Log `research/logs/run-20261016-141428.txt`. Scenario `b6dock` on a new `tutorial_station` (Savage Spur II Solar Power Plant, FFD-157). Ship protection on. Cargo, refund and workforce off (`MAIN tracking` `ships=1 cargo=0 refund=0 workforce=0`). The setup matches run 25: Courier Vanguard (XVV-180) in the S internal bay (`internal=1`), Mercury Vanguard (LLR-189) on an external M pad (`internal=0`, still inside the station). The M internal bay and the XS bay were empty. Both ships had pilots.
+
+Confirm at t=362301.27 removed only `dockarea_arg_m_station_01_macro` `0x16386e` (recycled 54 / 108 / 198). Both ships were still on the docked list in that frame. The sweep ordered both to park in that same frame.
+
+3.2 s later both still existed, with `dock=null` and `container` = the station. The Courier was still `internal=1`. The dock was under construction. At t=362312.06 (10.8 s after Confirm) both were warped. The warp line in that action still read `still in the station: 1`. The next sample, t=362313.24 (1.2 s later), had both at `container=null` and `inside=0`.
+
+Build `0x8518` finished at t=362361.61 (60.3 s after Confirm). At dt=68.8 the dock was gone, the other 6 modules were operational, both ships still existed and were outside, and build storage held the dock recipe (54 / 108 / 198). There is no `EVENT destroyed` line and no `contextkilled` for either ship. The result line is `RESULT b6dock: reason=dock-gone dock=0 Sexists=1 Mexists=1 modules=6 operational=6 construction=0 queued=0 inprogress=0`.
+
+**Verified:** with ship protection on, an S freighter in an internal bay and an M freighter on an external pad of a removed dock area both still exist after the dock is gone. The park order did not get them out (same as runs 6 and 7); the 10 s warp did, before deconstruction finished. `esr_refund.xml` stayed log-only (0 pieces). **Limit:** the M internal bay and the XS bay were empty. Both ships had pilots.
+
 ## Learned in automated run 2 (2026-10-15, B6 scenario, MD path; log `research/logs/run-20261015-202010.txt`)
 - **Verified:** `create_station macro="macro.station_gen_factory_base_01_macro" owner="faction.player" state="componentstate.operational" constructionplan="'tutorial_station'"` with `safepos max="30km" includeplotbox="true"` spawns a finished 7-module player station; `create_ship … dock="$Bay"` spawns ships docked; `add_workforce` to capacity works; `macro.ware.resources.table` gives the build cost (e.g. Argon pier `pier_arg_harbor_02`: 313 claytronics, 625 energy cells, 1143 hull parts).
 - **Verified:** `remove_from_construction_sequence` (pier only) also removed the habitat built onto the pier (`removed` = both components; "detaching all descendant entries").
@@ -177,7 +189,7 @@ Static analysis of `X4.exe` (sha256 19750a65…6891) with capstone and Ghidra 12
 The user's replacement of CVL-296 (427 modules) through the build menu, from a copy of their quicksave, protections on:
 - **Cargo:** at Confirm the cargo protection moved 14 464 307 wares (container, liquid and solid, every storage module doomed) into build storage; all of it was still there 6 min later, plus the vanilla module refunds (14 661 732 in total).
 - **Workforce:** 41 250 Terran workers held when capacity went to 0.
-- **Ships:** a park order alone did not save them: one second after the order `dock` was null but the ships were still inside the station, and they were destroyed with the modules ~60 s after Confirm (runs 6, 7). Now a ship counts as out only when `not $ship.hascontext.{$station}`; still inside after 10 s, it is warped to a safe spot near the station. Run 8: both warped at +11 s, both survived.
+- **Ships:** a park order alone did not save them: one second after the order `dock` was null but the ships were still inside the station, and they were destroyed with the modules ~60 s after Confirm (runs 6, 7). Now a ship counts as out only when `not $ship.hascontext.{$station}`; still inside after 10 s, it is warped to a safe spot near the station. Run 8: both warped at +11 s, both survived. Run 28 (scenario `b6dock`, ship protection only): the internal-bay S freighter and the external-pad M freighter were warped about 11 s after Confirm and both still existed after the dock was gone.
 
 - **Run 9 (build force-completed after the removal):** the first sweep after the build ended moved every leftover ware back from build storage into station cargo (D-15; nothing left over) and returned all 41 250 held workers to the new habitats (41 281 / 79 250 at the end). `C.ForceBuildCompletion(station)` (the workshop game start's Force build button) also works in a normal game. **Caveat:** the forced completion consumed nothing from build storage, so "everything came back" is an artifact of the test shortcut. In a real build the builder consumes from build storage first; `ReturnLeftovers` moves only what is still there when the build ends (remove from build storage, then add to the station; nothing is created).
 
