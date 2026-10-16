@@ -39,9 +39,25 @@ Steam has to be running and logged in. The same wiki page says a limited Steam a
 
 `WorkshopTool help` also opens the tool's tutorial page in the browser.
 
-## Publishing draft
+## Workshop item
 
-Draft only (2026-10-16). Not uploaded. The dev `extension/content.xml` is unchanged. Publish from a separate folder named `station_rebuilder`, never from the dev junction.
+The dev `extension/content.xml` is unchanged. The upload was from a separate folder named `station_rebuilder`, never from the dev junction.
+
+Published 2026-10-16. **verified** from `WorkshopTool` (exit 0, item id 3821053684) and from the Steam Web API `GetPublishedFileDetails` (result 1, visibility 0, title and the 944-character description below). An `ISteamUGC` details query on the same item returned the primary preview plus two additional image previews.
+
+Page: <https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684>
+
+The upload used a copy at `H:\dev\esr-release\station_rebuilder`, not the dev junction. `WorkshopTool` rewrote that copy's `content.xml` to `id="ws_3821053684"` and `sync="false"`. The dev `extension/content.xml` was not changed. In the copy, ships, cargo and workforce default on, and the log-only refund option is not in the menu (D-17).
+
+Images, from the repo root. The preview is the thumbnail. The other two are additional previews (Steam file names `02-cargo.jpg` and `03-settings.png`).
+
+| File | Role |
+|------|------|
+| `cargo on build storage.jpg` | Preview. Station planner, Asteroid Belt High Tech Factory II. |
+| `station cargo.jpg` | Additional. Logical overview, cargo and 41,250 workforce. |
+| `mod settings.png` | Additional. Extension Options, the three protections on. |
+
+The dev junction is still `station_rebuilder` in the profile. The Workshop copy uses the same folder name. Do not subscribe in this profile while that junction is linked.
 
 ### Page
 
@@ -69,7 +85,7 @@ The page does not mention module refunds. The game already returns those materia
 
 Dependency to show on the page: SirNukes Mod Support APIs, optional, Workshop id 2042901274 (`ws_2042901274` in `content.xml`). Minimum game version 9.00 (`<dependency version="900"/>`). The dependency is named in the text above. The `<dependency>` entry is what the extension menu lists.
 
-Proposed first version: **1.00**, which is `version="100"` (the tool's rule: the attribute is the displayed version times 100). Proposed first change note: `First release.` This version number is a proposal in this draft, not a logged decision.
+First version: **1.00**, which is `version="100"` (D-20). The attribute is the displayed version times 100. First change note: `First release.`
 
 ### Release content.xml
 
@@ -93,14 +109,9 @@ WorkshopTool publishx4 -path <release folder> -preview <jpg or png> -buildcat
 
 `-buildcat` packs the loose XML and Lua into `ext_01.cat` and deletes that catalog afterwards. After the upload, open the item page, accept the Steam Workshop legal agreement if it asks, and set the visibility. A new item stays hidden until then.
 
-The preview is still to be made. One real in-game screenshot, JPG or PNG, widescreen, 640×360 or larger.
+The preview used for this upload is `cargo on build storage.jpg` (1920×1080). The other two repo-root images are additional previews.
 
-### Still to do before that command
+### Still to do
 
-- Copy `extension/` to a release folder named `station_rebuilder` and use the content.xml above. The tool rewrites the content.xml it is pointed at. Done for the profile install (2026-10-16, D-20): `<profile>\extensions\station_rebuilder` is that copy. Do not point the upload at it if a later edit should not rewrite the installed file; copy it again first.
-- Turn the three protections on by default in that copy (D-14). Done in the profile copy. In the dev scripts they are still off (`$Ships`, `$Cargo`, `$Workforce` start at 0 in `esr_main.xml`). The release menu passes `$default = 1`, so a save that already stored 0 still comes up on, until the player turns an option off.
-- Take the log-only option "Refund equipment of removed modules (test)" out of the player menu in that copy (D-17). Done in the profile copy. The game already refunds that equipment.
-- Make the repo public first (D-3). The player README links to it.
-- A preview screenshot.
 - Leave the suggested-pairings paragraph off the page until a rebuild has been tried with each mod (Phase 7). Draft paragraph, for after that test, in the same voice as the page: "Build Storage: Station Drone Self-Supply hauls wares you already have on the station into the build. XBuilder adds construction ships to a station that is already being built. Both need SirNukes Mod Support APIs."
 

@@ -72,11 +72,11 @@ Log: [workflow-phase7.md](workflow-phase7.md)
 Log: [workflow-phase8.md](workflow-phase8.md)
 - [x] Licence: MIT (D-10)
 - [x] X Tools installed (WorkshopTool 1.15, Steam app 282160, `H:\SteamLibrary\steamapps\common\X Tools`)
-- [x] README for players ([README.md](../README.md)). Workshop page draft is in [docs/workshop.md](../docs/workshop.md); not uploaded.
-- [ ] Make the repo public
-- [ ] Steam Workshop upload (Egosoft's X Tools / WorkshopTool), description, screenshots; list dependencies on the Workshop page
+- [x] README for players ([README.md](../README.md)). The Workshop page is [docs/workshop.md](../docs/workshop.md).
+- [x] Make the repo public (already public when the upload started, 2026-10-16)
+- [x] Steam Workshop upload (item [3821053684](https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684), public, version 1.00). SirNukes is the optional dependency on the page.
 - [ ] Suggested pairings on the Workshop page ([docs/workshop.md](../docs/workshop.md))
-- [ ] Version scheme and release notes
+- [x] Version scheme and release notes (D-20): 1.00, change note `First release.`
 
 ## Later (ideas, not agreed)
 - [ ] Warning in the build menu listing what a plan change will remove (Lua, allowed by D-5)
