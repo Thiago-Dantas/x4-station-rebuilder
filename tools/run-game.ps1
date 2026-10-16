@@ -11,7 +11,8 @@
 # b4: remove the S container storage from the build menu and watch the medical supplies;
 # b6menu: remove the pier from the build menu with an L ship docked there and an M ship on the dock area;
 # b6dock: remove the dock area from the build menu with an S ship in an internal bay;
-# b2: remove the S container, one energy-cell module and the defence disc in one Confirm).
+# b2: remove the S container, one energy-cell module and the defence disc in one Confirm;
+# b3: load plan player_1792192001, a copy of library plan tutorial_quantumtube).
 # Links the test harness (extension_test\) and the mod into the profile, starts X4 through Steam
 # (launch options in Steam: -skipintro -logfile debuglog.txt), waits for
 # "[ESR-TEST] DONE" in debuglog.txt, lets the game quit (kills it after a grace period),

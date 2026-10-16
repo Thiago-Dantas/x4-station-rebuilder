@@ -342,6 +342,61 @@ local function replaceStation(_, station)
 	end)
 end
 
+-- B3: import extension_test/plans/esr_b3.xml (copied into the profile's constructionplan
+-- folder before the run) and load it onto the station. The file is library plan
+-- tutorial_quantumtube under id player_1792192001.
+local B3_PLAN_ID = "player_1792192001"
+
+local function loadStoredPlan(tag, planid, doneControl, station)
+	log(tag .. ": station param " .. tostring(station))
+	if not importPlan(planid) then
+		AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+		return
+	end
+	local id = ConvertStringTo64Bit(tostring(station))
+	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
+	log(tag .. ": build menu opened for " .. ffi.string(C.GetComponentName(id)))
+	later(8, function ()
+		local menu = findMenu("StationConfigurationMenu")
+		if not menu or not menu.shown or not menu.holomap or menu.holomap == 0 then
+			log(tag .. ": menu not ready, shown=" .. tostring(menu and menu.shown) .. " holomap=" .. tostring(menu and menu.holomap))
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+			return
+		end
+		menu.refreshPlan()
+		local entries, withcomp, removed, changed = planCounts(menu)
+		log(string.format("%s open: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+		log(tag .. " open-order: " .. planOrder(menu))
+		log(tag .. ": loading plan " .. planid)
+		local ok, err = pcall(function () menu.dropdownLoad(nil, planid) end)
+		if not ok then
+			log(tag .. ": load failed: " .. tostring(err))
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+			return
+		end
+		entries, withcomp, removed, changed = planCounts(menu)
+		log(string.format("%s loaded: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+		later(2, function ()
+			menu.refreshPlan()
+			entries, withcomp, removed, changed = planCounts(menu)
+			log(string.format("%s loaded-settled: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+			log(tag .. " order: " .. planOrder(menu))
+			if removed == 0 then
+				log(tag .. ": loaded plan removed nothing")
+				AddUITriggeredEvent("ESR_Test", doneControl, "fail")
+				return
+			end
+			menu.buttonConfirm()
+			log(tag .. ": confirmed")
+			later(3, function ()
+				menu.closeMenu("close")
+				log(tag .. ": build menu closed")
+				AddUITriggeredEvent("ESR_Test", doneControl, "")
+			end)
+		end)
+	end)
+end
+
 local function init()
 	RegisterEvent("esr_test_quit", function ()
 		-- a short delay: right after a load the game ignored QuitGame (run 2)
@@ -360,6 +415,7 @@ local function init()
 			"defence_arg_claim_01_macro",
 		}, "b2done", station)
 	end)
+	RegisterEvent("esr_test_b3", function (_, station) loadStoredPlan("b3", B3_PLAN_ID, "b3done", station) end)
 	RegisterEvent("esr_test_b6menu", function (_, station) removePlanModule("b6menu", "pier_arg_harbor_02_macro", "b6done", station) end)
 	RegisterEvent("esr_test_b6dock", function (_, station) removePlanModule("b6dock", "dockarea_arg_m_station_01_macro", "b6dockdone", station, false) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function

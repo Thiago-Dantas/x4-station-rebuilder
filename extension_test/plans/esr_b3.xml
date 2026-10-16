@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plans>
+  <plan id="player_1792192001" name="esr b3" description="B3 full replacement. Library plan tutorial_quantumtube, copied so the build menu can import it.">
+    <entry index="1" macro="pier_arg_harbor_02_macro">
+      <offset>
+        <position x="2800" y="-565.543" z="-337.165"/>
+        <rotation yaw="-89.99998"/>
+      </offset>
+    </entry>
+    <entry index="2" macro="dockarea_arg_m_station_02_macro" connection="connectionsnap001">
+      <predecessor index="1" connection="connectionsnap004"/>
+      <offset>
+        <position x="2800" y="-565.543" z="-137.165"/>
+        <rotation yaw="-89.99997"/>
+      </offset>
+    </entry>
+    <entry index="3" macro="hab_arg_l_01_macro" connection="connectionsnap001">
+      <predecessor index="1" connection="connectionsnap006"/>
+      <offset>
+        <position x="2800" y="434.457" z="-537.165"/>
+        <rotation yaw="-89.99998"/>
+      </offset>
+    </entry>
+    <entry index="4" macro="storage_arg_l_container_01_macro" connection="connectionsnap004">
+      <predecessor index="2" connection="connectionsnap002"/>
+      <offset>
+        <position x="2799.999" y="-562.771" z="862.835"/>
+      </offset>
+    </entry>
+    <entry index="5" macro="prod_gen_quantumtubes_macro" connection="connectionsnap001">
+      <predecessor index="3" connection="connectionsnap002"/>
+      <offset>
+        <position x="2800" y="1834.457" z="-537.165"/>
+      </offset>
+    </entry>
+  </plan>
+</plans>
