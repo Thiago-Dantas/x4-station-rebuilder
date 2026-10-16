@@ -38,20 +38,33 @@
           </do_if>
         </do_for_each>
 
+        <!-- by class, not by a list of known equipment: mods' turrets and shields are found and priced the same way
+             (weapon covers turret, missileturret and any modded weapon class derived from it).
+             Runs 10-11: a station's equipment is not found under its module (not as a child, not recursively), so
+             search the whole station once and match each item to a module by its module context. Docked ships'
+             equipment is skipped (its container is the ship, not the station). -->
+        <set_value name="$StationEquipment" exact="null"/>
         <set_value name="$Current" exact="table[]"/>
         <do_for_each name="$Module" in="$Doomed">
           <set_value name="$Current.{$Module}" exact="true"/>
           <do_if value="$Watch.{$Module}? or not $Module.exists or $Module.isconstruction">
             <continue/>
           </do_if>
-          <!-- by class, not by a list of known equipment: mods' turrets and shields are found and priced the same way
-               (weapon covers turret, missileturret and any modded weapon class derived from it) -->
-          <!-- run 10: on station modules the equipment is not a direct child, so search recursively; skip what belongs
-               to docked ships (their container is the ship, not the station) -->
-          <find_object_component name="$Found" object="$Module" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true" recursive="true"/>
+          <do_if value="not $StationEquipment">
+            <find_object_component name="$Found" object="$Station" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true" recursive="true"/>
+            <set_value name="$StationEquipment" exact="[]"/>
+            <set_value name="$Contexts" exact="table[]"/>
+            <do_for_each name="$Item" in="$Found">
+              <do_if value="$Item.container == $Station">
+                <append_to_list name="$StationEquipment" exact="$Item"/>
+                <set_value name="$Contexts.{@$Item.module.macro}" exact="1" operation="add"/>
+              </do_if>
+            </do_for_each>
+            <debug_text text="'[ESR] REFUND %s: %s weapons/shields on the station (of %s found incl. docked ships); by module context %s'.[$Station.knownname, $StationEquipment.count, $Found.count, $Contexts]" filter="general"/>
+          </do_if>
           <set_value name="$Items" exact="[]"/>
-          <do_for_each name="$Item" in="$Found">
-            <do_if value="$Item.container == $Station">
+          <do_for_each name="$Item" in="$StationEquipment">
+            <do_if value="$Item.module == $Module or $Item.hascontext.{$Module}">
               <append_to_list name="$Items" exact="$Item"/>
             </do_if>
           </do_for_each>
