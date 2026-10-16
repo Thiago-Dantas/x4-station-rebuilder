@@ -42,6 +42,11 @@
     storage_arg_s_container_01_macro the way the menu's remove button does
     (RemoveItemFromConstructionMap2, sequence off, then on if the engine removed nothing).
     The watch logs station cargo against build storage until that module is gone, or for 6 min.
+
+    Scenario b6menu (B6, build-menu path): the same new station, protections off, an L freighter
+    docked at the pier and an M freighter at the dock area. Lua removes the pier the same way
+    (sequence off, then on if nothing was removed). The watch logs whether each ship still exists
+    until the pier is gone, or for 6 min. The script-path B6 (scenario b6) is a different cue.
   -->
   <cues>
     <!-- handshake: once the save has loaded, ask the Lua side for the scenario (it answers with the UI event) -->
@@ -812,6 +817,173 @@
           <actions>
             <set_value name="$Stop" exact="true"/>
             <debug_text text="'[ESR-TEST] RESULT b4: reason=menu-cap modules=%s station=%s buildstorage=%s'.[@$Station.modules.all.count, @$Station.cargo.table, @$Station.buildstorage.cargo.table]" filter="general"/>
+            <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+            <raise_lua_event name="'esr_test_quit'"/>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
+    <!--
+      Scenario b6menu: see the header. Protections stay off. The L ship is the one on the removed pier.
+    -->
+    <cue name="B6Menu" instantiate="true" namespace="this">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'b6menu'"/>
+      </conditions>
+      <actions>
+        <set_value name="$Stop" exact="false"/>
+        <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
+        <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
+        <debug_text text="'[ESR-TEST] scenario b6menu: protections off'" filter="general"/>
+
+        <set_value name="$Sector" exact="player.sector"/>
+        <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
+          <safepos max="30km" allowyaxis="false" includeplotbox="true" radius="5km"/>
+        </create_station>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="false"/>
+        <set_build_plot object="$Station" x="10km" y="5km" z="10km" paid="true"/>
+        <transfer_money from="faction.player" to="$Station.buildstorage" amount="20000000ct" result="$Paid"/>
+
+        <find_object_component name="$Pier" object="$Station" class="class.pier" checkoperational="false"/>
+        <find_object_component name="$DockArea" object="$Station" class="class.dockarea" checkoperational="false"/>
+        <find_dockingbay name="$PierBay" object="$Pier">
+          <match_dock size="tag.dock_l" free="true"/>
+        </find_dockingbay>
+        <find_dockingbay name="$AreaBay" object="$DockArea">
+          <match_dock size="tag.dock_m" free="true"/>
+        </find_dockingbay>
+        <create_ship name="$ShipL" macro="macro.ship_arg_l_trans_container_01_a_macro" dock="$PierBay">
+          <owner exact="faction.player" overridenpc="true"/>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+        </create_ship>
+        <create_ship name="$ShipM" macro="macro.ship_arg_m_trans_container_01_a_macro" dock="$AreaBay">
+          <owner exact="faction.player" overridenpc="true"/>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+        </create_ship>
+        <create_ship name="$Builder" macro="macro.ship_arg_xl_builder_01_a_macro" sector="$Sector">
+          <owner exact="faction.player" overridenpc="true"/>
+          <loadout>
+            <quantity exact="1.0">
+              <variation exact="0.0"/>
+            </quantity>
+            <quality exact="0.5"/>
+          </loadout>
+          <pilot>
+            <select race="[race.argon]" tags="tag.aipilot"/>
+          </pilot>
+          <safepos object="$Station" min="2km" max="4km"/>
+        </create_ship>
+        <create_order object="$Builder" id="'DeployToStation'">
+          <param name="station" value="$Station"/>
+        </create_order>
+        <debug_text text="'[ESR-TEST] B6Menu station %s (%s): %s modules, paid %s; L %s (%s) dock %s; M %s (%s) dock %s'.[@$Station.knownname, @$Station.idcode, @$Station.modules.all.count, $Paid, @$ShipL.knownname, @$ShipL.idcode, @$ShipL.dock, @$ShipM.knownname, @$ShipM.idcode, @$ShipM.dock]" filter="general"/>
+      </actions>
+      <cues>
+        <cue name="B6MenuOpen">
+          <delay exact="10s"/>
+          <actions>
+            <set_value name="$AskedAt" exact="player.age"/>
+            <raise_lua_event name="'esr_test_b6menu'" param="$Station"/>
+            <debug_text text="'[ESR-TEST] B6Menu menu requested, modules %s, L exists %s, M exists %s'.[@$Station.modules.all.count, $ShipL.exists, $ShipM.exists]" filter="general"/>
+          </actions>
+        </cue>
+        <cue name="B6MenuDone" instantiate="true">
+          <conditions>
+            <event_ui_triggered screen="'ESR_Test'" control="'b6done'"/>
+            <check_value value="not $Stop"/>
+          </conditions>
+          <actions>
+            <do_if value="event.param3 == 'fail'">
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b6menu: reason=remove-failed Lexists=%s Mexists=%s'.[$ShipL.exists, $ShipM.exists]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
+            <do_else>
+              <set_value name="$WatchAt" exact="player.age"/>
+              <do_if value="$ShipL.exists">
+                <debug_text text="'[ESR-TEST] B6Menu watch start L exists dock=%s container=%s inside=%s'.[@$ShipL.dock, @$ShipL.container, @$ShipL.hascontext.{$Station}]" filter="general"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'[ESR-TEST] B6Menu watch start L gone'" filter="general"/>
+              </do_else>
+              <do_if value="$ShipM.exists">
+                <debug_text text="'[ESR-TEST] B6Menu watch start M exists dock=%s container=%s inside=%s'.[@$ShipM.dock, @$ShipM.container, @$ShipM.hascontext.{$Station}]" filter="general"/>
+              </do_if>
+              <do_else>
+                <debug_text text="'[ESR-TEST] B6Menu watch start M gone'" filter="general"/>
+              </do_else>
+              <debug_text text="'[ESR-TEST] B6Menu watch start modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[@$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, @$Station.buildstorage.builds.queued.count, @$Station.buildstorage.builds.inprogress.count]" filter="general"/>
+            </do_else>
+          </actions>
+        </cue>
+        <cue name="B6MenuWatch" instantiate="true" checkinterval="30s">
+          <conditions>
+            <check_value value="$WatchAt? and not $Stop"/>
+          </conditions>
+          <actions>
+            <set_value name="$PierLeft" exact="0"/>
+            <do_for_each name="$Module" in="$Station.modules.all.list">
+              <do_if value="$Module.macro == macro.pier_arg_harbor_02_macro">
+                <set_value name="$PierLeft" operation="add"/>
+              </do_if>
+            </do_for_each>
+            <set_value name="$Queued" exact="@$Station.buildstorage.builds.queued.count"/>
+            <do_if value="not $Queued">
+              <set_value name="$Queued" exact="0"/>
+            </do_if>
+            <set_value name="$Busy" exact="@$Station.buildstorage.builds.inprogress.count"/>
+            <do_if value="not $Busy">
+              <set_value name="$Busy" exact="0"/>
+            </do_if>
+            <do_if value="$ShipL.exists">
+              <debug_text text="'[ESR-TEST] B6Menu watch dt=%s pier=%s L exists dock=%s container=%s inside=%s'.[player.age - $WatchAt, $PierLeft, @$ShipL.dock, @$ShipL.container, @$ShipL.hascontext.{$Station}]" filter="general"/>
+            </do_if>
+            <do_else>
+              <debug_text text="'[ESR-TEST] B6Menu watch dt=%s pier=%s L gone'.[player.age - $WatchAt, $PierLeft]" filter="general"/>
+            </do_else>
+            <do_if value="$ShipM.exists">
+              <debug_text text="'[ESR-TEST] B6Menu watch dt=%s M exists dock=%s inside=%s'.[player.age - $WatchAt, @$ShipM.dock, @$ShipM.hascontext.{$Station}]" filter="general"/>
+            </do_if>
+            <do_else>
+              <debug_text text="'[ESR-TEST] B6Menu watch dt=%s M gone'.[player.age - $WatchAt]" filter="general"/>
+            </do_else>
+            <debug_text text="'[ESR-TEST] B6Menu watch dt=%s modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[player.age - $WatchAt, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, $Queued, $Busy]" filter="general"/>
+            <set_value name="$Reason" exact="''"/>
+            <do_if value="player.age gt $WatchAt + 6min">
+              <set_value name="$Reason" exact="'cap'"/>
+            </do_if>
+            <do_elseif value="$PierLeft == 0 and $Busy == 0 and $Queued == 0">
+              <do_if value="$SawGone?">
+                <set_value name="$Reason" exact="'pier-gone'"/>
+              </do_if>
+              <do_else>
+                <set_value name="$SawGone" exact="true"/>
+              </do_else>
+            </do_elseif>
+            <do_if value="$Reason != ''">
+              <set_value name="$Stop" exact="true"/>
+              <debug_text text="'[ESR-TEST] RESULT b6menu: reason=%s pier=%s Lexists=%s Mexists=%s modules=%s operational=%s construction=%s queued=%s inprogress=%s'.[$Reason, $PierLeft, $ShipL.exists, $ShipM.exists, @$Station.modules.all.count, @$Station.modules.operational.count, @$Station.modules.construction.count, $Queued, $Busy]" filter="general"/>
+              <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+              <raise_lua_event name="'esr_test_quit'"/>
+            </do_if>
+          </actions>
+        </cue>
+        <cue name="B6MenuCap" checkinterval="15s">
+          <conditions>
+            <check_value value="$AskedAt? and not $Stop and player.age gt $AskedAt + 10min"/>
+          </conditions>
+          <actions>
+            <set_value name="$Stop" exact="true"/>
+            <debug_text text="'[ESR-TEST] RESULT b6menu: reason=menu-cap Lexists=%s Mexists=%s'.[$ShipL.exists, $ShipM.exists]" filter="general"/>
             <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
             <raise_lua_event name="'esr_test_quit'"/>
           </actions>

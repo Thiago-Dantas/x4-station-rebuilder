@@ -8,7 +8,8 @@
 # b1: save the new station's own plan and load it back through the build menu;
 # b1b: load that same layout with the two energy-cell modules swapped in sequence order;
 # b1c: load that layout with the defence disc moved 1000 m up;
-# b4: remove the S container storage from the build menu and watch the medical supplies).
+# b4: remove the S container storage from the build menu and watch the medical supplies;
+# b6menu: remove the pier from the build menu with an L ship docked there and an M ship on the dock area).
 # Links the test harness (extension_test\) and the mod into the profile, starts X4 through Steam
 # (launch options in Steam: -skipintro -logfile debuglog.txt), waits for
 # "[ESR-TEST] DONE" in debuglog.txt, lets the game quit (kills it after a grace period),

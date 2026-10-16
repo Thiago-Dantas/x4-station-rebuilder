@@ -181,72 +181,71 @@ local function matchStation(mode, station)
 	end)
 end
 
--- the player's steps: open the station's build menu, load the plan, confirm, close
--- B4: the build menu's "remove module" button. sequence=false removes that module only;
+-- The build menu's "remove module" button. sequence=false removes that module only;
 -- the retry uses true (remove the module and whatever is attached to it) when the first call
--- left the engine's removed list empty.
-local function removeStorage(_, station)
-	log("b4: station param " .. tostring(station))
+-- left the engine's removed list empty. B4 removes the S container. b6menu removes the pier.
+local function removePlanModule(tag, macro, doneControl, station)
+	log(tag .. ": station param " .. tostring(station))
 	local id = ConvertStringTo64Bit(tostring(station))
 	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
-	log("b4: build menu opened for " .. ffi.string(C.GetComponentName(id)))
+	log(tag .. ": build menu opened for " .. ffi.string(C.GetComponentName(id)))
 	later(8, function ()
 		local menu = findMenu("StationConfigurationMenu")
 		if not menu or not menu.shown or not menu.holomap or menu.holomap == 0 then
-			log("b4: menu not ready, shown=" .. tostring(menu and menu.shown) .. " holomap=" .. tostring(menu and menu.holomap))
-			AddUITriggeredEvent("ESR_Test", "b4done", "fail")
+			log(tag .. ": menu not ready, shown=" .. tostring(menu and menu.shown) .. " holomap=" .. tostring(menu and menu.holomap))
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 			return
 		end
 		menu.refreshPlan()
 		local entries, withcomp, removed, changed = planCounts(menu)
-		log(string.format("b4 open: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
-		log("b4 open-order: " .. planOrder(menu))
+		log(string.format("%s open: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+		log(tag .. " open-order: " .. planOrder(menu))
 		local entry = nil
 		for _, candidate in ipairs(menu.constructionplan or {}) do
-			if candidate.macro == "storage_arg_s_container_01_macro" then
+			if candidate.macro == macro then
 				entry = candidate
 				break
 			end
 		end
 		if not entry then
-			log("b4: storage module is not in the plan")
-			AddUITriggeredEvent("ESR_Test", "b4done", "fail")
+			log(tag .. ": " .. macro .. " is not in the plan")
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 			return
 		end
 		local function applyRemove(sequence)
-			log(string.format("b4: RemoveItemFromConstructionMap2 idx=%s sequence=%s", tostring(entry.idx), tostring(sequence)))
+			log(string.format("%s: RemoveItemFromConstructionMap2 idx=%s sequence=%s", tag, tostring(entry.idx), tostring(sequence)))
 			C.RemoveItemFromConstructionMap2(menu.holomap, entry.idx, sequence)
 			menu.refreshPlan()
 			entries, withcomp, removed, changed = planCounts(menu)
-			log(string.format("b4 removed: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
-			log("b4 order: " .. planOrder(menu))
+			log(string.format("%s removed: entries=%d with-component=%d removed=%d changed=%d", tag, entries, withcomp, removed, changed))
+			log(tag .. " order: " .. planOrder(menu))
 		end
 		local ok, err = pcall(applyRemove, false)
 		if not ok then
-			log("b4: remove failed: " .. tostring(err))
-			AddUITriggeredEvent("ESR_Test", "b4done", "fail")
+			log(tag .. ": remove failed: " .. tostring(err))
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 			return
 		end
 		if removed == 0 then
-			log("b4: sequence=false removed nothing; retrying with the attached modules")
+			log(tag .. ": sequence=false removed nothing; retrying with the attached modules")
 			ok, err = pcall(applyRemove, true)
 			if not ok then
-				log("b4: sequence remove failed: " .. tostring(err))
-				AddUITriggeredEvent("ESR_Test", "b4done", "fail")
+				log(tag .. ": sequence remove failed: " .. tostring(err))
+				AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 				return
 			end
 		end
 		if removed == 0 then
-			log("b4: storage still not on the removed list")
-			AddUITriggeredEvent("ESR_Test", "b4done", "fail")
+			log(tag .. ": module still not on the removed list")
+			AddUITriggeredEvent("ESR_Test", doneControl, "fail")
 			return
 		end
 		menu.buttonConfirm()
-		log("b4: confirmed")
+		log(tag .. ": confirmed")
 		later(3, function ()
 			menu.closeMenu("close")
-			log("b4: build menu closed")
-			AddUITriggeredEvent("ESR_Test", "b4done", "")
+			log(tag .. ": build menu closed")
+			AddUITriggeredEvent("ESR_Test", doneControl, "")
 		end)
 	end)
 end
@@ -285,7 +284,8 @@ local function init()
 	RegisterEvent("esr_test_b1", function (_, station) matchStation("b1", station) end)
 	RegisterEvent("esr_test_b1b", function (_, station) matchStation("b1b", station) end)
 	RegisterEvent("esr_test_b1c", function (_, station) matchStation("b1c", station) end)
-	RegisterEvent("esr_test_b4", function (_, station) removeStorage(nil, station) end)
+	RegisterEvent("esr_test_b4", function (_, station) removePlanModule("b4", "storage_arg_s_container_01_macro", "b4done", station) end)
+	RegisterEvent("esr_test_b6menu", function (_, station) removePlanModule("b6menu", "pier_arg_harbor_02_macro", "b6done", station) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
 	RegisterEvent("esr_test_forcebuild", function (_, station)
 		local id = ConvertStringTo64Bit(tostring(station))
