@@ -17,7 +17,7 @@ Log: [workflow-phase1-research.md](workflow-phase1-research.md)
 Questions to answer before writing the mod (part A, game files, done 2026-10-15; part B, in game, waiting):
 - [ ] Reproduce the four losses in a test save and measure them (B2–B6)
 - [ ] How the game matches the old station to the new plan, and can a script influence it (S1, D-9). Files: the engine matches, Lua only reads the result; B1 decides.
-- [ ] The vanilla refund rule for removed modules. Files: `GetModuleRecycledResources` / `recyclingwares.max`, back to build storage by the builder; amounts vs build cost in B2/B3.
+- [x] The vanilla refund rule for removed modules: 100 % of the module recipe plus mounted turrets/shields (`GetModuleRecycledResources`; delivered to build storage). Manual test 2026-10-16, D-17.
 - [x] Build storage: MD adds wares with `add_cargo` (vanilla does it). The no-limit statement (D-11) vs `iswaitingforstorage` → B3.
 - [ ] Cargo in storage modules that get removed: vanilla moves cargo only when the whole station goes → B4
 - [x] The first moment a script can act: before confirm, from a Lua wrap of the build menu's confirm (the engine's removed-module list is available); after confirm, `event_build_added` on the build storage, while the builder recycles modules over time
@@ -45,10 +45,10 @@ First version written 2026-10-15; **verified in game** (automated run 8, full re
 - [ ] In-game test: replace a pier and a dock area with ships docked; nothing destroyed
 
 ## Phase 4: Materials (G2, D-6)
-Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes are refunded by vanilla. Station equipment refunds are untested: the earlier "equipment is not refunded" finding was wrong (the equipment belonged to docked ships); the engine code includes module equipment. The equipment refund is log-only until measured. `esr_cargo.xml`, `esr_refund.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes **and** station equipment are refunded 100 % by vanilla (D-17); `esr_refund.xml` is log-only. `esr_cargo.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Keep stored wares: cargo in storage modules that get removed goes to build storage
-- [ ] Refund removed modules at 100% of their build cost (wares per build method, from `wares.xml`) into build storage, without paying twice for what the game already returns
-- [ ] Equipment on removed modules (turrets, shields)
+- [x] Refund removed modules at 100% of their build cost: vanilla already does this (recipe + mounted equipment)
+- [x] Equipment on removed modules (turrets, shields): vanilla refunds 100 % (manual test 2026-10-16, D-17)
 - [x] ~~Build storage full~~: not needed, build storage has no limit (D-11)
 - [ ] In-game test: full replacement; wares before and after add up
 

@@ -7,7 +7,7 @@ When the player edits a station's construction plan in game and confirms it:
 3. **Workforce is lost** when habitats go away.
 4. **Docked ships are destroyed** when the dock area or pier they sit at is deleted.
 
-**Status of the reports (2026-10-15, verified; details in [x4-modding.md](x4-modding.md)):** in the user's full replacement through the build menu, every module was replaced (report 1, also for identical modules), **all station cargo was lost** (≈13 M wares; report 2), module recipes came back 100 % but gradually and went into the new build, **2 of 4 docked ships were destroyed** (report 4), all workforce was lost at once (report 3). A small script-made change (automated run 3) lost nothing but the workforce. Not a mod bug.
+**Status of the reports (2026-10-15, verified; details in [x4-modding.md](x4-modding.md)):** in the user's full replacement through the build menu, every module was replaced (report 1, also for identical modules), **all station cargo was lost** (≈13 M wares; report 2), module recipes came back 100 % but gradually and went into the new build, **2 of 4 docked ships were destroyed** (report 4), all workforce was lost at once (report 3). A small script-made change (automated run 3) lost nothing but the workforce. Not a mod bug. Station equipment (turrets, shields on the module) is also refunded 100 % by vanilla (manual test 2026-10-16, D-17).
 
 ## Vision
 Reorganizing or replacing a station costs time, not assets. The player can rebuild a station the way they want without losing ships, wares or people.

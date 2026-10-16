@@ -48,7 +48,7 @@ All protections are off by default (D-14). Turn one on in *Extension Options →
 |------------|--------|-----------|-----------|
 | Protect docked ships | B6 | `SHIPS … ordered to park` / `asked to undock` / `warped out` | No ship destroyed (`EVENT destroyed` lines); player ships wait near the station |
 | Keep cargo of removed storage | B4 | `CARGO … moving` / `moved` | Station cargo + build storage after the build ≥ station cargo before (minus what the build used) |
-| Full refund for removed modules | B2, B3 | `REFUND … added` | Build storage gains each removed module's full build cost (vanilla refund + ours) |
+| Full refund for removed modules | B2, B3 | `CONFIRM removed … recycled=` | Build storage gains the engine refund (module recipe + mounted equipment). Vanilla already pays 100 %; `esr_refund.xml` is log-only (D-17) |
 | Keep workforce during rebuilds | B5 | `WORKFORCE … holding` / `returned` | Workers come back when the new habitats finish; before the grace period ends none are lost |
 
 Also check after each test: no `[=ERROR=]` lines for `extensions\station_rebuilder` (`tools/esr_log.py --errors`).

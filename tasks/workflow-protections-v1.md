@@ -19,18 +19,18 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 - [x] Docs: docs/x4-modding.md (design + open points), docs/testing.md (how to test each protection), CLAUDE.md, roadmap
 - [x] Engine list of removed modules (added after the first review): `ui/esr_confirm.lua` sends the build menu's removed modules at Confirm (UI event `esr_confirm`), `ESR_Main.OnConfirm` stores them and the sweep prefers them over the plan-entry mapping; `MAIN COMPARE` logs both. Removes the dependency on the B1 hypothesis for plan changes made in the build menu. Checks pass.
 - [x] Build method for refunds: `esr_confirm.lua` also sends the build storage's build method; `esr_refund.xml` maps it to a race and uses `raceresources`. Checker: keyword values (`race.terran`, `class.storage`, …) now learned from vanilla scripts. Checks pass.
-- [x] **Verified in game (automated runs 6–8, the user's CVL-296 replacement through the build menu):** cargo (14.46 M wares kept), ships (0 of 2 lost after the warp fix), workforce (41 250 held). Not yet verified: held workers returning when new habitats finish (needs the new build to progress), the refund redesign (equipment).
+- [x] **Verified in game (automated runs 6–8, the user's CVL-296 replacement through the build menu):** cargo (14.46 M wares kept), ships (0 of 2 lost after the warp fix), workforce (41 250 held). Equipment refund: vanilla already pays 100 % (manual test 2026-10-16, D-17).
 
 ## What the user's replacement showed (2026-10-15)
 - Cargo protection: the most important one (≈13 M wares lost). It must act at Confirm: 57 s later all storage was gone.
-- Refund protection: module recipes come back 100 % in vanilla. (Corrected 2026-10-16: the equipment that seemed lost belonged to docked ships; station equipment refunds are untested and likely done by vanilla, see docs/x4-modding.md.) The equipment refund is log-only until measured.
+- Refund protection: module recipes and mounted turrets/shields come back 100 % in vanilla (manual test 2026-10-16, D-17). `esr_refund.xml` stays log-only.
 - Ship protection and workforce protection: needed as designed.
 - All of it has to happen in the first seconds: all modules switch to deconstruction at once.
 
 ## Open points (to settle with B1–B6 or the user)
 - ~~Leave rate~~: settled, D-12 revised: setting, default 20 %/h of the held pool (vanilla drops everything at once). Saves that already ran the mod keep their stored value (10) until changed in the options.
 - ~~Refunds use the default build method's recipe~~: fixed; the build method comes with the Confirm event (`GetContainerBuildMethod`, else the player's global method) and refunds use `ware.raceresources.{race}`. Plan changes made without the build menu still use the default recipe.
-- Equipment (turrets, shields) on removed modules: does vanilla refund it? Test with an equipped station (next session).
+- ~~Equipment (turrets, shields) on removed modules~~: vanilla refunds 100 % (D-17).
 - Wares in build storage that the build doesn't need: can the player get them back? (OD-10)
 - `recyclingwares.max` may already be a table; then `.table` gives null and the refund would add the full cost on top of vanilla (B2 log shows the type).
 - Ships arriving at a doomed dock later are caught by the 30 s sweep, not prevented from docking.

@@ -2,11 +2,9 @@
 <mdscript name="ESR_Refund" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
     Easier Station Rebuild: refund for the equipment of removed modules (G2 part 2, D-6).
-    LOG ONLY until measured (2026-10-16): the earlier finding "vanilla does not refund equipment" was wrong; the 34
-    turrets and shields in the test station belonged to two docked ships, the station had none. X4.exe's refund code
-    includes a module's destructible children (equipment) and skips docked ships, so vanilla most likely refunds
-    station equipment already; adding it again would double it. To test with a station whose modules carry
-    equipment (docs/x4-modding.md).
+    LOG ONLY (D-17, verified 2026-10-16): vanilla already refunds 100 % of a removed module's recipe plus the
+    recipes of turrets and shields mounted on it (undamaged; hull-fraction scaled). Adding the equipment cost
+    would double it. Log: research/logs/manual-2026-10-16-equipment-test.txt (docs/x4-modding.md).
     Where the equipment comes from: ui/esr_confirm.lua sends each removed module's loadout as the build menu
     read it before Confirm (UI event "esr_equipment"). MD searches don't find station equipment
     (automated runs 10-12: not under the module, not recursively, not station-wide), so this is the source.
@@ -14,8 +12,9 @@
     modded ones included.
     Called by ESR_Main's sweep: the first time a doomed module is seen, its loadout is priced with the recipes
     for the station's build method (sent at Confirm; default recipe otherwise). When the module no longer
-    exists, that cost goes to the station's build storage. A module that is no longer doomed (plan changed
-    again) or still stands after the build gets nothing. Returns true while the station has watched modules.
+    exists, that cost is logged and nothing is added to build storage. A module that is no longer doomed
+    (plan changed again) or still stands after the build gets nothing. Returns true while the station has
+    watched modules.
   -->
   <cues>
     <cue name="State">
