@@ -3,7 +3,8 @@
 # Scenarios are in extension_test/md/esr_test.xml (b6: script-made pier removal on save_010;
 # replace: the user's CVL-296 replacement through the build menu on save_009, a copy of their quicksave;
 # replace_build: the same, then the build is force-completed after the removal to see workers return;
-# grace: remove a new station's habitat and sample the held workforce through the grace period).
+# grace: remove a new station's habitat and sample the held workforce through the grace period;
+# build: add a habitat to a new tutorial_station and let the builder finish it).
 # Links the test harness (extension_test\) and the mod into the profile, starts X4 through Steam
 # (launch options in Steam: -skipintro -logfile debuglog.txt), waits for
 # "[ESR-TEST] DONE" in debuglog.txt, lets the game quit (kills it after a grace period),
