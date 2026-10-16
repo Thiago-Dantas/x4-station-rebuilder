@@ -1,4 +1,4 @@
--- Easier Station Rebuild: hands the engine's list of removed modules to the MD scripts.
+-- Easy Station Rebuild: hands the engine's list of removed modules to the MD scripts.
 -- The station build menu asks the engine which modules a plan change removes (menu.removedModules,
 -- filled from GetRemovedConstructionPlanModules2). When the player confirms, this sends
 -- { station, build method, removed module 1, removed module 2, ... } as a UI event; ESR_Main (MD)

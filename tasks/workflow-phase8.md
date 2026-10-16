@@ -2,7 +2,7 @@
 
 Status: **in progress** (started 2026-10-16)
 
-Goal (G5): published on the Steam Workshop as "Easier Station Rebuild". Roadmap: [roadmap.md](roadmap.md). This file tracks the upload prerequisites. Do not publish, do not make the repo public, and do not change `extension/content.xml` until the release step.
+Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [roadmap.md](roadmap.md). This file tracks the upload prerequisites. Do not publish, do not make the repo public, and do not change `extension/content.xml` until the release step.
 
 ## Steps
 - [x] Tooling: Egosoft X Tools (Steam app 282160), which contains `WorkshopTool.exe` and the catalog tool

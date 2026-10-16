@@ -1,4 +1,4 @@
--- Easier Station Rebuild test harness (Lua side). Development only; tools/run-game.ps1 links it in.
+-- Easy Station Rebuild test harness (Lua side). Development only; tools/run-game.ps1 links it in.
 -- Start menu: loads ESR_TEST.save (ui/esr_test_config.lua). In game: tells the MD side which scenario to
 -- run (UI event screen "ESR_Test", control "scenario"), drives the station build menu for scenarios that
 -- need it (Lua event "esr_test_replace"), and quits when MD raises "esr_test_quit".

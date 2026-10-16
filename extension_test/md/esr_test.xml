@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Test" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuild test harness (MD side). Development only.
+    Easy Station Rebuild test harness (MD side). Development only.
     After the test save loads (MD raises the Lua event esr_test_ready), the Lua side requests the scenario named in ui/esr_test_config.lua
     (UI event screen 'ESR_Test', control 'scenario', param3 = name). Each scenario logs "[ESR-TEST] ..." lines,
     ends with "[ESR-TEST] DONE" and asks the Lua side to quit the game. tools/run-game.ps1 waits for DONE.

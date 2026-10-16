@@ -1,4 +1,4 @@
-# Easier Station Rebuild
+# Easy Station Rebuild
 
 A mod for **X4: Foundations**. Confirming a new construction plan on a station you own keeps the ships at its docks, the wares in its storage, and the workforce that would otherwise leave with the habitats.
 
@@ -6,7 +6,7 @@ The game still takes the removed modules apart and builds the new plan. What cha
 
 ## Install
 
-Subscribe on the Steam Workshop, then start the game. The extension is named Easier Station Rebuild.
+Subscribe on the Steam Workshop, then start the game. The extension is named Easy Station Rebuild.
 
 To install a downloaded copy, put the folder `station_rebuilder` here:
 
@@ -30,7 +30,7 @@ Only stations you own are affected.
 
 ## Settings
 
-In Extension Options, category **Easier Station Rebuild**:
+In Extension Options, category **Easy Station Rebuild**:
 
 | Setting | Release default |
 |---|---|

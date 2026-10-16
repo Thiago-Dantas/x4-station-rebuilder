@@ -1,4 +1,4 @@
-# Easier Station Rebuild
+# Easy Station Rebuild
 
 Extension id `station_rebuilder` (D-4). A mod for **X4: Foundations** that makes station replacement and reorganization less painful. When the player changes a station's construction plan (reorders, replaces or removes modules), the game deconstructs modules and with them loses materials, kills workforce and destroys ships docked at removed docks. This mod prevents those losses:
 - **No destroyed ships:** ships docked at a module that goes away are parked near the station, teleported if needed (D-7).

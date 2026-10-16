@@ -45,7 +45,7 @@ Draft only (2026-10-16). Not uploaded. The dev `extension/content.xml` is unchan
 
 ### Page
 
-Title: **Easier Station Rebuild**
+Title: **Easy Station Rebuild**
 
 Description the tool uploads (the `description` attribute below). English, as the Workshop page does not localise:
 
@@ -67,7 +67,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easier Station Rebuild" description="Changing a station's construction plan keeps the ships at its docks, the wares in its storage, and the workforce for a grace period.&#10;&#10;When you confirm a plan change on a station you own, ships docked at a module that is removed are parked near the station, and moved out if they cannot leave in time. Wares that no longer fit are moved to the station's build storage, and what the finished station can hold is moved back when the build ends. Removed modules, turrets and shields are refunded in full by the game. Workers who lose their habitat wait 2 hours, then leave at 20% of those still waiting per hour. New habitats take them back as room appears.&#10;&#10;Settings are in Extension Options when SirNukes Mod Support APIs is installed. Without it, the defaults above are used. That mod is optional.&#10;&#10;Only your own stations are affected. A module the new plan still contains can still be taken apart and built again. Build time and build cost are unchanged." author="Thiago Almeida Dantas" version="100" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="Changing a station's construction plan keeps the ships at its docks, the wares in its storage, and the workforce for a grace period.&#10;&#10;When you confirm a plan change on a station you own, ships docked at a module that is removed are parked near the station, and moved out if they cannot leave in time. Wares that no longer fit are moved to the station's build storage, and what the finished station can hold is moved back when the build ends. Removed modules, turrets and shields are refunded in full by the game. Workers who lose their habitat wait 2 hours, then leave at 20% of those still waiting per hour. New habitats take them back as room appears.&#10;&#10;Settings are in Extension Options when SirNukes Mod Support APIs is installed. Without it, the defaults above are used. That mod is optional.&#10;&#10;Only your own stations are affected. A module the new plan still contains can still be taken apart and built again. Build time and build cost are unchanged." author="Thiago Almeida Dantas" version="100" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
