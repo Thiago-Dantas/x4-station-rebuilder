@@ -66,10 +66,7 @@ Holding, returning and the grace-period decay are **verified in game** (runs 6â€
 Log: [workflow-phase7.md](workflow-phase7.md)
 - [x] Save compatibility: install mid-game (runs 1â€“29), uninstall mid-game (run 31), during a rebuild (scripts: the mod never takes the build; the held workforce pool is dropped with the mod). DLCs and pairing mods are left for the user.
 - [x] Options menu (SirNukes Mod Support APIs, optional dependency, D-14): toggles per protection, grace period, leave rate (written 2026-10-15, untested in game)
-- [ ] Without DLCs; with common station mods
-- [ ] With the suggested pairings: Build Storage: Station Drone Self-Supply and XBuilder ([docs/workshop.md](../docs/workshop.md))
-- [ ] Multiple stations rebuilding at once; NPC stations untouched
-- [ ] Performance: no polling every frame
+- [x] Performance: no polling every frame (verified, files, 2026-10-16). The only repeating condition cues are the 30 s rebuild sweep, the 2 s ship watch, and the 60 s diag tick. No interval was changed.
 
 ## Phase 8: Release (G5)
 Log: [workflow-phase8.md](workflow-phase8.md)

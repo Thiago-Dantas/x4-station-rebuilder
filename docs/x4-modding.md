@@ -242,6 +242,20 @@ A root cue without conditions runs once; in a save where it already ran under an
 
 **Conclusion (G4):** uninstall does not break the save and does not leave a build stuck. Removing the mod while workers are held drops that pool. Cargo already in build storage stays there. Ships already moved out stay out; a ship still on a dock that is coming down can still be destroyed, because that protection has stopped.
 
+## Condition checks (verified, files, 2026-10-16)
+
+No cue in the player mod (`extension/md`, `extension/ui`) polls every frame. No interval was changed.
+
+`research/extracted/base/libraries/md.xsd` (game 9.00) documents `checkinterval` as the delay between condition checks, and says not to use it on a cue that has an event condition. A cue with no `<conditions>` becomes active once when it is enabled. `X4.exe` 9.00 (the string `Cue '%s' would instantiate without either an event condition or a check interval`) reports an instantiating cue that has neither an event condition nor a check interval. The scheduler reads the interval double written for that cue: a value greater than 0 is kept, and any other value is replaced with the constant 1.0. The same function also uses the constant 0.001, one millisecond on the game-time clock (`player.age` is in seconds), so 1.0 is one second. The fallback is not a per-frame check.
+
+The only repeating condition cues are:
+
+- `ESR_Main.SweepTimer` in `esr_main.xml`: `checkinterval="30s"`, and its sweep runs only while `Tracker.$Rebuilds` is not empty.
+- `ESR_Ships.Watch` in `esr_ships.xml`: `checkinterval="2s"`, and it acts only while `State.$Tried` is not empty.
+- `ESR_Diag.Tick` in `esr_diag.xml`: `checkinterval="60s"`, and it acts only while `Diag.$Tracked` is not empty.
+
+The other cues are event cues (`event_player_build_added`, `event_ui_triggered`, `event_game_loaded`, `event_player_build_finished`, `event_player_build_finished_components`, `event_player_build_cancelled`, `event_player_owned_destroyed`, `event_cue_signalled`) or one-shot state cues with no `<conditions>` (`Settings`, `Tracker`, `ESR_Ships.State`, `ESR_Refund.State`, `ESR_Workforce.State`, `ESR_Diag.Diag`). The cargo, refund, workforce, and sweep libraries are `purpose="run_actions"` and run only when a sweep calls them. `ui/esr_confirm.lua` and `ui/esr_diag.lua` replace `menu.buttonConfirm` when the menu addon loads. Neither file registers a per-frame callback.
+
 ## Protections, first version (2026-10-15; design, untested in game)
 Code in `extension/md/`; all off by default in dev builds (D-14). Workflow: [workflow-protections-v1.md](../tasks/workflow-protections-v1.md).
 - **Tracker** (`esr_main.xml`): `event_player_build_added` with `isexpansion` on a player station starts tracking that station and its build. A sweep runs at once and every 30 s. **Doomed modules** come from the engine itself when the plan change was confirmed in the build menu: `ui/esr_confirm.lua` wraps Confirm and sends `{station, removed module…}` (the menu's `removedModules`, i.e. `GetRemovedConstructionPlanModules2`) with `AddUITriggeredEvent("StationConfigurationMenu", "esr_confirm", list)`; `ESR_Main.OnConfirm` reads it from `event.param3` (schema: "param3 = screen parameters"; vanilla passes Lua tables the same way, e.g. `"modinstalled"`, and MD indexes them as lists). Without that list (plan changed some other way), doomed = station modules that no entry of the build's `constructionsequence` maps to through `planmodule.{entry.id}` (hypothesis: kept modules keep their entry ids; B1). The first sweep with both logs `MAIN COMPARE` (counts only in one list), which answers B1 as a side effect.

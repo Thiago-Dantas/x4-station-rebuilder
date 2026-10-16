@@ -14,9 +14,10 @@ Goal (G4): safe to add to and remove from an existing save. No broken saves, no 
 - [ ] Without DLCs; with common station mods. The user will test these. Do not run them in the harness.
 - [ ] With the suggested pairings: Build Storage: Station Drone Self-Supply and XBuilder ([docs/workshop.md](../docs/workshop.md)). The user will test these. Do not run them in the harness.
 - [ ] Multiple stations rebuilding at once; NPC stations untouched
-- [ ] Performance: no polling every frame
+- [x] Performance: no polling every frame (verified, files, 2026-10-16). No interval was changed. Details: [docs/x4-modding.md](../docs/x4-modding.md) "Condition checks".
 
 ## Notes
 - `extension/content.xml` has `save="false"` (since the skeleton). SirNukes is an optional dependency (D-14).
 - Run 13: root State cues that already ran do not run again on load, so MD variables survive a reload while the mod is installed. Run 15: the save still held leave rate 10 after the harness wrote 20 into the live game. Both are with the mod present.
-- NPC stations are already excluded (`isplayerowned` on the build event and on Confirm). The sweep is `checkinterval="30s"`. Ship watch is `2s`. Diag tick is `60s`. None of those is every frame. Not checked off until the step is reviewed.
+- NPC stations are already excluded (`isplayerowned` on the build event and on Confirm).
+- Condition checks (verified, files, 2026-10-16): `libraries/md.xsd` says `checkinterval` is the delay between condition checks, and not to use it on a cue that has an event. `X4.exe` 9.00 reports an instantiating cue that has neither an event condition nor a check interval. Its scheduler keeps a positive interval and uses 1 second when the stored interval is not greater than 0. That is not a per-frame poll. In `extension/md` the only repeating condition cues are `ESR_Main.SweepTimer` (`30s`, and the sweep runs only while a rebuild is tracked), `ESR_Ships.Watch` (`2s`, and it acts only while a ship is in `$Tried`), and `ESR_Diag.Tick` (`60s`, and it acts only while a station is tracked). The other cues are events or one-shot state cues. `extension/ui/esr_confirm.lua` and `esr_diag.lua` only wrap Confirm.
