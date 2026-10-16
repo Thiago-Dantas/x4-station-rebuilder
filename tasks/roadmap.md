@@ -53,7 +53,7 @@ Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes are 
 - [ ] In-game test: full replacement; wares before and after add up
 
 ## Phase 5: Workforce (G3, D-8)
-Holding **verified in game** (runs 6–8: 41 250 held); returning to new habitats not yet tested. `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Holding and returning **verified in game** (runs 6–9: 41 250 held, all returned when the new habitats were built). The grace-period decay is not tested yet. `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Record workforce per race before habitats go
 - [ ] Hold workers above the new capacity in a mod-side store; add them back as capacity returns
 - [ ] Grace period (setting, default 2 h), then workers leave at the game's own rate or the rate setting (D-8, D-12)

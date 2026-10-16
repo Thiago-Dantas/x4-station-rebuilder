@@ -31,7 +31,8 @@ User request (2026-10-15): automate the game so Claude can test without the user
 - [x] **Run 8 (replace, ship fix 2), passed:** both ships still inside the station after 10 s were warped out (11 s after Confirm) and survived (one parked 35 km away); no ship destroyed. Cargo kept (14 661 732 wares in build storage), 41 250 workers held. All three protections verified in the user's real replacement scenario.
 - [ ] More B6 variants: dock area with ships (S/M docks, internal storage), full replacement
 - [x] D-15 leftovers return (`ESR_Cargo.ReturnLeftovers`, once when the build is gone) and scenario `replace_build`: the harness calls `C.ForceBuildCompletion(station)` (the "workshop" game start's Force build button) at Confirm + 100 s, after the removal; report at + 6 min. Checks pass.
-- [ ] **Run 9 (replace_build)**: held workers return, leftovers go back to the station
+- [x] **Run 9 (replace_build), passed:** `ForceBuildCompletion` from Lua works outside the workshop start (571 modules operational). The first sweep after it: leftovers moved back to the station (all of them, nothing left in build storage), 41 250 held workers returned (workforce 41 281 / 79 250 at the end, vanilla growth on top). Ships 0 of 2 lost.
+- [ ] **Run 10 (replace, equipment refund on)**
 - [ ] Scenarios B1–B6 (vanilla, protections off), then each protection on
 - [ ] Docs: docs/testing.md (automated runs), CLAUDE.md, roadmap
 
