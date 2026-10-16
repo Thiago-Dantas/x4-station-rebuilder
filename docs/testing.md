@@ -32,7 +32,7 @@ What the logger writes for each plan change:
 
 | Test | Do | Then |
 |------|----|------|
-| B1 Matching | (a) Save the station's plan as a new plan and load it back onto the station; Confirm. (b) The same plan with a changed build order (from `x4-station-designer`), Confirm. (c) Move one built module in the editor, Confirm. | Note which of a/b/c you did and roughly when. The `PLAN … -> existing/new` lines answer it. |
+| B1 Matching | (a) Save the station's plan as a new plan and load it back onto the station; Confirm. (b) The same plan with a changed build order (from `x4-station-designer`), Confirm. (c) Move one built module in the editor, Confirm. | Note which of a/b/c you did and roughly when. The `PLAN … -> existing/new` lines answer it. (a) is done: automated run 19, 2026-10-16, kept all 7 modules. |
 | B2 Replace a few | Replace 2–3 modules (one of them a storage module with cargo, if possible). Confirm and let it build. | Let it run until the build finishes, plus 5 min. |
 | B3 Full replacement | Load a different plan onto the station, Confirm, let it build. | As B2. Watch for "waiting for storage". |
 | B4 Storage with cargo | Remove a storage module that holds wares. | As B2. |
