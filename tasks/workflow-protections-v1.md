@@ -23,14 +23,14 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 
 ## What the user's replacement showed (2026-10-15)
 - Cargo protection: the most important one (≈13 M wares lost). It must act at Confirm: 57 s later all storage was gone.
-- Refund protection: module recipes come back 100 % in vanilla; what is lost is the **equipment** on removed modules. Redesign: refund equipment (turrets, shields) of removed modules instead of module costs.
+- Refund protection: module recipes come back 100 % in vanilla. (Corrected 2026-10-16: the equipment that seemed lost belonged to docked ships; station equipment refunds are untested and likely done by vanilla, see docs/x4-modding.md.) The equipment refund is log-only until measured.
 - Ship protection and workforce protection: needed as designed.
 - All of it has to happen in the first seconds: all modules switch to deconstruction at once.
 
 ## Open points (to settle with B1–B6 or the user)
 - ~~Leave rate~~: settled, D-12 revised: setting, default 20 %/h of the held pool (vanilla drops everything at once). Saves that already ran the mod keep their stored value (10) until changed in the options.
 - ~~Refunds use the default build method's recipe~~: fixed; the build method comes with the Confirm event (`GetContainerBuildMethod`, else the player's global method) and refunds use `ware.raceresources.{race}`. Plan changes made without the build menu still use the default recipe.
-- Equipment (turrets, shields) on removed modules is not refunded yet.
+- Equipment (turrets, shields) on removed modules: does vanilla refund it? Test with an equipped station (next session).
 - Wares in build storage that the build doesn't need: can the player get them back? (OD-10)
 - `recyclingwares.max` may already be a table; then `.table` gives null and the refund would add the full cost on top of vanilla (B2 log shows the type).
 - Ships arriving at a doomed dock later are caught by the 30 s sweep, not prevented from docking.

@@ -2,8 +2,11 @@
 <mdscript name="ESR_Refund" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
     Easier Station Rebuild: refund for the equipment of removed modules (G2 part 2, D-6).
-    Vanilla refunds the module's own recipe to build storage, but not the turrets and shields on it
-    (verified in game and in X4.exe, docs/x4-modding.md "How the engine computes module refunds").
+    LOG ONLY until measured (2026-10-16): the earlier finding "vanilla does not refund equipment" was wrong; the 34
+    turrets and shields in the test station belonged to two docked ships, the station had none. X4.exe's refund code
+    includes a module's destructible children (equipment) and skips docked ships, so vanilla most likely refunds
+    station equipment already; adding it again would double it. To test with a station whose modules carry
+    equipment (docs/x4-modding.md).
     Where the equipment comes from: ui/esr_confirm.lua sends each removed module's loadout as the build menu
     read it before Confirm (UI event "esr_equipment"). MD searches don't find station equipment
     (automated runs 10-12: not under the module, not recursively, not station-wide), so this is the source.
@@ -124,10 +127,7 @@
             <debug_text text="'[ESR] REFUND %s: %s is no longer being removed; no refund'.[$Station.knownname, $Entry.$macro]" filter="general"/>
           </do_if>
           <do_elseif value="$Entry.$count gt 0">
-            <do_for_each name="$Ware" valuename="$Amount" in="$Entry.$equipment">
-              <add_cargo object="$Station.buildstorage" ware="$Ware" exact="$Amount"/>
-            </do_for_each>
-            <debug_text text="'[ESR] REFUND %s: %s removed with %s turrets/shields; refunded %s to build storage'.[$Station.knownname, $Entry.$macro, $Entry.$count, $Entry.$equipment]" filter="general"/>
+            <debug_text text="'[ESR] REFUND %s: %s removed with %s turrets/shields worth %s (log only, nothing added)'.[$Station.knownname, $Entry.$macro, $Entry.$count, $Entry.$equipment]" filter="general"/>
           </do_elseif>
           <remove_value name="$Watch.{$Module}"/>
           <remove_value name="md.ESR_Refund.State.$Loadouts.{$Module}"/>

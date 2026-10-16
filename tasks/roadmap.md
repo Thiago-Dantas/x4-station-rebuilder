@@ -45,7 +45,7 @@ First version written 2026-10-15; **verified in game** (automated run 8, full re
 - [ ] In-game test: replace a pier and a dock area with ships docked; nothing destroyed
 
 ## Phase 4: Materials (G2, D-6)
-Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes are refunded by vanilla; equipment is not (engine, docs/x4-modding.md), so the refund protection is being redesigned to refund equipment. `esr_cargo.xml`, `esr_refund.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes are refunded by vanilla. Station equipment refunds are untested: the earlier "equipment is not refunded" finding was wrong (the equipment belonged to docked ships); the engine code includes module equipment. The equipment refund is log-only until measured. `esr_cargo.xml`, `esr_refund.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Keep stored wares: cargo in storage modules that get removed goes to build storage
 - [ ] Refund removed modules at 100% of their build cost (wares per build method, from `wares.xml`) into build storage, without paying twice for what the game already returns
 - [ ] Equipment on removed modules (turrets, shields)

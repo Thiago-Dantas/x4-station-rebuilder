@@ -55,8 +55,8 @@
               $type = 'button', $default = md.ESR_Main.Settings.$Cargo, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
               $category = 'Easier Station Rebuild', $id = 'esr_refund', $echo = 'Refund',
-              $name = 'Refund equipment of removed modules',
-              $mouseover = 'Turrets and shields on removed modules return their build cost to the build storage (the game already refunds the modules themselves).',
+              $name = 'Refund equipment of removed modules (test)',
+              $mouseover = 'Development build: only logs what the turrets and shields on removed modules are worth; adds nothing yet.',
               $type = 'button', $default = md.ESR_Main.Settings.$Refund, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
               $category = 'Easier Station Rebuild', $id = 'esr_workforce', $echo = 'Workforce',
