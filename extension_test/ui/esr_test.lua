@@ -102,10 +102,44 @@ local function findPlanByName(name)
 	return found
 end
 
--- B1(a): save the live station plan, load that plan back, confirm.
--- The "reloaded" line is the engine's removed-module list (GetRemovedConstructionPlanModules2).
-local function matchStation(_, station)
-	log("b1: station param " .. tostring(station))
+-- Positions separate the two energy-cell modules, which share a macro.
+local function planOrder(menu)
+	local parts = {}
+	for _, entry in ipairs(menu.constructionplan or {}) do
+		local x = "?"
+		pcall(function () x = string.format("%.0f", entry.offset.x) end)
+		table.insert(parts, tostring(entry.macro) .. "@" .. x)
+	end
+	return table.concat(parts, ", ")
+end
+
+local function confirmPlan(menu, planid)
+	log("b1: loading plan " .. planid)
+	menu.dropdownLoad(nil, planid)
+	local entries, withcomp, removed, changed = planCounts(menu)
+	log(string.format("b1 reloaded: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+	later(2, function ()
+		menu.refreshPlan()
+		entries, withcomp, removed, changed = planCounts(menu)
+		log(string.format("b1 reloaded-settled: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+		log("b1 order: " .. planOrder(menu))
+		menu.buttonConfirm()
+		log("b1: confirmed")
+		later(3, function ()
+			menu.closeMenu("close")
+			log("b1: build menu closed")
+			AddUITriggeredEvent("ESR_Test", "b1done", "")
+		end)
+	end)
+end
+
+-- B1(a): save the live plan and load it back. B1(b): load player_1792159001, the same
+-- layout with the two energy-cell modules swapped in sequence order. The "reloaded" line
+-- is the engine's removed-module list.
+local B1B_PLAN = "player_1792159001"
+
+local function matchStation(reorder, station)
+	log("b1: station param " .. tostring(station) .. " reorder=" .. tostring(reorder))
 	local id = ConvertStringTo64Bit(tostring(station))
 	OpenMenu("StationConfigurationMenu", Helper.convertComponentIDs({ 0, 0, id }), nil)
 	log("b1: build menu opened for " .. ffi.string(C.GetComponentName(id)))
@@ -119,6 +153,11 @@ local function matchStation(_, station)
 		menu.refreshPlan()
 		local entries, withcomp, removed, changed = planCounts(menu)
 		log(string.format("b1 open: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
+		log("b1 open-order: " .. planOrder(menu))
+		if reorder then
+			confirmPlan(menu, B1B_PLAN)
+			return
+		end
 		C.SaveMapConstructionPlan(menu.holomap, "local", "player", false, "esr b1", "")
 		log("b1: saved the live plan as 'esr b1'")
 		later(3, function ()
@@ -128,22 +167,7 @@ local function matchStation(_, station)
 				AddUITriggeredEvent("ESR_Test", "b1done", "")
 				return
 			end
-			log("b1: loading plan " .. planid)
-			menu.dropdownLoad(nil, planid)
-			entries, withcomp, removed, changed = planCounts(menu)
-			log(string.format("b1 reloaded: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
-			later(2, function ()
-				menu.refreshPlan()
-				entries, withcomp, removed, changed = planCounts(menu)
-				log(string.format("b1 reloaded-settled: entries=%d with-component=%d removed=%d changed=%d", entries, withcomp, removed, changed))
-				menu.buttonConfirm()
-				log("b1: confirmed")
-				later(3, function ()
-					menu.closeMenu("close")
-					log("b1: build menu closed")
-					AddUITriggeredEvent("ESR_Test", "b1done", "")
-				end)
-			end)
+			confirmPlan(menu, planid)
 		end)
 	end)
 end
@@ -180,7 +204,8 @@ local function init()
 		later(3, function () QuitGame() end)
 	end)
 	RegisterEvent("esr_test_replace", replaceStation)
-	RegisterEvent("esr_test_b1", matchStation)
+	RegisterEvent("esr_test_b1", function (_, station) matchStation(false, station) end)
+	RegisterEvent("esr_test_b1b", function (_, station) matchStation(true, station) end)
 	-- the "workshop" game start's Force build button (menu.buttonForceBuild) uses the same function
 	RegisterEvent("esr_test_forcebuild", function (_, station)
 		local id = ConvertStringTo64Bit(tostring(station))

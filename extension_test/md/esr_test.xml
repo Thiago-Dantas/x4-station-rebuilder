@@ -577,15 +577,16 @@
     <cue name="B1" instantiate="true" namespace="this">
       <conditions>
         <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
-        <check_value value="event.param3 == 'b1'"/>
+        <check_value value="event.param3 == 'b1' or event.param3 == 'b1b'"/>
       </conditions>
       <actions>
+        <set_value name="$Mode" exact="event.param3"/>
         <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
         <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
         <set_value name="$Stop" exact="false"/>
-        <debug_text text="'[ESR-TEST] scenario b1: protections off'" filter="general"/>
+        <debug_text text="'[ESR-TEST] scenario %s: protections off'.[$Mode]" filter="general"/>
 
         <set_value name="$Sector" exact="player.sector"/>
         <create_station name="$Station" macro="macro.station_gen_factory_base_01_macro" owner="faction.player" sector="$Sector" state="componentstate.operational" constructionplan="'tutorial_station'">
@@ -617,7 +618,12 @@
           <delay exact="10s"/>
           <actions>
             <set_value name="$AskedAt" exact="player.age"/>
-            <raise_lua_event name="'esr_test_b1'" param="$Station"/>
+            <do_if value="$Mode == 'b1b'">
+              <raise_lua_event name="'esr_test_b1b'" param="$Station"/>
+            </do_if>
+            <do_else>
+              <raise_lua_event name="'esr_test_b1'" param="$Station"/>
+            </do_else>
             <debug_text text="'[ESR-TEST] B1 menu requested, modules %s'.[@$Station.modules.all.count]" filter="general"/>
           </actions>
         </cue>
