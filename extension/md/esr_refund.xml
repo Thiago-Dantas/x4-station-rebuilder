@@ -5,7 +5,7 @@
     Vanilla refunds the module's own recipe to build storage, but not the turrets and shields on it
     (verified in game and in X4.exe, docs/x4-modding.md "How the engine computes module refunds").
     Called by ESR_Main's sweep. The first time a doomed module is seen (before it goes into deconstruction,
-    when it can still be searched) its turrets, missile turrets and shield generators are recorded with
+    when it can still be searched) its weapons (turrets, missile turrets, modded weapon classes) and shield generators are recorded with
     their wares' recipes for the station's build method (sent at Confirm; default recipe otherwise).
     When the module no longer exists, that equipment cost goes to the station's build storage.
     A module that is no longer doomed (plan changed again) or still stands after the build gets nothing.
@@ -44,7 +44,9 @@
           <do_if value="$Watch.{$Module}? or not $Module.exists or $Module.isconstruction">
             <continue/>
           </do_if>
-          <find_object_component name="$Items" object="$Module" class="[class.turret, class.missileturret, class.shieldgenerator]" checkoperational="false" multiple="true"/>
+          <!-- by class, not by a list of known equipment: mods' turrets and shields are found and priced the same way
+               (weapon covers turret, missileturret and any modded weapon class derived from it) -->
+          <find_object_component name="$Items" object="$Module" class="[class.weapon, class.shieldgenerator]" checkoperational="false" multiple="true"/>
           <set_value name="$Equipment" exact="table[]"/>
           <do_for_each name="$Item" in="$Items">
             <set_value name="$Recipe" exact="if $Race then @$Item.macro.ware.raceresources.{$Race}.table else @$Item.macro.ware.resources.table"/>
@@ -53,6 +55,9 @@
                 <set_value name="$Equipment.{$Ware}" exact="$Amount" operation="add"/>
               </do_for_each>
             </do_if>
+            <do_else>
+              <debug_text text="'[ESR] REFUND %s: %s on %s has no ware recipe; it cannot be refunded'.[$Station.knownname, $Item.macro, $Module.macro]" filter="general"/>
+            </do_else>
           </do_for_each>
           <set_value name="$Watch.{$Module}" exact="table[$station = $Station, $macro = $Module.macro, $equipment = $Equipment, $count = $Items.count]"/>
         </do_for_each>
