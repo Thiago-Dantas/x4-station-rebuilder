@@ -63,6 +63,7 @@ Holding, returning and the grace-period decay are **verified in game** (runs 6â€
 - [ ] Depends on Phase 1 findings; steps to be written then
 
 ## Phase 7: Safety, options, compatibility (G4)
+Log: [workflow-phase7.md](workflow-phase7.md)
 - [ ] Save compatibility: install mid-game, uninstall mid-game, during a rebuild
 - [x] Options menu (SirNukes Mod Support APIs, optional dependency, D-14): toggles per protection, grace period, leave rate (written 2026-10-15, untested in game)
 - [ ] Without DLCs; with common station mods
