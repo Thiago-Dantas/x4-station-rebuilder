@@ -19,7 +19,7 @@ Reorganizing or replacing a station costs time, not assets. The player can rebui
 | G2 | No materials are lost | Wares stored on the station are kept (also cargo in removed storage modules), and removed modules are refunded at 100% of their build cost, all into build storage (D-6) |
 | G3 | No workforce is lost to a rebuild for a grace period | Workers above the new capacity wait 2 hours for habitats to come back, then start to leave (D-8) |
 | G4 | Safe to add to and remove from an existing save | No broken saves, no stuck builds after uninstall |
-| G5 | Published on the Steam Workshop as "Easier Station Rebuilder" | English text first; repo public before release; MIT (D-10) |
+| G5 | Published on the Steam Workshop as "Easier Station Rebuild" | English text first; repo public before release; MIT (D-10) |
 
 ## Stretch goal (agreed, D-9)
 | ID | Goal | Notes |

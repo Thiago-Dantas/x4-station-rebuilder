@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Workforce" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuilder: workforce during rebuilds (G3, D-8, D-12).
+    Easier Station Rebuild: workforce during rebuilds (G3, D-8, D-12).
     Called by ESR_Main's sweep for each tracked station. Per race:
     - a drop caused by lost capacity (previous amount above the new capacity) goes into a held pool;
     - held workers come back with add_workforce as soon as capacity allows (the game can't hold more

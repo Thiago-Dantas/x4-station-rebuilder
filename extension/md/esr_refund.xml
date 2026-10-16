@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Refund" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuilder: refund for the equipment of removed modules (G2 part 2, D-6).
+    Easier Station Rebuild: refund for the equipment of removed modules (G2 part 2, D-6).
     Vanilla refunds the module's own recipe to build storage, but not the turrets and shields on it
     (verified in game and in X4.exe, docs/x4-modding.md "How the engine computes module refunds").
     Where the equipment comes from: ui/esr_confirm.lua sends each removed module's loadout as the build menu

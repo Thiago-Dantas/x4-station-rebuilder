@@ -1,4 +1,4 @@
--- Easier Station Rebuilder: diagnostic logger (Lua side).
+-- Easier Station Rebuild: diagnostic logger (Lua side).
 -- Wraps the station build menu's Confirm button and writes what the game is about
 -- to do to debuglog.txt, before the engine applies the plan change. Changes nothing.
 -- Every line starts with "[ESR]" so the log can be filtered.

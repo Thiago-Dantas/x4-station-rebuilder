@@ -30,7 +30,7 @@ Questions to answer before writing the mod (part A, game files, done 2026-10-15;
 ## Phase 2: Mod skeleton and dev loop
 Log: [workflow-diag-logger.md](workflow-diag-logger.md) (the skeleton is the diagnostic logger)
 - [x] Repo subfolder `extension/` (D-13)
-- [x] Extension (`content.xml` id `station_rebuilder`, "Easier Station Rebuilder"), MD and Lua logger, linked into `<profile>\extensions\` through a junction (`tools/link-dev.ps1`)
+- [x] Extension (`content.xml` id `station_rebuilder`, "Easier Station Rebuild"), MD and Lua logger, linked into `<profile>\extensions\` through a junction (`tools/link-dev.ps1`)
 - [x] Offline checks (`tools/check.py`): schemas, references, property names, Lua syntax
 - [x] Logging to `debuglog.txt` (format checked in the existing log), `tools/esr_log.py`
 - [x] Detect a plan change on a player station and log the modules that will be removed (Lua: engine list at Confirm; MD: plan entries vs existing modules)

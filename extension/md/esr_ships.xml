@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Ships" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuilder: docked ships (G1, D-7). Called by ESR_Main's sweep with the doomed modules.
+    Easier Station Rebuild: docked ships (G1, D-7). Called by ESR_Main's sweep with the doomed modules.
     A ship docked at a doomed module:
     - the player's, with a pilot: MoveWait order to a free spot near the station (parks there until given new orders);
     - someone else's: asked to undock (its own AI flies off);

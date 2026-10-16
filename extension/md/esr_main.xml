@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mdscript name="ESR_Main" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
-    Easier Station Rebuilder: settings and the rebuild tracker.
+    Easier Station Rebuild: settings and the rebuild tracker.
     - Settings: one on/off per protection (off by default in dev builds, D-14), grace period and leave rate (D-12).
       Shown in Extension Options when SirNukes Mod Support APIs is installed; otherwise the defaults apply.
     - Tracker: a player station whose plan changed (event_player_build_added, expansion) is tracked with its build.
@@ -44,34 +44,34 @@
           </conditions>
           <actions>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_ships', $echo = 'Ships',
+              $category = 'Easier Station Rebuild', $id = 'esr_ships', $echo = 'Ships',
               $name = 'Protect docked ships',
               $mouseover = 'Ships docked at modules that a plan change removes are parked near the station (teleported if needed).',
               $type = 'button', $default = md.ESR_Main.Settings.$Ships, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_cargo', $echo = 'Cargo',
+              $category = 'Easier Station Rebuild', $id = 'esr_cargo', $echo = 'Cargo',
               $name = 'Keep cargo of removed storage',
               $mouseover = 'Wares that no longer fit when storage modules are removed go to the build storage.',
               $type = 'button', $default = md.ESR_Main.Settings.$Cargo, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_refund', $echo = 'Refund',
+              $category = 'Easier Station Rebuild', $id = 'esr_refund', $echo = 'Refund',
               $name = 'Refund equipment of removed modules',
               $mouseover = 'Turrets and shields on removed modules return their build cost to the build storage (the game already refunds the modules themselves).',
               $type = 'button', $default = md.ESR_Main.Settings.$Refund, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_workforce', $echo = 'Workforce',
+              $category = 'Easier Station Rebuild', $id = 'esr_workforce', $echo = 'Workforce',
               $name = 'Keep workforce during rebuilds',
               $mouseover = 'Workers who lose their habitat wait for new habitats instead of leaving.',
               $type = 'button', $default = md.ESR_Main.Settings.$Workforce, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_grace_hours', $echo = 'GraceHours',
+              $category = 'Easier Station Rebuild', $id = 'esr_grace_hours', $echo = 'GraceHours',
               $name = 'Workforce grace period',
               $mouseover = 'Hours that displaced workers wait before they start to leave.',
               $type = 'slidercell', $default = md.ESR_Main.Settings.$GraceHours,
               $args = table[$min = 0, $max = 24, $step = 1, $suffix = ' h'],
               $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easier Station Rebuilder', $id = 'esr_leave_rate', $echo = 'LeaveRate',
+              $category = 'Easier Station Rebuild', $id = 'esr_leave_rate', $echo = 'LeaveRate',
               $name = 'Workforce leave rate after the grace period',
               $mouseover = 'Share of the waiting workers that leave per hour once the grace period is over.',
               $type = 'slidercell', $default = md.ESR_Main.Settings.$LeaveRate,
