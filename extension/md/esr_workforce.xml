@@ -25,6 +25,10 @@
         <param name="Station"/>
       </params>
       <actions>
+        <!-- created here too: state cues don't run again in older saves (run 13) -->
+        <do_if value="not md.ESR_Workforce.State.$Stations?">
+          <set_value name="md.ESR_Workforce.State.$Stations" exact="table[]"/>
+        </do_if>
         <set_value name="$Amounts" exact="$Station.workforce.amounts"/>
         <set_value name="$Capacities" exact="$Station.workforce.capacities"/>
         <set_value name="$State" exact="@md.ESR_Workforce.State.$Stations.{$Station}"/>

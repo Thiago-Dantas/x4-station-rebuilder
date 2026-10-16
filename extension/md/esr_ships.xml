@@ -23,7 +23,7 @@
       <cues>
         <cue name="Watch" instantiate="true" checkinterval="2s">
           <conditions>
-            <check_value value="md.ESR_Ships.State.$Tried.keys.count gt 0"/>
+            <check_value value="@md.ESR_Ships.State.$Tried.keys.count gt 0"/>
           </conditions>
           <actions>
             <do_for_each name="$Ship" in="md.ESR_Ships.State.$Tried.keys.list">
@@ -57,6 +57,10 @@
         <param name="Doomed"/>
       </params>
       <actions>
+        <!-- created here too: state cues don't run again in older saves (run 13) -->
+        <do_if value="not md.ESR_Ships.State.$Tried?">
+          <set_value name="md.ESR_Ships.State.$Tried" exact="table[]"/>
+        </do_if>
         <do_for_each name="$Module" in="$Doomed">
           <!-- a module already in deconstruction can't be searched; its ships were taken at Confirm -->
           <do_if value="not $Module.exists or $Module.isconstruction">

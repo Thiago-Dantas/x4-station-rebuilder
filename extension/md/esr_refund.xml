@@ -33,6 +33,10 @@
             <event_ui_triggered screen="'StationConfigurationMenu'" control="'esr_equipment'"/>
           </conditions>
           <actions>
+            <!-- created here too: State already ran in saves made with an older version (run 13) -->
+            <do_if value="not md.ESR_Refund.State.$Loadouts?">
+              <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
+            </do_if>
             <set_value name="$List" exact="event.param3"/>
             <set_value name="$Module" exact="null"/>
             <set_value name="$Modules" exact="0"/>
@@ -65,6 +69,10 @@
         <param name="Doomed"/>
       </params>
       <actions>
+        <!-- created here too: State already ran in saves made with an older version (run 13) -->
+        <do_if value="not md.ESR_Refund.State.$Loadouts?">
+          <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
+        </do_if>
         <set_value name="$Watch" exact="md.ESR_Refund.State.$Watch"/>
         <!-- build method id -> race (raceresources falls back to the default recipe when a race has none) -->
         <set_value name="$Method" exact="@md.ESR_Main.Tracker.$BuildMethods.{$Station}"/>

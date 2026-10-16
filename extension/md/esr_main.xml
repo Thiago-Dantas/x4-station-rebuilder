@@ -133,6 +133,10 @@
             <check_value value="event.param.isexpansion and @event.param.base.isclass.station and @event.param.base.isplayerowned"/>
           </conditions>
           <actions>
+            <!-- created here too: state cues don't run again in older saves (run 13) -->
+            <do_if value="not md.ESR_Main.Tracker.$Rebuilds?">
+              <set_value name="md.ESR_Main.Tracker.$Rebuilds" exact="table[]"/>
+            </do_if>
             <set_value name="$Station" exact="event.param.base"/>
             <set_value name="md.ESR_Main.Tracker.$Rebuilds.{$Station}" exact="table[$build = event.param, $since = player.age]"/>
             <debug_text text="'[ESR] MAIN tracking %s (%s) build=%s | ships=%s cargo=%s refund=%s workforce=%s grace=%sh leave=%s pct/h'.[$Station.knownname, $Station.idcode, event.param, md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$LeaveRate]" filter="general"/>
@@ -149,6 +153,13 @@
             <event_ui_triggered screen="'StationConfigurationMenu'" control="'esr_confirm'"/>
           </conditions>
           <actions>
+            <!-- created here too: state cues don't run again in older saves (run 13) -->
+            <do_if value="not md.ESR_Main.Tracker.$EngineDoomed?">
+              <set_value name="md.ESR_Main.Tracker.$EngineDoomed" exact="table[]"/>
+            </do_if>
+            <do_if value="not md.ESR_Main.Tracker.$BuildMethods?">
+              <set_value name="md.ESR_Main.Tracker.$BuildMethods" exact="table[]"/>
+            </do_if>
             <set_value name="$List" exact="event.param3"/>
             <set_value name="$Station" exact="@$List.{1}"/>
             <do_if value="$Station and $Station.exists and $Station.isplayerowned">
@@ -173,7 +184,7 @@
 
         <cue name="SweepTimer" instantiate="true" checkinterval="30s">
           <conditions>
-            <check_value value="md.ESR_Main.Tracker.$Rebuilds.keys.count gt 0"/>
+            <check_value value="@md.ESR_Main.Tracker.$Rebuilds.keys.count gt 0"/>
           </conditions>
           <actions>
             <set_value name="$Done" exact="[]"/>

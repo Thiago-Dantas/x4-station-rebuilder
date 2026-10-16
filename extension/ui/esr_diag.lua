@@ -59,6 +59,29 @@ local function logConfirm()
 			table.insert(recycled, { ware = resource.ware, amount = -resource.amount })
 		end
 		log(string.format("CONFIRM removed #%d %s component=%s recycled=%s", i, tostring(entry.macro), hexid(entry.component), wares(recycled)))
+		-- what the menu holds as the module's equipment (run 13: the refund found none in it)
+		if string.find(tostring(entry.macro), "pier", 1, true) then
+			local parts = {}
+			for kind, slots in pairs(entry.upgradeplan or {}) do
+				if type(slots) == "table" and next(slots) then
+					local first
+					for _, v in pairs(slots) do
+						first = v
+						break
+					end
+					local shown = first
+					if type(first) == "table" then
+						shown = "{macro=" .. tostring(first.macro) .. ", count=" .. tostring(first.count) .. ", group=" .. tostring(first.group) .. "}"
+					end
+					local n = 0
+					for _ in pairs(slots) do
+						n = n + 1
+					end
+					table.insert(parts, kind .. "[" .. n .. "] first=" .. tostring(shown))
+				end
+			end
+			log(string.format("CONFIRM removed #%d upgradeplan: %s", i, table.concat(parts, "; ")))
+		end
 	end
 end
 
