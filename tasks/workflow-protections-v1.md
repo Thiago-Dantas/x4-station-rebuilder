@@ -19,7 +19,7 @@ Goal: first working versions of the protections, written from the Phase 1 file r
 - [x] Docs: docs/x4-modding.md (design + open points), docs/testing.md (how to test each protection), CLAUDE.md, roadmap
 - [x] Engine list of removed modules (added after the first review): `ui/esr_confirm.lua` sends the build menu's removed modules at Confirm (UI event `esr_confirm`), `ESR_Main.OnConfirm` stores them and the sweep prefers them over the plan-entry mapping; `MAIN COMPARE` logs both. Removes the dependency on the B1 hypothesis for plan changes made in the build menu. Checks pass.
 - [x] Build method for refunds: `esr_confirm.lua` also sends the build storage's build method; `esr_refund.xml` maps it to a race and uses `raceresources`. Checker: keyword values (`race.terran`, `class.storage`, …) now learned from vanilla scripts. Checks pass.
-- [ ] **In game (user)** after B1–B6: turn each protection on and repeat the matching test
+- [x] **Verified in game (automated runs 6–8, the user's CVL-296 replacement through the build menu):** cargo (14.46 M wares kept), ships (0 of 2 lost after the warp fix), workforce (41 250 held). Not yet verified: held workers returning when new habitats finish (needs the new build to progress), the refund redesign (equipment).
 
 ## What the user's replacement showed (2026-10-15)
 - Cargo protection: the most important one (≈13 M wares lost). It must act at Confirm: 57 s later all storage was gone.

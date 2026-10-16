@@ -38,14 +38,14 @@ Log: [workflow-diag-logger.md](workflow-diag-logger.md) (the skeleton is the dia
 - [ ] Test save(s) with a station set up for each loss (user), backed up
 
 ## Phase 3: Docked ships (G1, D-7)
-First version written 2026-10-15, untested in game: [workflow-protections-v1.md](workflow-protections-v1.md) (`esr_ships.xml`).
+First version written 2026-10-15; **verified in game** (automated run 8, full replacement: 0 of 2 ships lost): [workflow-protections-v1.md](workflow-protections-v1.md) (`esr_ships.xml`).
 - [ ] Find ships docked at modules about to be removed
 - [ ] Undock them and park them near the station; teleport the ones that can't get out in time
 - [ ] Handle ships that can't undock (no pilot, busy, being built or repaired at that dock)
 - [ ] In-game test: replace a pier and a dock area with ships docked; nothing destroyed
 
 ## Phase 4: Materials (G2, D-6)
-First version written 2026-10-15, untested in game: `esr_cargo.xml`, `esr_refund.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Cargo **verified in game** (runs 6–8: 14.46 M wares kept). Module recipes are refunded by vanilla; equipment is not (engine, docs/x4-modding.md), so the refund protection is being redesigned to refund equipment. `esr_cargo.xml`, `esr_refund.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Keep stored wares: cargo in storage modules that get removed goes to build storage
 - [ ] Refund removed modules at 100% of their build cost (wares per build method, from `wares.xml`) into build storage, without paying twice for what the game already returns
 - [ ] Equipment on removed modules (turrets, shields)
@@ -53,7 +53,7 @@ First version written 2026-10-15, untested in game: `esr_cargo.xml`, `esr_refund
 - [ ] In-game test: full replacement; wares before and after add up
 
 ## Phase 5: Workforce (G3, D-8)
-First version written 2026-10-15, untested in game: `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
+Holding **verified in game** (runs 6–8: 41 250 held); returning to new habitats not yet tested. `esr_workforce.xml` ([workflow-protections-v1.md](workflow-protections-v1.md)).
 - [ ] Record workforce per race before habitats go
 - [ ] Hold workers above the new capacity in a mod-side store; add them back as capacity returns
 - [ ] Grace period (setting, default 2 h), then workers leave at the game's own rate or the rate setting (D-8, D-12)
