@@ -12,7 +12,9 @@
 # b6menu: remove the pier from the build menu with an L ship docked there and an M ship on the dock area;
 # b6dock: remove the dock area from the build menu with an S ship in an internal bay;
 # b2: remove the S container, one energy-cell module and the defence disc in one Confirm;
-# b3: load plan player_1792192001, a copy of library plan tutorial_quantumtube).
+# b3: load plan player_1792192001, a copy of library plan tutorial_quantumtube;
+# savewrite: SaveGame("save_010") while the mod is linked;
+# uninstall: load that file with -NoMod, so the mod junction is removed for the run and put back after).
 # Links the test harness (extension_test\) and the mod into the profile, starts X4 through Steam
 # (launch options in Steam: -skipintro -logfile debuglog.txt), waits for
 # "[ESR-TEST] DONE" in debuglog.txt, lets the game quit (kills it after a grace period),
@@ -25,7 +27,7 @@
 # FOpenForWriting Error 13 is that read-only file. The backup is restored after the game exits,
 # including when the run fails. A leftover backup is restored at the next run.
 # Exit code 0 when the DONE line was seen.
-param([string]$Scenario = 'b6', [string]$Save = 'save_010', [int]$TimeoutMinutes = 20)
+param([string]$Scenario = 'b6', [string]$Save = 'save_010', [int]$TimeoutMinutes = 20, [switch]$NoMod)
 $ErrorActionPreference = 'Stop'
 
 $repo = Split-Path $PSScriptRoot -Parent
@@ -70,7 +72,21 @@ Set-Content -Path (Join-Path $repo 'extension_test\ui\esr_test_config.lua') -Val
 )
 "Scenario $Scenario on $Save"
 
-& (Join-Path $PSScriptRoot 'link-dev.ps1') | Out-Host
+$modLink = Join-Path $profileDir 'extensions\station_rebuilder'
+$modWasLinked = $false
+if ($NoMod) {
+    $existingMod = Get-Item $modLink -ErrorAction SilentlyContinue
+    if ($existingMod) {
+        if ($existingMod.LinkType -ne 'Junction') { throw "$modLink is not a junction; not removing it" }
+        $modWasLinked = $true
+        $existingMod.Delete()
+        'Mod unlinked for this run'
+    } else {
+        'Mod already absent'
+    }
+} else {
+    & (Join-Path $PSScriptRoot 'link-dev.ps1') | Out-Host
+}
 if (-not (Get-Item $harness -ErrorAction SilentlyContinue)) {
     New-Item -ItemType Junction -Path $harness -Target (Join-Path $repo 'extension_test') | Out-Null
 }
@@ -137,6 +153,10 @@ finally {
     }
     $item = Get-Item $harness -ErrorAction SilentlyContinue
     if ($item -and $item.LinkType -eq 'Junction') { $item.Delete(); 'Harness unlinked' }
+    if ($modWasLinked -and -not (Test-Path $modLink)) {
+        & (Join-Path $PSScriptRoot 'link-dev.ps1') | Out-Host
+        'Mod link restored'
+    }
 }
 
 $logs = Join-Path $repo 'research\logs'

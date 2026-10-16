@@ -424,6 +424,19 @@ local function init()
 		C.ForceBuildCompletion(id)
 		log("ForceBuildCompletion called for " .. ffi.string(C.GetComponentName(id)))
 	end)
+	-- savewrite: write this slot only. The name "#010" is the in-file label, same shape as "#002".
+	RegisterEvent("esr_test_save", function ()
+		log("SaveGame " .. config.save)
+		local ok, err = pcall(function ()
+			SaveGame(config.save, "#010")
+		end)
+		if not ok then
+			log("SaveGame failed: " .. tostring(err))
+			AddUITriggeredEvent("ESR_Test", "savedone", "fail")
+		else
+			log("SaveGame returned")
+		end
+	end)
 	-- the MD side raises this once the save has loaded (run 5: a timed request came during loading and was lost)
 	RegisterEvent("esr_test_ready", function ()
 		AddUITriggeredEvent("ESR_Test", "scenario", config.scenario)

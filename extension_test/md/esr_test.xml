@@ -6,6 +6,10 @@
     (UI event screen 'ESR_Test', control 'scenario', param3 = name). Each scenario logs "[ESR-TEST] ..." lines,
     ends with "[ESR-TEST] DONE" and asks the Lua side to quit the game. tools/run-game.ps1 waits for DONE.
 
+    Scenario savewrite: once the mod's cues exist, Lua calls SaveGame("save_010", "#010") and this script
+    waits for event_game_saved. Scenario uninstall: log that the save reached the game. It does not read
+    md.ESR_* (those scripts are not loaded on that run).
+
     Scenario B6 (docked ships at a removed pier, vanilla behaviour unless protections are on):
     - a player station from the library plan tutorial_station in the player's sector, with a builder,
       an L freighter docked at the pier and an M freighter at the dock area, cargo and workforce;
@@ -1585,6 +1589,63 @@
           </actions>
         </cue>
       </cues>
+    </cue>
+
+    <!-- savewrite / uninstall: see the header. SaveState is a root cue so $Waiting exists before the save. -->
+    <cue name="SaveState">
+      <actions>
+        <set_value name="$Waiting" exact="false"/>
+      </actions>
+    </cue>
+
+    <cue name="SaveWrite" instantiate="true">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'savewrite'"/>
+      </conditions>
+      <actions>
+        <debug_text text="'[ESR-TEST] scenario savewrite: ships=%s leave=%s workforce-state=%s'.[@md.ESR_Main.Settings.$Ships, @md.ESR_Main.Settings.$LeaveRate, md.ESR_Workforce.State.$Stations?]" filter="general"/>
+        <set_value name="md.ESR_Test.SaveState.$Waiting" exact="true"/>
+        <raise_lua_event name="'esr_test_save'"/>
+      </actions>
+    </cue>
+
+    <cue name="SaveDone" instantiate="true">
+      <conditions>
+        <event_game_saved/>
+        <check_value value="@md.ESR_Test.SaveState.$Waiting"/>
+      </conditions>
+      <actions>
+        <set_value name="md.ESR_Test.SaveState.$Waiting" exact="false"/>
+        <debug_text text="'[ESR-TEST] SAVED success=%s'.[event.param]" filter="general"/>
+        <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+        <raise_lua_event name="'esr_test_quit'"/>
+      </actions>
+    </cue>
+
+    <cue name="SaveFailed" instantiate="true">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'savedone'"/>
+        <check_value value="event.param3 == 'fail'"/>
+      </conditions>
+      <actions>
+        <debug_text text="'[ESR-TEST] SAVED success=0 (SaveGame call failed)'" filter="general"/>
+        <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+        <raise_lua_event name="'esr_test_quit'"/>
+      </actions>
+    </cue>
+
+    <cue name="UninstallLoad" instantiate="true">
+      <conditions>
+        <event_ui_triggered screen="'ESR_Test'" control="'scenario'"/>
+        <check_value value="event.param3 == 'uninstall'"/>
+      </conditions>
+      <actions>
+        <debug_text text="'[ESR-TEST] scenario uninstall: loaded, player age %s, sector %s'.[player.age, @player.sector.knownname]" filter="general"/>
+        <debug_text text="'[ESR-TEST] RESULT uninstall: in-game=1'" filter="general"/>
+        <debug_text text="'[ESR-TEST] DONE t=%s'.[player.age]" filter="general"/>
+        <raise_lua_event name="'esr_test_quit'"/>
+      </actions>
     </cue>
 
     <!-- Total ware counts on the station and in its build storage -->
