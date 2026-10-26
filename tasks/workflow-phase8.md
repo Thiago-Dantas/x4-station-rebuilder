@@ -1,6 +1,6 @@
 # Workflow: Phase 8, release (G5)
 
-Status: **in progress** (started 2026-10-16). The item is public. Suggested pairings are still held.
+Status: **in progress** (started 2026-10-16). The item is public. Suggested pairings are on the page (2026-10-26).
 
 Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [roadmap.md](roadmap.md). This file tracks the upload prerequisites. Do not publish, do not make the repo public, and do not change `extension/content.xml` until the release step.
 
@@ -12,7 +12,7 @@ Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [
 - [x] Workshop publishing draft: title, description, release `content.xml`, dependencies ([docs/workshop.md](../docs/workshop.md)). Player-facing page text, not the README. Not uploaded. Page text retuned 2026-10-16 to the length and voice of the top-rated Workshop items (175 words, plain paragraphs, one compatibility line). The module-refund sentence was removed the same day: that refund is vanilla (D-17).
 - [x] Make the repo public. `gh repo view` already reported public when the upload started (2026-10-16). Nothing was changed.
 - [x] Steam Workshop upload. Item [3821053684](https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684), public, version 1.00 (D-20). Uploaded 2026-10-16 from `H:\dev\esr-release\station_rebuilder` with `WorkshopTool publishx4 -buildcat`. The dev `extension/` was not the `-path`. Protections default on in that copy. The refund test option is not in its menu. Three images: `cargo on build storage.jpg` is the preview; `station cargo.jpg` and `mod settings.png` are additional previews.
-- [ ] Suggested pairings on the Workshop page. Wording is drafted and held until the Phase 7 test.
+- [x] Suggested pairings on the Workshop page (2026-10-26, user asked before the Phase 7 test). Wording reviewed by the user; mod names are Steam `[url]` links. Minor update, version stays 1.02.
 - [x] Version scheme and release notes (D-20). First release 1.00, change note `First release.` The `version` attribute stays the displayed version times 100.
 - [x] Update 1.01 (D-21). Ships, cargo and workforce start on, including a save that already had SirNukes' stored off values. Change note `Ships, cargo and workforce now start on.` Dev `extension/` stays off. Uploaded 2026-10-16 with `WorkshopTool update -buildcat` (exit 0, item 3821053684, version 1.01).
 - [x] Update 1.02 (2026-10-26): code review fixes and save cleanup, built from `extension/` (D-22). Uploaded with `WorkshopTool update -buildcat -changenote` (exit 0, version 1.02). Details in [docs/workshop.md](../docs/workshop.md).

@@ -12,7 +12,7 @@ Mods to recommend next to ours on the Workshop page. Both make station building 
 
 **Why they fit:** our mod keeps a rebuild from losing ships, wares and workers; Drone Self-Supply gets the refunded and stored wares into the build faster; XBuilder shortens the rebuild itself.
 
-**Compatibility (to test in Phase 7):** both touch station builds. XBuilder adds builders to a running build and Drone Self-Supply moves wares into build storage, while our mod hooks plan changes, recycling and build storage. Test a rebuild with each of them installed before naming them on the page.
+**Compatibility (to test in Phase 7):** both touch station builds. XBuilder adds builders to a running build and Drone Self-Supply moves wares into build storage, while our mod hooks plan changes, recycling and build storage. Not tested yet. The user put both on the page on 2026-10-26 before that test, so the page recommends them without claiming they work together with this mod.
 
 ## Upload tool
 
@@ -51,6 +51,8 @@ Update 1.02 (2026-10-26): the code review fixes and save cleanup ([workflow-revi
 
 The same day the description got a dated **Changelog** section (user: a "small changelog" means that section on the item page, one dated line per version, newest first). Uploaded with `WorkshopTool update -minor -namedesc up` (version stays 1.02, change note `Added a changelog to the description.`). **verified** from `GetPublishedFileDetails`: the live description is the `content.xml` text, 1247 characters, ending with the changelog. `lastupdate="1793025195"`. For each later update: add a line at the top of the changelog in the release `content.xml` and pass `-namedesc up`.
 
+Also on 2026-10-26 the **Suggested mods** section went on the page (user reviewed the wording: praise the two mods, but not too much). The mod names are Steam `[url=...]` links. The same text shows in the in-game extension menu, where the tags appear as raw text (user's choice). Uploaded with `WorkshopTool update -buildcat -minor -namedesc up -changenote "Added suggested mods to the description."`, confirmed with `y` on stdin (exit 0, version stays 1.02, `lastupdate="1793044040"`). **verified** from `GetPublishedFileDetails` (result 1, visibility 0, 1874 characters) and from the item page HTML, which renders both names as `bb_link` anchors to items 3754773002 and 3797254195. The release `content.xml` from before this change is `H:\dev\esr-release\content.xml.bak-20261026-pairings`.
+
 Page: <https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684>
 
 The upload used a copy at `H:\dev\esr-release\station_rebuilder`, not the dev junction. `WorkshopTool` rewrote that copy's `content.xml` to `id="ws_3821053684"` and `sync="false"`. The dev `extension/content.xml` was not changed. In the copy, ships, cargo and workforce default on, and the log-only refund option is not in the menu (D-17).
@@ -87,9 +89,16 @@ Safe to add or remove mid-game. Only your own stations. Build time and cost stay
 
 With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.
 
+Suggested mods
+If you rebuild stations often, these two are worth a look:
+- [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3754773002]Build Storage: Station Drone Self-Supply[/url] (by Simucad). The station's own drones carry wares it already has into build storage, so a rebuild doesn't have to wait for traders.
+- [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3797254195]XBuilder[/url] (by Lord Starwolf). It lets you put more construction ships on a station that is already being built, so big rebuilds finish sooner.
+Both need SirNukes Mod Support APIs.
+
 For X4 9.00 or newer.
 
 Changelog
+2026-10-26 (1.02): Added suggested mods.
 2026-10-26 (1.02): Parked ships go back to their orders after 3 minutes. Ships that dock at a module being removed later are moved too. New Enable debug log option (off), and old save data is cleaned up.
 2026-10-16 (1.01): Ships, cargo and workers start on.
 2026-10-16 (1.00): First release.
@@ -106,7 +115,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer.&#10;&#10;Changelog&#10;2026-10-26 (1.02): Parked ships go back to their orders after 3 minutes. Ships that dock at a module being removed later are moved too. New Enable debug log option (off), and old save data is cleaned up.&#10;2026-10-16 (1.01): Ships, cargo and workers start on.&#10;2026-10-16 (1.00): First release." author="Dant" version="102" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;Suggested mods&#10;If you rebuild stations often, these two are worth a look:&#10;- [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3754773002]Build Storage: Station Drone Self-Supply[/url] (by Simucad). The station's own drones carry wares it already has into build storage, so a rebuild doesn't have to wait for traders.&#10;- [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3797254195]XBuilder[/url] (by Lord Starwolf). It lets you put more construction ships on a station that is already being built, so big rebuilds finish sooner.&#10;Both need SirNukes Mod Support APIs.&#10;&#10;For X4 9.00 or newer.&#10;&#10;Changelog&#10;2026-10-26 (1.02): Added suggested mods.&#10;2026-10-26 (1.02): Parked ships go back to their orders after 3 minutes. Ships that dock at a module being removed later are moved too. New Enable debug log option (off), and old save data is cleaned up.&#10;2026-10-16 (1.01): Ships, cargo and workers start on.&#10;2026-10-16 (1.00): First release." author="Dant" version="102" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
@@ -126,5 +135,5 @@ The preview used for this upload is `cargo on build storage.jpg` (1920×1080). T
 
 ### Still to do
 
-- Leave the suggested-pairings paragraph off the page until a rebuild has been tried with each mod (Phase 7). Draft paragraph, for after that test, in the same voice as the page: "Build Storage: Station Drone Self-Supply hauls wares you already have on the station into the build. XBuilder adds construction ships to a station that is already being built. Both need SirNukes Mod Support APIs."
+- Try a rebuild with each suggested mod installed (Phase 7, user). If one turns out not to work with this mod, change or remove its line on the page.
 
