@@ -2,6 +2,8 @@
 <mdscript name="ESR_Diag" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
     Easy Station Rebuild: diagnostic logger (MD side). Changes nothing in the game.
+    Off unless the "Enable debug log" setting is on (ESR_Main.Settings.$Debug): a plan change on a large station
+    writes hundreds of lines and searches every removed module in one frame.
     Writes to debuglog.txt (start the game with -debug all -logfile debuglog.txt). Every line starts with "[ESR]".
     - PLAN: when a player station gets a changed plan, which plan entries map to existing modules (kept) and which are new,
       and the station's modules that are not in the new plan (removed), with their build cost, equipment and docked ships.
@@ -20,6 +22,7 @@
         <cue name="OnLoad" instantiate="true">
           <conditions>
             <event_game_loaded/>
+            <check_value value="@md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <debug_text text="'[ESR] MD logger active after load, t=%s, tracking %s station(s)'.[player.age, md.ESR_Diag.Diag.$Tracked.keys.count]" filter="general"/>
@@ -29,7 +32,7 @@
         <cue name="OnPlanChange" instantiate="true">
           <conditions>
             <event_player_build_added/>
-            <check_value value="event.param.isexpansion"/>
+            <check_value value="event.param.isexpansion and @md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <set_value name="$Build" exact="event.param"/>
@@ -97,7 +100,7 @@
 
         <cue name="Tick" instantiate="true" checkinterval="60s">
           <conditions>
-            <check_value value="md.ESR_Diag.Diag.$Tracked.keys.count gt 0"/>
+            <check_value value="md.ESR_Diag.Diag.$Tracked.keys.count gt 0 and @md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <set_value name="$Finished" exact="[]"/>
@@ -147,7 +150,7 @@
         <cue name="OnBuildFinished" instantiate="true">
           <conditions>
             <event_player_build_finished/>
-            <check_value value="@event.param3.isexpansion"/>
+            <check_value value="@event.param3.isexpansion and @md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <debug_text text="'[ESR] EVENT build finished %s station=%s t=%s'.[event.param3, @event.param3.base.knownname, player.age]" filter="general"/>
@@ -157,7 +160,7 @@
         <cue name="OnBuildFinishedComponents" instantiate="true">
           <conditions>
             <event_player_build_finished_components/>
-            <check_value value="@event.param3.isexpansion"/>
+            <check_value value="@event.param3.isexpansion and @md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <debug_text text="'[ESR] EVENT build step done %s station=%s t=%s components=%s'.[event.param3, @event.param3.base.knownname, player.age, event.param2]" filter="general"/>
@@ -167,6 +170,7 @@
         <cue name="OnBuildCancelled" instantiate="true">
           <conditions>
             <event_player_build_cancelled/>
+            <check_value value="@md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <debug_text text="'[ESR] EVENT build cancelled %s t=%s'.[event.param, player.age]" filter="general"/>
@@ -176,7 +180,7 @@
         <cue name="OnOwnedDestroyed" instantiate="true">
           <conditions>
             <event_player_owned_destroyed/>
-            <check_value value="event.param.isclass.ship or event.param.isclass.module"/>
+            <check_value value="(event.param.isclass.ship or event.param.isclass.module) and @md.ESR_Main.Settings.$Debug"/>
           </conditions>
           <actions>
             <set_value name="$Killed" exact="event.param"/>

@@ -2,11 +2,13 @@
 -- Wraps the station build menu's Confirm button and writes what the game is about
 -- to do to debuglog.txt, before the engine applies the plan change. Changes nothing.
 -- Every line starts with "[ESR]" so the log can be filtered.
+-- Logs only while the "Enable debug log" setting is on: ESR_Main (MD) sends it as the Lua event "esr_debug".
 
 local ffi = require("ffi")
 local C = ffi.C
 
 local menu
+local enabled = false
 
 local function log(text)
 	DebugError("[ESR] " .. text)
@@ -86,6 +88,9 @@ local function logConfirm()
 end
 
 local function init()
+	RegisterEvent("esr_debug", function (_, value)
+		enabled = (value == 1)
+	end)
 	for _, m in ipairs(Menus or {}) do
 		if m.name == "StationConfigurationMenu" then
 			menu = m
@@ -99,9 +104,11 @@ local function init()
 
 	local buttonConfirm = menu.buttonConfirm
 	menu.buttonConfirm = function (...)
-		local ok, err = pcall(logConfirm)
-		if not ok then
-			log("logging Confirm failed: " .. tostring(err))
+		if enabled then
+			local ok, err = pcall(logConfirm)
+			if not ok then
+				log("logging Confirm failed: " .. tostring(err))
+			end
 		end
 		return buttonConfirm(...)
 	end

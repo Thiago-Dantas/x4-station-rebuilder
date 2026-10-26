@@ -3,7 +3,7 @@
   <!--
     Easy Station Rebuild: docked ships (G1, D-7). Called by ESR_Main's sweep with the doomed modules.
     A ship docked at a doomed module:
-    - the player's, with a pilot: MoveWait order to a free spot near the station (parks there until given new orders);
+    - the player's, with a pilot: MoveWait order to a free spot near the station (waits there 3 min, then back to its orders);
     - someone else's: asked to undock (its own AI flies off);
     - no pilot: warped to that spot at once.
     The Watch cue checks the ships every 2 s and warps any that is still inside the station 10 s after the first try.
@@ -11,6 +11,7 @@
     killed two ships whose park order had not got them out; the fallback then waited 60 s and lost the race.
     Modules in deconstruction can't be searched for docks ("Invalid space"), so ships are remembered at Confirm.)
     The ship the player sits in is never touched (logged instead); drones (units) and mass traffic are skipped.
+    Ships are found by the sweeps and, between sweeps, when they dock at a tracked station (OnDocked).
   -->
   <cues>
     <cue name="State">
@@ -51,16 +52,38 @@
       </cues>
     </cue>
 
+    <!-- Ships that dock at a tracked station (ESR_Main adds it to the group) after the Confirm sweep: the next
+         sweep may come after the module went into deconstruction, when its docks can no longer be searched -->
+    <cue name="Docking">
+      <actions>
+        <create_group groupname="md.ESR_Ships.Docking.$Stations"/>
+      </actions>
+      <cues>
+        <cue name="OnDocked" instantiate="true">
+          <conditions>
+            <event_object_docked_at group="md.ESR_Ships.Docking.$Stations"/>
+            <check_value value="md.ESR_Main.Settings.$Ships and not event.param.isunit and not event.param.ismasstraffic"/>
+          </conditions>
+          <actions>
+            <set_value name="$Ship" exact="event.param"/>
+            <set_value name="$Doomed" exact="@md.ESR_Main.Tracker.$Rebuilds.{event.object}.$doomed"/>
+            <do_if value="$Doomed and @$Ship.dock and $Doomed.indexof.{$Ship.dock.module}">
+              <run_actions ref="md.ESR_Ships.Protect">
+                <param name="Station" value="event.object"/>
+                <param name="Ship" value="$Ship"/>
+              </run_actions>
+            </do_if>
+          </actions>
+        </cue>
+      </cues>
+    </cue>
+
     <library name="Sweep" purpose="run_actions">
       <params>
         <param name="Station"/>
         <param name="Doomed"/>
       </params>
       <actions>
-        <!-- created here too: state cues don't run again in older saves (run 13) -->
-        <do_if value="not md.ESR_Ships.State.$Tried?">
-          <set_value name="md.ESR_Ships.State.$Tried" exact="table[]"/>
-        </do_if>
         <do_for_each name="$Module" in="$Doomed">
           <!-- a module already in deconstruction can't be searched; its ships were taken at Confirm -->
           <do_if value="not $Module.exists or $Module.isconstruction">
@@ -69,36 +92,57 @@
           <find_dockingbay name="$Bays" object="$Module" multiple="true"/>
           <do_for_each name="$Bay" in="$Bays">
             <do_for_each name="$Ship" in="$Bay.docked">
-              <do_if value="$Ship.isunit or $Ship.ismasstraffic or md.ESR_Ships.State.$Tried.{$Ship}?">
-                <continue/>
-              </do_if>
-              <do_if value="$Ship == player.occupiedship">
-                <debug_text text="'[ESR] SHIPS %s: player ship %s is docked at a module being removed; not moved'.[$Station.knownname, $Ship.knownname]" filter="general"/>
-                <continue/>
-              </do_if>
-              <do_if value="not $Ship.pilot">
-                <run_actions ref="md.ESR_Ships.WarpOut">
-                  <param name="Station" value="$Station"/>
-                  <param name="Ship" value="$Ship"/>
-                </run_actions>
-                <continue/>
-              </do_if>
-              <do_if value="$Ship.isplayerowned">
-                <get_safe_pos result="$Pos" sector="$Station.sector" object="$Station" min="$Station.size" max="$Station.size * 2" radius="$Ship.size"/>
-                <create_order id="'MoveWait'" object="$Ship" immediate="true">
-                  <param name="destination" value="[$Station.sector, $Pos]"/>
-                  <param name="timeout" value="0s"/>
-                </create_order>
-                <debug_text text="'[ESR] SHIPS %s: %s (%s) ordered to park near the station'.[$Station.knownname, $Ship.knownname, $Ship.idcode]" filter="general"/>
-              </do_if>
-              <do_else>
-                <request_undocking ship="$Ship" queuedresult="$Queued" grantedresult="$Granted"/>
-                <debug_text text="'[ESR] SHIPS %s: %s (%s, %s) asked to undock'.[$Station.knownname, $Ship.knownname, $Ship.idcode, $Ship.owner]" filter="general"/>
-              </do_else>
-              <set_value name="md.ESR_Ships.State.$Tried.{$Ship}" exact="table[$station = $Station, $time = player.age]"/>
+              <run_actions ref="md.ESR_Ships.Protect">
+                <param name="Station" value="$Station"/>
+                <param name="Ship" value="$Ship"/>
+              </run_actions>
             </do_for_each>
           </do_for_each>
         </do_for_each>
+      </actions>
+    </library>
+
+    <!-- One ship docked at a doomed module -->
+    <library name="Protect" purpose="run_actions">
+      <params>
+        <param name="Station"/>
+        <param name="Ship"/>
+      </params>
+      <actions>
+        <!-- created here too: state cues don't run again in older saves (run 13) -->
+        <do_if value="not md.ESR_Ships.State.$Tried?">
+          <set_value name="md.ESR_Ships.State.$Tried" exact="table[]"/>
+        </do_if>
+        <do_if value="$Ship.isunit or $Ship.ismasstraffic or md.ESR_Ships.State.$Tried.{$Ship}?">
+          <return/>
+        </do_if>
+        <do_if value="$Ship == player.occupiedship">
+          <debug_text text="'[ESR] SHIPS %s: player ship %s is docked at a module being removed; not moved'.[$Station.knownname, $Ship.knownname]" filter="general"/>
+          <return/>
+        </do_if>
+        <do_if value="not $Ship.pilot">
+          <run_actions ref="md.ESR_Ships.WarpOut">
+            <param name="Station" value="$Station"/>
+            <param name="Ship" value="$Ship"/>
+          </run_actions>
+          <return/>
+        </do_if>
+        <do_if value="$Ship.isplayerowned">
+          <!-- a finite wait: 0s waits forever, and the station's traders and miners would never go back to their
+               default orders. Removed modules are gone ~3 min after Confirm (runs 26, 27). -->
+          <get_safe_pos result="$Pos" sector="$Station.sector" object="$Station" min="$Station.size" max="$Station.size * 2" radius="$Ship.size"/>
+          <create_order id="'MoveWait'" object="$Ship" immediate="true">
+            <param name="destination" value="[$Station.sector, $Pos]"/>
+            <param name="timeout" value="3min"/>
+            <param name="recallsubordinates" value="false"/>
+          </create_order>
+          <debug_text text="'[ESR] SHIPS %s: %s (%s) ordered to park near the station'.[$Station.knownname, $Ship.knownname, $Ship.idcode]" filter="general"/>
+        </do_if>
+        <do_else>
+          <request_undocking ship="$Ship" queuedresult="$Queued" grantedresult="$Granted"/>
+          <debug_text text="'[ESR] SHIPS %s: %s (%s, %s) asked to undock'.[$Station.knownname, $Ship.knownname, $Ship.idcode, $Ship.owner]" filter="general"/>
+        </do_else>
+        <set_value name="md.ESR_Ships.State.$Tried.{$Ship}" exact="table[$station = $Station, $time = player.age]"/>
       </actions>
     </library>
 

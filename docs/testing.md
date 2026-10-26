@@ -42,7 +42,7 @@ What the logger writes for each plan change:
 Tests can share one plan change (e.g. B2 + B4 + B6 in one go); write down which ones you combined.
 
 ## Protections (after B1–B6)
-All protections are off by default (D-14). Turn one on in *Extension Options → Easy Station Rebuild* (needs SirNukes Mod Support APIs), repeat the matching test, and look for its log lines. The `MAIN tracking …` line shows which ones were on.
+Ships, cargo and workforce are on by default (D-22; they were off in dev builds under D-14). Turn them on or off in *Extension Options → Easy Station Rebuild* (needs SirNukes Mod Support APIs), repeat the matching test, and look for its log lines. The `[ESR] PLAN`, `SNAP`, `CONFIRM` and `MAIN COMPARE` lines need **Enable debug log** on (off by default); the harness (`extension_test`) turns it on at load. The `MAIN tracking …` line shows which ones were on.
 
 | Protection | Repeat | Log lines | Pass when |
 |------------|--------|-----------|-----------|

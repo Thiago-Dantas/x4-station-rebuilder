@@ -83,6 +83,9 @@
       </conditions>
       <actions>
         <debug_text text="'[ESR-TEST] save loaded, t=%s; asking Lua for the scenario'.[player.age]" filter="general"/>
+        <!-- test logs keep the diagnostic PLAN, SNAP and CONFIRM lines (the mod's debug log setting, off by default) -->
+        <set_value name="md.ESR_Main.Settings.$Debug" exact="1"/>
+        <raise_lua_event name="'esr_debug'" param="1"/>
         <raise_lua_event name="'esr_test_ready'"/>
       </actions>
     </cue>

@@ -22,25 +22,26 @@ A Workshop release turns the three protections on. Version 1.01 also turns them 
 
 Only player-owned stations. `ui/esr_confirm.lua` runs when the build menu confirms and sends the engine's removed-module list to the Mission Director scripts in `extension/md/`. `esr_main.xml` tracks the station's build and, every 30 seconds, runs the protections that are on. Log lines start with `[ESR]` in `debuglog.txt` when the general debug filter is being written.
 
-**Ships** (`esr_ships`). A ship docked at a module that is going is ordered to a free spot near the station and parks there until it gets another order. A ship from another faction is told to undock. A ship with no pilot is moved at once. A ship still inside the station about ten seconds later is moved out. The ship the player is flying is not touched. Drones and mass traffic are skipped.
+**Ships** (`esr_ships`). A ship docked at a module that is going is ordered to a free spot near the station and waits there for 3 minutes, then goes back to its orders. A ship that docks at such a module later in the rebuild is moved the same way. A ship from another faction is told to undock. A ship with no pilot is moved at once. A ship still inside the station about ten seconds later is moved out. The ship the player is flying is not touched. Drones and mass traffic are skipped.
 
-**Cargo** (`esr_cargo`). For each ware transport type, the amount that will not fit once the removed storage modules are gone is moved to that station's build storage. The check repeats during the build, so wares delivered later are moved too. When the build ends, `ReturnLeftovers` moves back what the station can hold. The rest stays in build storage. This mod does not cap build storage.
+**Cargo** (`esr_cargo`). For each ware transport type, the amount that will not fit once the removed storage modules are gone is moved to that station's build storage. The check repeats during the build, so wares delivered later are moved too. When the build ends and no other build of the station is waiting, `ReturnLeftovers` moves back what the station can hold. The rest stays in build storage. This mod does not cap build storage.
 
 **Workforce** (`esr_workforce`). Workers above the new habitat capacity go into a held pool. They come back with `add_workforce` as soon as the new habitats have room. The pool waits for the grace period, then shrinks by the leave rate. Both are game time, so SETA shortens the wait on the clock. Defaults are 2 hours and 20% of the pool per hour.
 
-**Module refunds.** The game already puts the full recipe of a removed module, and of the turrets and shields on it, into build storage. `esr_refund.xml` only logs that amount. It adds nothing. The dev options menu still shows a test toggle named "Refund equipment of removed modules (test)". A release build should not offer that toggle.
+**Module refunds.** The game already puts the full recipe of a removed module, and of the turrets and shields on it, into build storage. `esr_refund.xml` only logs that amount. It adds nothing. Its test setting is not in the options menu.
 
 ## Settings
 
 Extension Options, category **Easy Station Rebuild**:
 
-| Setting | Option id | Release default | Dev default |
-|---|---|---|---|
-| Protect docked ships | `esr_ships` | On | Off |
-| Keep cargo of removed storage | `esr_cargo` | On | Off |
-| Keep workforce during rebuilds | `esr_workforce` | On | Off |
-| Workforce grace period | `esr_grace_hours` | 2 h (0–24, step 1) | 2 h |
-| Workforce leave rate after the grace period | `esr_leave_rate` | 20 %/h (1–100) | 20 %/h |
+| Setting | Option id | Default |
+|---|---|---|
+| Protect docked ships | `esr_ships` | On |
+| Keep cargo of removed storage | `esr_cargo` | On |
+| Keep workforce during rebuilds | `esr_workforce` | On |
+| Workforce grace period | `esr_grace_hours` | 2 h (0–24, step 1) |
+| Workforce leave rate after the grace period | `esr_leave_rate` | 20 %/h (1–100) |
+| Enable debug log | `esr_debug` | Off. Writes a detailed log of each plan change (`[ESR] PLAN`, `SNAP`, `CONFIRM`) to `debuglog.txt`. |
 
 ## Limits
 

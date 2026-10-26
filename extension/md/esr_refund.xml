@@ -35,31 +35,37 @@
             <event_ui_triggered screen="'StationConfigurationMenu'" control="'esr_equipment'"/>
           </conditions>
           <actions>
-            <!-- created here too: State already ran in saves made with an older version (run 13) -->
-            <do_if value="not md.ESR_Refund.State.$Loadouts?">
+            <!-- only the refund sweep removes entries: with the test setting off, keep none (and drop older ones) -->
+            <do_if value="not md.ESR_Main.Settings.$Refund">
               <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
             </do_if>
-            <set_value name="$List" exact="event.param3"/>
-            <set_value name="$Module" exact="null"/>
-            <set_value name="$Modules" exact="0"/>
-            <set_value name="$Items" exact="0"/>
-            <set_value name="$i" exact="2"/>
-            <do_while value="$i le $List.count">
-              <do_if value="typeof $List.{$i} == datatype.component">
-                <set_value name="$Module" exact="$List.{$i}"/>
-                <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}" exact="table[]"/>
-                <set_value name="$Modules" operation="add"/>
-                <set_value name="$i" operation="add"/>
+            <do_else>
+              <!-- created here too: State already ran in saves made with an older version (run 13) -->
+              <do_if value="not md.ESR_Refund.State.$Loadouts?">
+                <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
               </do_if>
-              <do_else>
-                <do_if value="$Module and $i lt $List.count">
-                  <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}.{macro.{$List.{$i}}}" exact="$List.{$i + 1}" operation="add"/>
-                  <set_value name="$Items" exact="$List.{$i + 1}" operation="add"/>
+              <set_value name="$List" exact="event.param3"/>
+              <set_value name="$Module" exact="null"/>
+              <set_value name="$Modules" exact="0"/>
+              <set_value name="$Items" exact="0"/>
+              <set_value name="$i" exact="2"/>
+              <do_while value="$i le $List.count">
+                <do_if value="typeof $List.{$i} == datatype.component">
+                  <set_value name="$Module" exact="$List.{$i}"/>
+                  <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}" exact="table[]"/>
+                  <set_value name="$Modules" operation="add"/>
+                  <set_value name="$i" operation="add"/>
                 </do_if>
-                <set_value name="$i" exact="$i + 2"/>
-              </do_else>
-            </do_while>
-            <debug_text text="'[ESR] REFUND %s: equipment of removed modules from the build menu: %s pieces on %s modules'.[@$List.{1}.knownname, $Items, $Modules]" filter="general"/>
+                <do_else>
+                  <do_if value="$Module and $i lt $List.count">
+                    <set_value name="md.ESR_Refund.State.$Loadouts.{$Module}.{macro.{$List.{$i}}}" exact="$List.{$i + 1}" operation="add"/>
+                    <set_value name="$Items" exact="$List.{$i + 1}" operation="add"/>
+                  </do_if>
+                  <set_value name="$i" exact="$i + 2"/>
+                </do_else>
+              </do_while>
+              <debug_text text="'[ESR] REFUND %s: equipment of removed modules from the build menu: %s pieces on %s modules'.[@$List.{1}.knownname, $Items, $Modules]" filter="general"/>
+            </do_else>
           </actions>
         </cue>
       </cues>

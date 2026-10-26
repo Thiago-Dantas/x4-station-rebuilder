@@ -2,14 +2,15 @@
 <mdscript name="ESR_Main" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
   <!--
     Easy Station Rebuild: settings and the rebuild tracker.
-    - Settings: one on/off per protection (off by default in dev builds, D-14), grace period and leave rate (D-12).
+    - Settings: one on/off per protection (on by default, D-21, D-22), grace period and leave rate (D-12), debug log (off).
       Shown in Extension Options when SirNukes Mod Support APIs is installed; otherwise the defaults apply.
     - Tracker: a player station whose plan changed (event_player_build_added, expansion) is tracked with its build.
       Every 30 s the sweep works out the doomed modules and calls each enabled protection. Doomed modules come
       from the engine's own list when the build menu's Confirm sent it (ui/esr_confirm.lua, UI event
       "esr_confirm"); otherwise they are the station modules that no entry of the build's construction
-      sequence maps to (planmodule.{entry.id}). The first sweep with both logs how they compare. A station stops being tracked
-      when its build is gone and no protection still holds anything for it.
+      sequence maps to (planmodule.{entry.id}). With the debug log on, the first sweep with both logs how they
+      compare. A station stops being tracked when no expansion build of it is left and no protection still
+      holds anything for it.
     Log lines start with "[ESR]".
   -->
   <cues>
@@ -17,16 +18,16 @@
       <actions>
         <!-- keep values across loads; only fill in what is missing -->
         <do_if value="not md.ESR_Main.Settings.$Ships?">
-          <set_value name="md.ESR_Main.Settings.$Ships" exact="0"/>
+          <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
         </do_if>
         <do_if value="not md.ESR_Main.Settings.$Cargo?">
-          <set_value name="md.ESR_Main.Settings.$Cargo" exact="0"/>
+          <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
         </do_if>
         <do_if value="not md.ESR_Main.Settings.$Refund?">
           <set_value name="md.ESR_Main.Settings.$Refund" exact="0"/>
         </do_if>
         <do_if value="not md.ESR_Main.Settings.$Workforce?">
-          <set_value name="md.ESR_Main.Settings.$Workforce" exact="0"/>
+          <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
         </do_if>
         <do_if value="not md.ESR_Main.Settings.$GraceHours?">
           <set_value name="md.ESR_Main.Settings.$GraceHours" exact="2"/>
@@ -34,6 +35,10 @@
         <do_if value="not md.ESR_Main.Settings.$LeaveRate?">
           <!-- percent of the held workers that leave per hour after the grace period (D-12) -->
           <set_value name="md.ESR_Main.Settings.$LeaveRate" exact="20"/>
+        </do_if>
+        <!-- diagnostic logger (ESR_Diag, ui/esr_diag.lua); read as @$Debug: older saves never ran this cue with it -->
+        <do_if value="not md.ESR_Main.Settings.$Debug?">
+          <set_value name="md.ESR_Main.Settings.$Debug" exact="0"/>
         </do_if>
       </actions>
       <cues>
@@ -54,11 +59,6 @@
               $mouseover = 'Wares that no longer fit when storage modules are removed go to the build storage.',
               $type = 'button', $default = md.ESR_Main.Settings.$Cargo, $callback = md.ESR_Main.OnOption]"/>
             <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
-              $category = 'Easy Station Rebuild', $id = 'esr_refund', $echo = 'Refund',
-              $name = 'Refund equipment of removed modules (test)',
-              $mouseover = 'Development build: only logs what the turrets and shields on removed modules are worth; adds nothing yet.',
-              $type = 'button', $default = md.ESR_Main.Settings.$Refund, $callback = md.ESR_Main.OnOption]"/>
-            <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
               $category = 'Easy Station Rebuild', $id = 'esr_workforce', $echo = 'Workforce',
               $name = 'Keep workforce during rebuilds',
               $mouseover = 'Workers who lose their habitat wait for new habitats instead of leaving.',
@@ -77,6 +77,29 @@
               $type = 'slidercell', $default = md.ESR_Main.Settings.$LeaveRate,
               $args = table[$min = 1, $max = 100, $step = 1, $suffix = ' %/h'],
               $callback = md.ESR_Main.OnOption]"/>
+            <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
+              $category = 'Easy Station Rebuild', $id = 'esr_debug', $echo = 'Debug',
+              $name = 'Enable debug log',
+              $mouseover = 'Writes a detailed log of every plan change to debuglog.txt. Costs time on large stations; leave off unless you need the log.',
+              $type = 'button', $default = @md.ESR_Main.Settings.$Debug, $callback = md.ESR_Main.OnOption]"/>
+            <!-- hidden; SirNukes keeps the first value it stored for an option id, across saves -->
+            <signal_cue_instantly cue="md.Simple_Menu_Options.Register_Option" param="table[
+              $category = 'Easy Station Rebuild', $id = 'esr_defaults_rev', $name = 'Release defaults',
+              $type = 'button', $default = 0, $disabled = 1, $skip_initial_callback = 1]"/>
+            <run_actions ref="md.Simple_Menu_Options.Read_Value" result="$Rev">
+              <param name="id" value="'esr_defaults_rev'"/>
+            </run_actions>
+            <!-- 0 means this id was just created. Write the three protections on once; later choices stick. -->
+            <do_if value="@$Rev == 0">
+              <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
+              <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
+              <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
+              <signal_cue_instantly cue="md.Simple_Menu_Options.Write_Option_Value" param="table[$id = 'esr_ships', $value = 1]"/>
+              <signal_cue_instantly cue="md.Simple_Menu_Options.Write_Option_Value" param="table[$id = 'esr_cargo', $value = 1]"/>
+              <signal_cue_instantly cue="md.Simple_Menu_Options.Write_Option_Value" param="table[$id = 'esr_workforce', $value = 1]"/>
+              <signal_cue_instantly cue="md.Simple_Menu_Options.Write_Option_Value" param="table[$id = 'esr_defaults_rev', $value = 1]"/>
+              <debug_text text="'[ESR] MAIN release defaults on: ships cargo workforce'" filter="general"/>
+            </do_if>
           </actions>
         </cue>
 
@@ -105,10 +128,29 @@
             <do_elseif value="$Key == 'LeaveRate'">
               <set_value name="md.ESR_Main.Settings.$LeaveRate" exact="$Value"/>
             </do_elseif>
+            <do_elseif value="$Key == 'Debug'">
+              <set_value name="md.ESR_Main.Settings.$Debug" exact="$Value"/>
+              <!-- ui/esr_diag.lua logs Confirm only while this is on; SirNukes sends the stored value on every load -->
+              <raise_lua_event name="'esr_debug'" param="$Value"/>
+            </do_elseif>
             <debug_text text="'[ESR] MAIN setting %s = %s'.[$Key, $Value]" filter="general"/>
           </actions>
         </cue>
       </cues>
+    </cue>
+
+    <!--
+      Saves that already ran the dev build, or 1.00 after that, keep ships, cargo and workforce off.
+      SirNukes stores the first value it saw for those option ids and sends it back on every load,
+      which overwrites the release default. This cue runs once and turns the three on. RegisterOptions
+      writes the same values into the menu when SirNukes is installed. Later changes stick.
+    -->
+    <cue name="ReleaseDefaults">
+      <actions>
+        <set_value name="md.ESR_Main.Settings.$Ships" exact="1"/>
+        <set_value name="md.ESR_Main.Settings.$Cargo" exact="1"/>
+        <set_value name="md.ESR_Main.Settings.$Workforce" exact="1"/>
+      </actions>
     </cue>
 
     <cue name="Tracker">
@@ -120,6 +162,10 @@
         <!-- station -> list of the modules the engine said the last Confirm removes -->
         <do_if value="not md.ESR_Main.Tracker.$EngineDoomed?">
           <set_value name="md.ESR_Main.Tracker.$EngineDoomed" exact="table[]"/>
+        </do_if>
+        <!-- station -> player.age of that Confirm -->
+        <do_if value="not md.ESR_Main.Tracker.$ConfirmTimes?">
+          <set_value name="md.ESR_Main.Tracker.$ConfirmTimes" exact="table[]"/>
         </do_if>
         <!-- station -> build method id at the last Confirm ('default', 'terran', ...) -->
         <do_if value="not md.ESR_Main.Tracker.$BuildMethods?">
@@ -139,6 +185,18 @@
             </do_if>
             <set_value name="$Station" exact="event.param.base"/>
             <set_value name="md.ESR_Main.Tracker.$Rebuilds.{$Station}" exact="table[$build = event.param, $since = player.age]"/>
+            <!-- The Confirm's UI event arrives ~0.1 s after this event (runs 6-29). A list from an earlier Confirm
+                 belongs to another build, or to a Confirm that added none: drop it so this build doesn't use it. -->
+            <set_value name="$Confirmed" exact="@md.ESR_Main.Tracker.$ConfirmTimes.{$Station}"/>
+            <do_if value="not $Confirmed or player.age gt $Confirmed + 5s">
+              <remove_value name="md.ESR_Main.Tracker.$EngineDoomed.{$Station}"/>
+              <remove_value name="md.ESR_Main.Tracker.$BuildMethods.{$Station}"/>
+              <remove_value name="md.ESR_Main.Tracker.$ConfirmTimes.{$Station}"/>
+            </do_if>
+            <!-- ESR_Ships.OnDocked catches ships that dock at a doomed module after the first sweep -->
+            <do_if value="md.ESR_Ships.Docking.$Stations?">
+              <add_to_group groupname="md.ESR_Ships.Docking.$Stations" object="$Station"/>
+            </do_if>
             <debug_text text="'[ESR] MAIN tracking %s (%s) build=%s | ships=%s cargo=%s refund=%s workforce=%s grace=%sh leave=%s pct/h'.[$Station.knownname, $Station.idcode, event.param, md.ESR_Main.Settings.$Ships, md.ESR_Main.Settings.$Cargo, md.ESR_Main.Settings.$Refund, md.ESR_Main.Settings.$Workforce, md.ESR_Main.Settings.$GraceHours, md.ESR_Main.Settings.$LeaveRate]" filter="general"/>
             <!-- act at once: ships and cargo before the builder reaches the modules, workforce baseline before habitats go -->
             <run_actions ref="md.ESR_Main.SweepStation">
@@ -160,6 +218,9 @@
             <do_if value="not md.ESR_Main.Tracker.$BuildMethods?">
               <set_value name="md.ESR_Main.Tracker.$BuildMethods" exact="table[]"/>
             </do_if>
+            <do_if value="not md.ESR_Main.Tracker.$ConfirmTimes?">
+              <set_value name="md.ESR_Main.Tracker.$ConfirmTimes" exact="table[]"/>
+            </do_if>
             <set_value name="$List" exact="event.param3"/>
             <set_value name="$Station" exact="@$List.{1}"/>
             <do_if value="$Station and $Station.exists and $Station.isplayerowned">
@@ -169,6 +230,7 @@
               </do_all>
               <set_value name="md.ESR_Main.Tracker.$EngineDoomed.{$Station}" exact="$Removed"/>
               <set_value name="md.ESR_Main.Tracker.$BuildMethods.{$Station}" exact="$List.{2}"/>
+              <set_value name="md.ESR_Main.Tracker.$ConfirmTimes.{$Station}" exact="player.age"/>
               <debug_text text="'[ESR] MAIN %s: Confirm removes %s module(s) (engine list), build method %s'.[$Station.knownname, $Removed.count, $List.{2}]" filter="general"/>
               <do_if value="md.ESR_Main.Tracker.$Rebuilds.{$Station}?">
                 <run_actions ref="md.ESR_Main.SweepStation">
@@ -204,7 +266,11 @@
               <remove_value name="md.ESR_Main.Tracker.$Rebuilds.{$Station}"/>
               <remove_value name="md.ESR_Main.Tracker.$EngineDoomed.{$Station}"/>
               <remove_value name="md.ESR_Main.Tracker.$BuildMethods.{$Station}"/>
+              <remove_value name="md.ESR_Main.Tracker.$ConfirmTimes.{$Station}"/>
               <remove_value name="md.ESR_Workforce.State.$Stations.{$Station}"/>
+              <do_if value="md.ESR_Ships.Docking.$Stations? and $Station.exists">
+                <remove_from_group group="md.ESR_Ships.Docking.$Stations" object="$Station"/>
+              </do_if>
               <debug_text text="'[ESR] MAIN done with %s, t=%s'.[@$Station.knownname, player.age]" filter="general"/>
             </do_for_each>
           </actions>
@@ -220,40 +286,64 @@
       <actions>
         <set_value name="$Entry" exact="md.ESR_Main.Tracker.$Rebuilds.{$Station}"/>
         <set_value name="$Build" exact="$Entry.$build"/>
+        <!-- the tracked build, or another expansion of this station still queued or running (a later Confirm) -->
         <set_value name="$Busy" exact="$Build.exists"/>
+        <set_value name="$Storage" exact="@$Station.buildstorage"/>
+        <do_if value="not $Busy and $Storage">
+          <do_for_each name="$Builds" in="[$Storage.builds.inprogress, $Storage.builds.queued]">
+            <do_for_each name="$Other" in="$Builds">
+              <do_if value="@$Other.isexpansion">
+                <set_value name="$Busy" exact="true"/>
+              </do_if>
+            </do_for_each>
+          </do_for_each>
+        </do_if>
         <set_value name="$Doomed" exact="[]"/>
         <do_if value="$Build.exists and $Build.constructionsequence">
-          <run_actions ref="md.ESR_Main.DoomedModules" result="$Doomed">
-            <param name="Station" value="$Station"/>
-            <param name="Sequence" value="$Build.constructionsequence"/>
-          </run_actions>
           <set_value name="$FromEngine" exact="@md.ESR_Main.Tracker.$EngineDoomed.{$Station}"/>
           <do_if value="$FromEngine">
-            <do_if value="not $Entry.$compared?">
-              <set_value name="$OnlyEngine" exact="0"/>
+            <do_if value="@md.ESR_Main.Settings.$Debug and not $Entry.$compared?">
+              <run_actions ref="md.ESR_Main.DoomedModules" result="$Mapped">
+                <param name="Station" value="$Station"/>
+                <param name="Sequence" value="$Build.constructionsequence"/>
+              </run_actions>
+              <set_value name="$InEngine" exact="table[]"/>
               <do_for_each name="$Module" in="$FromEngine">
-                <do_if value="not $Doomed.indexof.{$Module}">
-                  <set_value name="$OnlyEngine" operation="add"/>
-                </do_if>
+                <set_value name="$InEngine.{$Module}" exact="true"/>
               </do_for_each>
+              <set_value name="$InMapped" exact="table[]"/>
               <set_value name="$OnlyPlan" exact="0"/>
-              <do_for_each name="$Module" in="$Doomed">
-                <do_if value="not $FromEngine.indexof.{$Module}">
+              <do_for_each name="$Module" in="$Mapped">
+                <set_value name="$InMapped.{$Module}" exact="true"/>
+                <do_if value="not $InEngine.{$Module}?">
                   <set_value name="$OnlyPlan" operation="add"/>
                 </do_if>
               </do_for_each>
-              <debug_text text="'[ESR] MAIN COMPARE %s: engine %s doomed, plan mapping %s; only engine %s, only plan mapping %s'.[$Station.knownname, $FromEngine.count, $Doomed.count, $OnlyEngine, $OnlyPlan]" filter="general"/>
+              <set_value name="$OnlyEngine" exact="0"/>
+              <do_for_each name="$Module" in="$FromEngine">
+                <do_if value="not $InMapped.{$Module}?">
+                  <set_value name="$OnlyEngine" operation="add"/>
+                </do_if>
+              </do_for_each>
+              <debug_text text="'[ESR] MAIN COMPARE %s: engine %s doomed, plan mapping %s; only engine %s, only plan mapping %s'.[$Station.knownname, $FromEngine.count, $Mapped.count, $OnlyEngine, $OnlyPlan]" filter="general"/>
               <set_value name="$Entry.$compared" exact="true"/>
             </do_if>
             <!-- the engine's list is what the build menu shows as Removed Modules: trust it -->
-            <set_value name="$Doomed" exact="[]"/>
             <do_for_each name="$Module" in="$FromEngine">
               <do_if value="$Module.exists">
                 <append_to_list name="$Doomed" exact="$Module"/>
               </do_if>
             </do_for_each>
           </do_if>
+          <do_else>
+            <run_actions ref="md.ESR_Main.DoomedModules" result="$Doomed">
+              <param name="Station" value="$Station"/>
+              <param name="Sequence" value="$Build.constructionsequence"/>
+            </run_actions>
+          </do_else>
         </do_if>
+        <!-- ESR_Ships.OnDocked reads it -->
+        <set_value name="$Entry.$doomed" exact="$Doomed"/>
 
         <do_if value="md.ESR_Main.Settings.$Ships and $Doomed.count">
           <run_actions ref="md.ESR_Ships.Sweep">
@@ -267,8 +357,9 @@
             <param name="Doomed" value="$Doomed"/>
           </run_actions>
         </do_if>
-        <!-- D-15: when the build is over, leftovers in build storage go back to the station (once per build) -->
-        <do_if value="md.ESR_Main.Settings.$Cargo and not $Build.exists and not $Entry.$returned?">
+        <!-- D-15: when the build is over, leftovers in build storage go back to the station (once per build).
+             Not while another expansion is pending: it needs that build storage. -->
+        <do_if value="md.ESR_Main.Settings.$Cargo and not $Busy and not $Entry.$returned?">
           <run_actions ref="md.ESR_Cargo.ReturnLeftovers">
             <param name="Station" value="$Station"/>
           </run_actions>

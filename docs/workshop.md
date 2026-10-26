@@ -51,6 +51,8 @@ Page: <https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684>
 
 The upload used a copy at `H:\dev\esr-release\station_rebuilder`, not the dev junction. `WorkshopTool` rewrote that copy's `content.xml` to `id="ws_3821053684"` and `sync="false"`. The dev `extension/content.xml` was not changed. In the copy, ships, cargo and workforce default on, and the log-only refund option is not in the menu (D-17).
 
+Since 2026-10-26 (D-22) `extension/` holds the same scripts as the release, so the copy is built from it. Before the next upload, replace `md/`, `ui/` and `ui.xml` in the release folder with the ones from `extension/` and keep the release folder's own `content.xml` (bump `version` and `date`). Do not copy the dev `content.xml`: its id is `station_rebuilder`, not `ws_3821053684`.
+
 Images, from the repo root. The preview is the thumbnail. The other two are additional previews (Steam file names `02-cargo.jpg` and `03-settings.png`).
 
 | File | Role |
