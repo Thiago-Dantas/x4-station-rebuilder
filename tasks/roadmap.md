@@ -77,7 +77,7 @@ Log: [workflow-phase8.md](workflow-phase8.md)
 - [x] Steam Workshop upload (item [3821053684](https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684), public, version 1.00). SirNukes is the optional dependency on the page.
 - [ ] Suggested pairings on the Workshop page ([docs/workshop.md](../docs/workshop.md))
 - [x] Version scheme and release notes (D-20): 1.00, change note `First release.` Update 1.01 (D-21): ships, cargo and workforce start on.
-- [ ] Code review fixes (2026-10-26): park timeout, ships docking between sweeps, leftovers vs. a pending build, stale Confirm list, refund loadouts, debug-log setting, `extension/` = release scripts (D-22). Log: [workflow-review-fixes.md](workflow-review-fixes.md). Needs an in-game run, then a Workshop update.
+- [ ] Code review fixes (2026-10-26): park timeout, ships docking between sweeps, leftovers vs. a pending build, stale Confirm list, refund loadouts, debug-log setting, `extension/` = release scripts (D-22). Log: [workflow-review-fixes.md](workflow-review-fixes.md). Workshop 1.02 uploaded 2026-10-26; still needs an in-game run.
 
 ## Later (ideas, not agreed)
 - [ ] Warning in the build menu listing what a plan change will remove (Lua, allowed by D-5)

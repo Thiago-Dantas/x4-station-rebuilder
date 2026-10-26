@@ -15,6 +15,7 @@ Goal (G5): published on the Steam Workshop as "Easy Station Rebuild". Roadmap: [
 - [ ] Suggested pairings on the Workshop page. Wording is drafted and held until the Phase 7 test.
 - [x] Version scheme and release notes (D-20). First release 1.00, change note `First release.` The `version` attribute stays the displayed version times 100.
 - [x] Update 1.01 (D-21). Ships, cargo and workforce start on, including a save that already had SirNukes' stored off values. Change note `Ships, cargo and workforce now start on.` Dev `extension/` stays off. Uploaded 2026-10-16 with `WorkshopTool update -buildcat` (exit 0, item 3821053684, version 1.01).
+- [x] Update 1.02 (2026-10-26): code review fixes and save cleanup, built from `extension/` (D-22). Uploaded with `WorkshopTool update -buildcat -changenote` (exit 0, version 1.02). Details in [docs/workshop.md](../docs/workshop.md).
 
 ## Notes
 - Installed 2026-10-16. Path: `H:\SteamLibrary\steamapps\common\X Tools`. WorkshopTool 1.15, build 19742470. Steam had written it on C:; it was moved to the H: library and Steam loaded it from there on restart (content log: 8 apps on H:, no manifest left on C:).
