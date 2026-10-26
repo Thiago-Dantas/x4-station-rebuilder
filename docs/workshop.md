@@ -49,6 +49,8 @@ Update 1.01 (2026-10-16, D-21): ships, cargo and workforce start on. Version 1.0
 
 Update 1.02 (2026-10-26): the code review fixes and save cleanup ([workflow-review-fixes.md](../tasks/workflow-review-fixes.md)). First release built from `extension/` (D-22): `md/`, `ui/` and `ui.xml` copied into the release folder, its own `content.xml` bumped to `version="102"`, `date="2026-10-26"`. The 1.01 folder was kept as `H:\dev\esr-release\station_rebuilder.bak-1.01-20261026`. Command: `WorkshopTool update -path <release folder> -buildcat -changenote <3 lines>`, confirmed with `y` on stdin. Change note (three lines): `Ships parked during a rebuild now go back to their orders after 3 minutes.` / `Ships that dock at a module being removed later in the rebuild are moved too; leftovers wait while another rebuild is queued.` / `New Enable debug log option (off); less work at Confirm; old save data cleaned up.`. **verified** from `WorkshopTool` (exit 0, version 1.01 to 1.02, `lastupdate="1793024668"`) and `GetPublishedFileDetails` (result 1, visibility 0, updated 2026-10-26 14:24 UTC). Page text unchanged. Not tested in game before the upload (user's call).
 
+The same day the description got a dated **Changelog** section (user: a "small changelog" means that section on the item page, one dated line per version, newest first). Uploaded with `WorkshopTool update -minor -namedesc up` (version stays 1.02, change note `Added a changelog to the description.`). **verified** from `GetPublishedFileDetails`: the live description is the `content.xml` text, 1247 characters, ending with the changelog. `lastupdate="1793025195"`. For each later update: add a line at the top of the changelog in the release `content.xml` and pass `-namedesc up`.
+
 Page: <https://steamcommunity.com/sharedfiles/filedetails/?id=3821053684>
 
 The upload used a copy at `H:\dev\esr-release\station_rebuilder`, not the dev junction. `WorkshopTool` rewrote that copy's `content.xml` to `id="ws_3821053684"` and `sync="false"`. The dev `extension/content.xml` was not changed. In the copy, ships, cargo and workforce default on, and the log-only refund option is not in the menu (D-17).
@@ -87,6 +89,11 @@ With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and cha
 
 For X4 9.00 or newer.
 
+Changelog
+2026-10-26 (1.02): Parked ships go back to their orders after 3 minutes. Ships that dock at a module being removed later are moved too. New Enable debug log option (off), and old save data is cleaned up.
+2026-10-16 (1.01): Ships, cargo and workers start on.
+2026-10-16 (1.00): First release.
+
 The page does not mention module refunds. The game already returns those materials (D-17).
 
 Dependency to show on the page: SirNukes Mod Support APIs, optional, Workshop id 2042901274 (`ws_2042901274` in `content.xml`). Minimum game version 9.00 (`<dependency version="900"/>`). The dependency is named in the text above. The `<dependency>` entry is what the extension menu lists.
@@ -99,7 +106,7 @@ The `&#10;` sequences are line breaks. The Egosoft wiki says `\n` does not work 
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer." author="Dant" version="101" date="YYYY-MM-DD" save="false" enabled="1">
+<content id="station_rebuilder" name="Easy Station Rebuild" description="This mod keeps the ships, cargo and workers on your stations when you confirm a new construction plan.&#10;&#10;Docked ships move off the modules that are coming down and wait nearby. A ship that can't get out is teleported away. The ship you are flying stays put.&#10;&#10;Cargo that no longer fits goes into that station's build storage, and is put back when there is room.&#10;&#10;Workers stay for 2 hours while new housing is built. After that, workers who still have nowhere to live leave at 20% of those still waiting each hour. New housing takes them back as soon as there is room.&#10;&#10;Safe to add or remove mid-game. Only your own stations. Build time and cost stay the same. The game can still take down a module that your new plan keeps, and build it again.&#10;&#10;With SirNukes Mod Support APIs you can turn ships, cargo or workers off, and change the wait and the leave rate, under Extension Options. Without it, the settings above are used.&#10;&#10;For X4 9.00 or newer.&#10;&#10;Changelog&#10;2026-10-26 (1.02): Parked ships go back to their orders after 3 minutes. Ships that dock at a module being removed later are moved too. New Enable debug log option (off), and old save data is cleaned up.&#10;2026-10-16 (1.01): Ships, cargo and workers start on.&#10;2026-10-16 (1.00): First release." author="Dant" version="102" date="YYYY-MM-DD" save="false" enabled="1">
   <dependency version="900"/>
   <dependency id="ws_2042901274" optional="true" name="SirNukes Mod Support APIs"/>
 </content>
