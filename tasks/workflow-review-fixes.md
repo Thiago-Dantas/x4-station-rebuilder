@@ -15,6 +15,7 @@ The user went through the `/code-review high` findings: 1, 4, 6, 7, 8, 9, 10 are
 - [x] 10: `extension/` matches the published 1.01 (protections on, `ReleaseDefaults`, `esr_defaults_rev`, no refund option); D-14 superseded
 - [x] Harness: turn the debug log on in `extension_test` so test logs keep the PLAN/SNAP lines
 - [x] `python -I tools/check.py` passes
+- [x] Save cleanup (user, 2026-10-26): `ESR_Main.SaveCleanup` runs once and removes 1.00/1.01 leftovers; the diag `$Seq`/`$Kept`, OnConfirm `$List`/`$Removed`, OnEquipment `$List` and OnDocked `$Doomed` are removed after use; the diag `Tick` clears `$Tracked` when the debug log is off (the previous commit would have left it forever). Offline checks pass.
 - [ ] In-game check with `tools/run-game.ps1` (ask the user first: they may be playing)
 - [x] Docs: CLAUDE.md, decisions, x4-modding (performance), workshop (release copy step)
 - [x] Commit and push

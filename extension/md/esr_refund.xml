@@ -65,6 +65,8 @@
                 </do_else>
               </do_while>
               <debug_text text="'[ESR] REFUND %s: equipment of removed modules from the build menu: %s pieces on %s modules'.[@$List.{1}.knownname, $Items, $Modules]" filter="general"/>
+              <!-- instance variables are stored on the State cue and saved -->
+              <remove_value name="$List"/>
             </do_else>
           </actions>
         </cue>

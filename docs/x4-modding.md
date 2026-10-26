@@ -228,6 +228,8 @@ Log `research/logs/run-20261016-100731.txt`. Same scenario, station UBN-610 (Sav
 ## MD state in existing saves (verified 2026-10-16, run 13)
 A root cue without conditions runs once; in a save where it already ran under an older script version it does not run again, so variables added to it later never exist (`Property lookup failed: md.ESR_Refund.State.$Loadouts`). Rule for this mod: every state table is also created where it is used (`do_if not …?` → `set_value … table[]`), and timer conditions read state with `@`.
 
+**Instance variables are saved on the parent cue (verified, save file, 2026-10-26).** In the user's `quicksave.xml.gz` (18 Oct, 1.01) the `<vars>` of `ESR_Diag.Diag`, `ESR_Main.Tracker`, `ESR_Refund.State` and `ESR_Ships.State` held the locals of their instantiated child cues: `$Seq` (a 1258-entry construction sequence, ~360 KB), `$Kept` (1258 entries, ~100 KB), `$List`, `$Removed`, `$Done`, `$Entry`. Variables of `run_actions` libraries (`$Doomed`, `$Build`, `$FromEngine` in `SweepStation`) were not there. MD tables and lists are stored once in `<refs type="table">` / `<refs type="list">` and referenced by id. Rule since then: an instance cue that holds a large list or table in a variable removes it at the end of its actions. `ESR_Main.SaveCleanup` (a new root cue, so it runs once in existing saves) removed the leftovers from 1.00/1.01: those variables, refund loadouts with the refund setting off, and Confirm lists of stations that are not tracked. Total in that save: about 460 KB of a ~1 GB uncompressed save.
+
 ## Save attribute (verified 2026-10-16, save files, no new game run)
 `extension/content.xml` has `save="false"`. Two saves were read, not modified:
 

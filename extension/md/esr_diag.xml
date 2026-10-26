@@ -85,6 +85,9 @@
                 </do_if>
               </do_for_each>
               <debug_text text="'[ESR] PLAN summary %s: entries kept=%s new=%s, modules removed=%s'.[$Station.knownname, $NumKept, $NumNew, $NumRemoved]" filter="general"/>
+              <!-- instance variables are stored on the Diag cue and saved: drop the plan copy (~360 KB for 1258 entries) -->
+              <remove_value name="$Seq"/>
+              <remove_value name="$Kept"/>
 
               <run_actions ref="md.ESR_Diag.Snapshot">
                 <param name="Station" value="$Station"/>
@@ -100,50 +103,56 @@
 
         <cue name="Tick" instantiate="true" checkinterval="60s">
           <conditions>
-            <check_value value="md.ESR_Diag.Diag.$Tracked.keys.count gt 0 and @md.ESR_Main.Settings.$Debug"/>
+            <check_value value="md.ESR_Diag.Diag.$Tracked.keys.count gt 0"/>
           </conditions>
           <actions>
-            <set_value name="$Finished" exact="[]"/>
-            <do_for_each name="$Station" valuename="$State" in="md.ESR_Diag.Diag.$Tracked">
-              <do_if value="not $Station.exists">
-                <debug_text text="'[ESR] SNAP station %s no longer exists, t=%s'.[$Station, player.age]" filter="general"/>
-                <append_to_list name="$Finished" exact="$Station"/>
-                <continue/>
-              </do_if>
-              <set_value name="$Busy" exact="@$Station.buildstorage.builds.inprogress.count + @$Station.buildstorage.builds.queued.count"/>
-              <do_if value="$Busy gt 0">
-                <run_actions ref="md.ESR_Diag.Snapshot">
-                  <param name="Station" value="$Station"/>
-                  <param name="Tag" value="'building'"/>
-                </run_actions>
-                <set_value name="$State.$done" exact="-1"/>
-              </do_if>
-              <do_elseif value="$State.$done lt 0">
-                <run_actions ref="md.ESR_Diag.Snapshot">
-                  <param name="Station" value="$Station"/>
-                  <param name="Tag" value="'build-done'"/>
-                </run_actions>
-                <set_value name="$State.$done" exact="player.age"/>
-                <set_value name="$State.$next" exact="player.age + 300s"/>
-              </do_elseif>
-              <do_elseif value="player.age ge $State.$done + 3600s">
-                <run_actions ref="md.ESR_Diag.Snapshot">
-                  <param name="Station" value="$Station"/>
-                  <param name="Tag" value="'end'"/>
-                </run_actions>
-                <append_to_list name="$Finished" exact="$Station"/>
-              </do_elseif>
-              <do_elseif value="player.age ge $State.$next">
-                <run_actions ref="md.ESR_Diag.Snapshot">
-                  <param name="Station" value="$Station"/>
-                  <param name="Tag" value="'after-build'"/>
-                </run_actions>
-                <set_value name="$State.$next" exact="$State.$next + 300s"/>
-              </do_elseif>
-            </do_for_each>
-            <do_for_each name="$Station" in="$Finished">
-              <remove_value name="md.ESR_Diag.Diag.$Tracked.{$Station}"/>
-            </do_for_each>
+            <!-- debug log turned off: stop tracking instead of keeping the entries forever -->
+            <do_if value="not @md.ESR_Main.Settings.$Debug">
+              <set_value name="md.ESR_Diag.Diag.$Tracked" exact="table[]"/>
+            </do_if>
+            <do_else>
+              <set_value name="$Finished" exact="[]"/>
+              <do_for_each name="$Station" valuename="$State" in="md.ESR_Diag.Diag.$Tracked">
+                <do_if value="not $Station.exists">
+                  <debug_text text="'[ESR] SNAP station %s no longer exists, t=%s'.[$Station, player.age]" filter="general"/>
+                  <append_to_list name="$Finished" exact="$Station"/>
+                  <continue/>
+                </do_if>
+                <set_value name="$Busy" exact="@$Station.buildstorage.builds.inprogress.count + @$Station.buildstorage.builds.queued.count"/>
+                <do_if value="$Busy gt 0">
+                  <run_actions ref="md.ESR_Diag.Snapshot">
+                    <param name="Station" value="$Station"/>
+                    <param name="Tag" value="'building'"/>
+                  </run_actions>
+                  <set_value name="$State.$done" exact="-1"/>
+                </do_if>
+                <do_elseif value="$State.$done lt 0">
+                  <run_actions ref="md.ESR_Diag.Snapshot">
+                    <param name="Station" value="$Station"/>
+                    <param name="Tag" value="'build-done'"/>
+                  </run_actions>
+                  <set_value name="$State.$done" exact="player.age"/>
+                  <set_value name="$State.$next" exact="player.age + 300s"/>
+                </do_elseif>
+                <do_elseif value="player.age ge $State.$done + 3600s">
+                  <run_actions ref="md.ESR_Diag.Snapshot">
+                    <param name="Station" value="$Station"/>
+                    <param name="Tag" value="'end'"/>
+                  </run_actions>
+                  <append_to_list name="$Finished" exact="$Station"/>
+                </do_elseif>
+                <do_elseif value="player.age ge $State.$next">
+                  <run_actions ref="md.ESR_Diag.Snapshot">
+                    <param name="Station" value="$Station"/>
+                    <param name="Tag" value="'after-build'"/>
+                  </run_actions>
+                  <set_value name="$State.$next" exact="$State.$next + 300s"/>
+                </do_elseif>
+              </do_for_each>
+              <do_for_each name="$Station" in="$Finished">
+                <remove_value name="md.ESR_Diag.Diag.$Tracked.{$Station}"/>
+              </do_for_each>
+            </do_else>
           </actions>
         </cue>
 

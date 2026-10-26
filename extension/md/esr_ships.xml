@@ -73,6 +73,8 @@
                 <param name="Ship" value="$Ship"/>
               </run_actions>
             </do_if>
+            <!-- instance variables are stored on the Docking cue and saved -->
+            <remove_value name="$Doomed"/>
           </actions>
         </cue>
       </cues>

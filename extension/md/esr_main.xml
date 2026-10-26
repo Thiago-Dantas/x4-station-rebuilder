@@ -241,6 +241,9 @@
             <do_else>
               <debug_text text="'[ESR] MAIN Confirm event without a player station: %s'.[$List]" filter="general"/>
             </do_else>
+            <!-- instance variables are stored on the Tracker cue and saved; the list is kept in $EngineDoomed -->
+            <remove_value name="$List"/>
+            <remove_value name="$Removed"/>
           </actions>
         </cue>
 
@@ -276,6 +279,49 @@
           </actions>
         </cue>
       </cues>
+    </cue>
+
+    <!--
+      Runs once, also in saves from 1.00 / 1.01 (review 2026-10-26). Instance cues store their variables on
+      the parent cue, so the diagnostic logger kept a copy of the last plan (~460 KB in a 1258-entry save).
+      Also drops refund loadouts kept with the refund test setting off, and Confirm lists of untracked stations.
+    -->
+    <cue name="SaveCleanup">
+      <actions>
+        <do_if value="md.ESR_Diag.Diag.$Seq?">
+          <remove_value name="md.ESR_Diag.Diag.$Seq"/>
+        </do_if>
+        <do_if value="md.ESR_Diag.Diag.$Kept?">
+          <remove_value name="md.ESR_Diag.Diag.$Kept"/>
+        </do_if>
+        <do_if value="md.ESR_Main.Tracker.$List?">
+          <remove_value name="md.ESR_Main.Tracker.$List"/>
+        </do_if>
+        <do_if value="md.ESR_Main.Tracker.$Removed?">
+          <remove_value name="md.ESR_Main.Tracker.$Removed"/>
+        </do_if>
+        <do_if value="md.ESR_Refund.State.$List?">
+          <remove_value name="md.ESR_Refund.State.$List"/>
+        </do_if>
+        <do_if value="md.ESR_Refund.State.$Loadouts? and not md.ESR_Main.Settings.$Refund">
+          <set_value name="md.ESR_Refund.State.$Loadouts" exact="table[]"/>
+        </do_if>
+        <do_if value="md.ESR_Main.Tracker.$Rebuilds? and md.ESR_Main.Tracker.$EngineDoomed? and md.ESR_Main.Tracker.$BuildMethods?">
+          <do_for_each name="$Station" in="md.ESR_Main.Tracker.$EngineDoomed.keys.list">
+            <do_if value="not md.ESR_Main.Tracker.$Rebuilds.{$Station}?">
+              <remove_value name="md.ESR_Main.Tracker.$EngineDoomed.{$Station}"/>
+            </do_if>
+          </do_for_each>
+          <do_for_each name="$Station" in="md.ESR_Main.Tracker.$BuildMethods.keys.list">
+            <do_if value="not md.ESR_Main.Tracker.$Rebuilds.{$Station}?">
+              <remove_value name="md.ESR_Main.Tracker.$BuildMethods.{$Station}"/>
+            </do_if>
+          </do_for_each>
+        </do_if>
+        <do_if value="$Station?">
+          <remove_value name="$Station"/>
+        </do_if>
+      </actions>
     </cue>
 
     <!-- One sweep for one tracked station. Returns true while the station still needs tracking. -->
